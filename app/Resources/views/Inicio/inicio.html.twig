@@ -1,0 +1,491 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkVenta" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoVenta') == 0 %}
+                <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoPlanVentas') %}
+                <div class="dashboard-stat  green-haze">
+            {% else  %}
+                <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoVenta') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="icon icon-basket-loaded"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameVentas">
+                        {{ app.session.get('totalEstimadoVenta')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>VENTAS</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkOtroIngreso" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoOtroIngreso') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoOtroIngreso') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoOtroIngreso') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-recycle"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameOtroIngreso">
+                        {{ app.session.get('totalEstimadoOtroIngreso')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>OTROS INGRESOS</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkSalario" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoRecursosHumanos') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoPlanRecursosHumanos') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoRecursosHumanos') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-money"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameRecursosHumanos">
+                        {{ app.session.get('totalEstimadoRecursosHumanos')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>SALARIO</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkCombustible" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoCombustible') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoCombustible') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoCombustible') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-automobile"></i>
+                </div>
+                <div class="details">
+                    <div class="number" id="nameCombustible">
+                        {{ app.session.get('totalEstimadoCombustible')|number_format(0, '.', ',') }} LTS
+                    </div>
+                    <div class="desc">
+                        <strong>COMBUSTIBLE</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkLubricante" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoLubricante') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoLubricante') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoLubricante') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-tint"></i>
+                </div>
+                <div class="details">
+                    <div class="number" id="nameLubricante">
+                        {{ app.session.get('totalEstimadoLubricante')|number_format(0, '.', ',') }} LTS
+                    </div>
+                    <div class="desc">
+                        <strong>ACEITE</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkEnergia" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoEnergia') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoPlanEnergia') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoEnergia') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="icon icon-bulb"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameEnergia">
+                        {{ app.session.get('totalEstimadoEnergia')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>ENERGÍA</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkOtroGastos" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoOtrosGastos') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoPlanOtrosGastos') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoOtrosGastos') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-archive"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameOtrosGastos">
+                        {{ app.session.get('totalEstimadoOtrosGastos')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>OTROS GASTOS</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkMateriasPrimas" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoMateriaPrima') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoMateriaPrima') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoMateriaPrima') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-slack"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMateriasPrimas">
+                        {{ app.session.get('totalEstimadoMateriaPrima')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>MATERIAS PRIMAS</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkDepreciacion" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoDepreciacion') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoDepreciacion') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoDepreciacion') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-recycle"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameDepreciacion">
+                        {{ app.session.get('totalEstimadoDepreciacion')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>DEPRECIACIÓN</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkGastoMaterial" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoCombustible') == 0 and app.session.get('totalEstimadoEnergia') == 0 and app.session.get('totalEstimadoMateriaPrima') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobarEstimadoCombustible') == true and app.session.get('aprobarEstimadoEnergia') == true and app.session.get('aprobarEstimadoMateriaPrima') == true %}
+                   <div class="dashboard-stat  green-haze">
+            {% else %}
+                   <div class="dashboard-stat  red-flamingo">
+            {% endif %}
+
+                <div class="visual">
+                    <i class="fa fa-bank"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameGastoMaterial">
+                        {{ (app.session.get('totalEstimadoCombustible') + app.session.get('totalEstimadoEnergia') + app.session.get('totalEstimadoMateriaPrima'))|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>GASTO MATERIAL</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkBonificacion" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoBonificacion') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoBonificacion') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoBonificacion') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-recycle"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameBonificacion">
+                        {{ app.session.get('totalEstimadoBonificacion')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>BONIFICACIÓN</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12" id="linkComedor" style="cursor: pointer;margin-top: 20px">
+            {% if app.session.get('totalEstimadoComedor') == 0 %}
+               <div class="dashboard-stat grey">
+            {% elseif app.session.get('aprobadoComedor') %}
+               <div class="dashboard-stat  green-haze">
+            {% else  %}
+               <div class="dashboard-stat  {{ app.session.get('aprobarEstimadoComedor') ? 'red-flamingo' : 'yellow-crusta' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-recycle"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameComedor">
+                        {{ app.session.get('totalEstimadoComedor')|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>GASTOS DE COMEDOR</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN ROW -->
+    <div class="row" id="dashboardInicio">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <!-- BEGIN CHART PORTLET-->
+            <div class="portlet light bordered sombreado" style="margin-top: 10px">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <span id="nameSeccion" class="caption-subject bold uppercase font-green-haze"> PLAN ANUAL DE INDICADORES PRINCIPALES </span>
+                        <span id="nameSeccionHelp" class="caption-helper bold uppercase"
+                              id="year">{{ app.session.get('yearActivo') }}</span>
+                    </div>
+                    <div class="tools">
+                    {#<a href="{{ path('exportarPlanEstimadoDivision') }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>#}
+                        <a href="#" class="reload hidden" id="btnAtrasInicio" data-placement="top"
+                           data-original-title="Reiniciar">
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    {#<img src="{{ asset('images/30.jpg') }}" class="img-responsive" >#}
+                    <a href="#" id="divisionMapa"></a>
+                    <div id="mapaDivision" class="chart" style="height: 500px;">
+                        </div>
+                </div>
+            </div>
+            <!-- END CHART PORTLET-->
+        </div>
+    </div>
+    <!-- END ROW -->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN MAPAS LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/Highmaps/code/highmaps.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/Highmaps/code/highcharts-more.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/Highmaps/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/Highmaps/mapdata/countries/cu/ecodic-all.js') }}"></script>
+    <!-- END  GRAFICOS MAPAS LEVEL PLUGINS -->
+    <!-- BEGIN MI PLANTILLA  LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <!-- END GRAFICOS LEVEL PLUGINS -->
+
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (app.user.isActive) %}
+                window.location.href = "{{ path('login') }}";
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            var divisionCentroCosto = '';
+            var centroCosto = '';
+            var idCentroCosto = 0;
+            var n;
+
+           //Funciones del mapa
+            var data2 = [
+                ['cu-ma', 0],
+                ['cu-ar', 0],
+                ['cu-mq', 0],
+                ['cu-pr', 0],
+                ['cu-ij', 0],
+                ['cu-ch', 9],
+                ['cu-vc', 6],
+                ['cu-ss', 6],
+                ['cu-ca', 6],
+                ['cu-cm', 3],
+                ['cu-cf', 6],
+                ['cu-ho', 3],
+                ['cu-gu', 3],
+                ['cu-gr', 3],
+                ['cu-lt', 3],
+                ['cu-sc', 3]
+            ];
+
+            graficoInicio(data2, 1000);
+
+            // Create the map
+            function graficoInicio(data, anima) {
+                Highcharts.mapChart('mapaDivision', {
+                    chart: {
+                        map: 'countries/cu/cu-all'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    mapNavigation: {
+                        enabled: true,
+                        buttonOptions: {
+                            verticalAlign: 'bottom'
+                        }
+                    },
+                    colorAxis: {
+                        min: 0,
+                        minColor: '#36d7b7',
+                        maxColor: '#1b534c',
+                    },
+                    series: [{
+                        animation: {
+                            duration: anima
+                        },
+                        data: data,
+                        name: 'Total de divisiones',
+                        states: {
+                            hover: {
+                                color: '#BADA55'
+                            }
+                        },
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.name}'
+                        },
+                        events: {
+                            click: function (oEvent) {
+                                cargarDivisionMapa(oEvent.point.name);
+                            }
+                        }
+                    }]
+                });
+            }
+
+            //Cargar el plan de ventas de la division seleccionada
+            function cargarDivisionMapa(categoria) {
+
+                var idDivisionCentroCosto = '';
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                    divisionCentroCosto = '{{ division.nombre }}';
+                    if (divisionCentroCosto === categoria) {
+                        idDivisionCentroCosto = {{ division.id }};
+                    }
+                {% endfor %}
+
+                var enlace = "{{ path('exportarPlanEstimadoDivision', {division:'id'}) }}";
+
+                var ruta = enlace.replace('id',idDivisionCentroCosto);
+
+                $('#divisionMapa').prop('href',ruta);
+                document.getElementById('divisionMapa').click();
+
+            }
+
+            //Dashboard de gestion de Ventas
+            $('#linkVenta').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanVenta') }}";
+            });
+
+            //Dashboard de Fondo de Salario
+            $('#linkSalario').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanSalario') }}";
+            });
+
+            //Dashboard de gestion de Combustible
+            $('#linkCombustible').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanCombustible') }}";
+            });
+
+            //Dashboard gestion de Energía
+            $('#linkEnergia').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanEnergia') }}";
+            });
+
+            //Dashboard gestion de Otros Gastos
+            $('#linkOtroGastos').on("click", function () {
+                 window.location.href = "{{ path('dashboardEstimadoPlanOtrosGastos') }}";
+            });
+
+            //Dashboard de gestion de Materias Primas
+            $('#linkMateriasPrimas').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanMateriasPrimas') }}";
+            });
+
+            //Dashboard de gestion de Depreciación
+            $('#linkDepreciacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanDepreciacion') }}";
+            });
+
+            //Dashboard de gestion de Amortización
+            $('#linkAmortizacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanAmortizacion') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkGastoMaterial').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanGastoMaterial') }}";
+            });
+
+            //Dashboard de gestion de Bonificación
+            $('#linkBonificacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanBonificacion') }}";
+            });
+
+            //Dashboard de gestion de Gastos de comedor
+            $('#linkComedor').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanComedor') }}";
+            });
+
+        });
+    </script>
+
+{% endblock %}

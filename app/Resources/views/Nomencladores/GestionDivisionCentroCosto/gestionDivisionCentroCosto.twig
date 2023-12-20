@@ -1,0 +1,290 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div id="containerMostrarCategoria" class="container-fluid" style="display:block">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green"></i>
+                    <span class="caption-subject bold uppercase">DIVISIONES DE LOS CENTROS DE COSTOS</span>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div style="padding-top: 10px">
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title" style="background-color: #2b3643">
+                            <div class="caption">
+                                <i class="fa fa-table"></i>
+                            </div>
+                            <div class="caption bold uppercase" style="float: right">
+                                    <a href="#" style="text-decoration: none; color: #ededed;" id="addDivisionCentroCosto" name="addDivisionCentroCosto">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                        AGREGAR
+                                    </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body " style="background-color: #afbac0 ; overflow-x: auto">
+                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                   id="dataDivisionCentroCosto">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Código
+                                    </th>
+                                    <th>
+                                        Nombre
+                                    </th>
+                                    <th class="text-center">
+                                        Acciones
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for division in divisionCentrosCostos %}
+                                    <tr data-id="{{ division.id }}">
+                                        <td class="text-center">{{ division.codigo }}</td>
+                                        <td>{{ division.nombre }}</td>
+                                        <td class="text-center">
+                                            <a href="#" style="margin-top: 5px" class="btn default btn-xs green-stripe edit" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Modificar División de Centro de Costo">
+                                                Editar </a>
+                                            <a href="#" style="margin-top: 5px" class="btn default btn-xs red-stripe delete" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Eliminar División de Centro de Costo">
+                                                Borrar </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('Nomencladores/GestionDivisionCentroCosto/modalAddDivisionCentroCosto.html.twig') }}
+        {{ include('Nomencladores/GestionDivisionCentroCosto/modalEditDivisionCentroCosto.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+
+            (function(){
+                {% if not (is_granted("ROLE_ADMINISTRADOR") or is_granted("ROLE_SUPERUSUARIO")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ADMINISTRACION' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            $('#dataDivisionCentroCosto').DataTable();
+
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function ()
+            {
+                window.location.href = "{{ path('gestionarDivisionCentrosCostos') }}";
+            });
+
+            $('#addDivisionCentroCosto').on('click' , function () {
+                $('#modalAddDivisionCentroCosto').modal('show');
+            });
+
+            $('#addGuardar').on('click',function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalAddDivisionCentroCosto input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val().trim() == ''){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                if(errores !== 0) return false;
+
+                $('#modalAddDivisionCentroCosto').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    codigo: $("#addCodigo").val(),
+                    nombre: $("#addNombre").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertDivisionCentroCosto") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if(data === 'ok'){
+
+                        alertify.alert('<strong>La división del centro de costo ha sido insertada correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label','Aceptar')
+                            .set('onok', function () {
+                                $('#modalAddDivisionCentroCosto input').each(function(){
+                                    $(this).val('');
+                                });
+                                window.location.href = "{{ path('gestionarDivisionCentrosCostos') }}";
+                            });
+                    }else{
+                        alertify.alert('<strong>'+ data +'</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label','Aceptar')
+                    }
+                });
+
+            });
+
+            var idDivisionCentroCosto = '';
+            var codigo = '';
+            var nombre = '';
+
+            // función que carga datos en el formulario para editar
+            $('#dataDivisionCentroCosto tbody').on('click', '.edit', function () {
+
+                var row = $(this).parents('tr');
+                idDivisionCentroCosto = row.data('id');
+
+                {% for division in divisionCentrosCostos %}
+                var id = parseInt('{{ division.id }}');
+                if( id === idDivisionCentroCosto)
+                {
+                    $('#editCodigo').val('{{ division.codigo }}');
+                    codigo = '{{ division.codigo }}';
+                    $('#editNombre').val('{{ division.nombre }}');
+                    nombre = '{{ division.nombre }}';
+                }
+                {% endfor %}
+                $('#modalEditDivisionCentroCosto').modal('show');
+            });
+
+            $('#editGuardar').on('click',function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalEditDivisionCentroCosto input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val().trim() == ''){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                if(errores !== 0) return false;
+
+                $('#modalEditDivisionCentroCosto').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idDivisionCentroCosto : idDivisionCentroCosto,
+                    codigo : $('#editCodigo').val(),
+                    nombre : $('#editNombre').val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateDivisionCentroCosto") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if(data === 'ok'){
+
+                        alertify.alert('<strong>La división del Centro de Costo ha sido modificada correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label','Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarDivisionCentrosCostos') }}";
+                            });
+                    }else{
+                        alertify.alert('<strong>'+ data +'</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label','Aceptar')
+                    }
+                });
+
+            });
+
+            $('#dataDivisionCentroCosto tbody').on('click', '.delete', function () {
+
+                var row = $(this).parents('tr');
+
+                var mat_datos = { idDivisionCentroCosto: row.data('id') };
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea eliminar la división del Centro de Costo seleccionada</strong>').set('onok', function(){
+
+                    $(".preload").removeClass('hidden');
+
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("deleteDivisionCentroCosto") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if(data === 'ok'){
+
+                            alertify.alert('<strong>La división del Centro de Costo ha sido eliminada correctamente</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label','Aceptar')
+                                .set('onok', function(){
+                                    row.fadeOut();
+                                });
+                        }else {
+                            alertify.alert('<strong>'+data+'</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label','Aceptar')
+                        }
+                    });
+                });
+            });
+
+
+        });
+    </script>
+{% endblock %}

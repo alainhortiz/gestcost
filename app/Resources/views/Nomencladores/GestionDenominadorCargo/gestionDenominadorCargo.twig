@@ -1,0 +1,330 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div id="containerMostrarDenominadorCargo" class="container-fluid" style="display:block">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green"></i>
+                    <span class="caption-subject bold uppercase">DENOMINADOR DE CARGOS</span>
+                </div>
+                {% if denominadorCargos %}
+                    <div class="caption font-green" style="float: right">
+                        <a href="{{ path('exportarListadoNomencladores' , {nomenclador:'DenominadorCargo'}) }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="portlet-body">
+                <div style="padding-top: 10px">
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title" style="background-color: #2b3643">
+                            <div class="caption">
+                                <i class="fa fa-table"></i>
+                            </div>
+                            <div class="caption bold uppercase" style="float: right">
+                                <a href="#" style="text-decoration: none; color: #ededed;" id="addDenominadorCargo"
+                                   name="addDenominadorCargo">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                    AGREGAR
+                                </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body " style="background-color: #afbac0 ; overflow-x: auto">
+                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                   id="dataDenominadorCargo">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Código
+                                    </th>
+                                    <th>
+                                        Denominador de Cargo
+                                    </th>
+                                    <th class="text-center">
+                                        Grupo de Escala
+                                    </th>
+                                    <th class="text-center">
+                                        Categoría
+                                    </th>
+                                    <th class="text-center">
+                                        Salario
+                                    </th>
+                                    <th class="text-center">
+                                        Acciones
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for denominador in denominadorCargos %}
+                                    <tr data-id="{{ denominador.id }}">
+                                        <td class="text-center">{{ denominador.codigo }}</td>
+                                        <td>{{ denominador.denominadorCargo }}</td>
+                                        <td class="text-center">{{ denominador.grupoEscala }}</td>
+                                        <td class="text-center">{{ denominador.categoria }}</td>
+                                        <td class="text-center">{{ denominador.salario }}</td>
+                                        <td class="text-center">
+                                            <a href="#" style="margin-top: 5px"
+                                               class="btn default btn-xs green-stripe edit" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Modificar Denominador de Cargo">
+                                                Editar </a>
+                                            <a href="#" style="margin-top: 5px"
+                                               class="btn default btn-xs red-stripe delete" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Eliminar Denominador de Cargo">
+                                                Borrar </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('Nomencladores/GestionDenominadorCargo/modalAddDenominadorCargo.html.twig') }}
+        {{ include('Nomencladores/GestionDenominadorCargo/modalEditDenominadorCargo.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (is_granted("ROLE_NOMENCLADOR")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'PLANTILLA_CARGOS' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            $('#dataDenominadorCargo').DataTable();
+
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function () {
+                window.location.href = "{{ path('gestionarDenominadorCargos') }}";
+            });
+
+            $('#addDenominadorCargo').on('click', function () {
+                $('#modalAddDenominadorCargo').modal('show');
+            });
+
+            $('#addGuardar').on('click', function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalAddDenominadorCargo input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+                if (errores !== 0) return false;
+
+                $('#modalAddDenominadorCargo').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    codigo: $("#addCodigo").val(),
+                    denominadorCargo: $("#addDenominador").val(),
+                    grupoEscala: $("#addGrupoEscala").val().toUpperCase(),
+                    categoria: $("#addCategoria").val().toUpperCase(),
+                    salario: parseFloat($("#addSalario").val())
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertDenominadorCargo") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El denominador de cargo ha sido insertado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#modalAddDenominadorCargo input').each(function () {
+                                    $(this).val('');
+                                });
+                                window.location.href = "{{ path('gestionarDenominadorCargos') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            var idDenominadorCargo = '';
+            var codigo = '';
+            var denominadorCargo = '';
+            var grupoEscala = '';
+            var categoria = '';
+            var salario = 0;
+
+            // función que carga datos en el formulario para editar
+            $('#dataDenominadorCargo tbody').on('click', '.edit', function () {
+
+                var row = $(this).parents('tr');
+                idDenominadorCargo = row.data('id');
+
+                {% for denominador in denominadorCargos %}
+                var id = parseInt('{{ denominador.id }}');
+                if (id === idDenominadorCargo) {
+                    $('#editCodigo').val('{{ denominador.codigo }}');
+                    codigo = '{{ denominador.codigo }}';
+
+                    $('#editDenominador').val('{{ denominador.denominadorCargo }}');
+                    denominadorCargo = '{{ denominador.denominadorCargo }}';
+
+                    $('#editGrupoEscala').val('{{ denominador.grupoEscala }}');
+                    grupoEscala = '{{ denominador.grupoEscala }}';
+
+                    $('#editCategoria').val('{{ denominador.categoria }}');
+                    categoria = '{{ denominador.categoria }}';
+
+                    $('#editSalario').val('{{ denominador.salario }}');
+                    salario = parseFloat('{{ denominador.categoria }}');
+                }
+                {% endfor %}
+                $('#modalEditDenominadorCargo').modal('show');
+            });
+
+            $('#editGuardar').on('click', function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalEditDenominadorCargo input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+                if (errores !== 0) return false;
+
+                $('#modalEditDenominadorCargo').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    codigo: $("#editCodigo").val(),
+                    idDenominadorCargo: idDenominadorCargo,
+                    denominadorCargo: $('#editDenominador').val(),
+                    grupoEscala: $('#editGrupoEscala').val().toUpperCase(),
+                    categoria: $('#editCategoria').val().toUpperCase(),
+                    salario: parseFloat($("#editSalario").val())
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateDenominadorCargo") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El denominador de cargo ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarDenominadorCargos') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('#dataDenominadorCargo tbody').on('click', '.delete', function () {
+
+                var row = $(this).parents('tr');
+
+                var mat_datos = {idDenominadorCargo: row.data('id')};
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea eliminar el denominador de cargo seleccionado</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("deleteDenominadorCargo") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>El denominador de cargo ha sido eliminado correctamente</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+
+                                    row.fadeOut();
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                        }
+                    });
+                });
+            });
+
+
+        });
+    </script>
+{% endblock %}

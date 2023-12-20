@@ -1,0 +1,73 @@
+<div id="modalEditDepreciacion" data-backdrop="static" data-keyboard=false class="modal fade" tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog" style="width: 70vw">
+        <div class="modal-content portlet light estilosForm">
+            <div class="modal-header">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green-sunglo"></i>
+                    <span class="bold uppercase" style="font-size: 17px"> MODIFICAR DEPRECIACIÓN</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="scroller" style="height: 150px" data-always-visible="1" data-rail-visible1="1">
+                    <div class="row">
+                        <div class="portlet-body form">
+                            <form class="form-horizontal" role="form">
+                                <div class="form-body">
+                                    <div class="form-group">
+                                        <label class="col-lg-2 col-md-2 col-sm-2 control-label">Código</label>
+                                        <div class="col-lg-9 col-md-9 col-sm-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editCodigo"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control" placeholder="Teclee el código"
+                                                       id="editCodigo" name="editCodigo">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-2 col-md-2 col-sm-2 control-label">Nombre</label>
+                                        <div class="col-lg-9 col-md-9 col-sm-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-comment"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editNombre"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control" placeholder="Teclee el nombre"
+                                                       id="editNombre" name="editNombre">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-8 col-md-8 col-sm-8" style="margin-left: 18%">
+                                            <div class="md-checkbox" >
+                                                <input type="checkbox" id="editActivo" class="md-check">
+                                                <label for="editActivo">
+                                                    <span></span>
+                                                    <span class="check"></span>
+                                                    <span class="box"></span>
+                                                    ACTIVO </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn default cerrar">Cerrar</button>
+            <button type="button" class="btn btn-secondary" id="editGuardar">Guardar</button>
+        </div>
+    </div>
+</div>

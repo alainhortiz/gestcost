@@ -1,0 +1,204 @@
+<div id="modalProcesos" data-backdrop="static" data-keyboard=false class="modal fade" tabindex="-1"
+     aria-hidden="true">
+        <div class="modal-dialog" style="width: 50vw">
+        <div class="modal-content portlet light estilosForm">
+            <div class="modal-header">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green-sunglo"></i>
+                    <span class="bold uppercase" style="font-size: 17px"> PROCESOS DEL PLAN EN CURSO</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="scroller" style="height: 290px" data-always-visible="1" data-rail-visible1="1">
+                    <div class="row">
+                        <div class="portlet-body form">
+                            <form class="form-horizontal" role="form">
+                                <div class="form-body">
+                                    <div class="form-group">
+                                        <div class="row" style="margin-top: 20px">
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procVentas" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoVenta') ? : 'disabled' }}>
+                                                            <label for="procVentas">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Ventas </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procOtrosIngresos" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoOtroIngreso') ? : 'disabled' }}>
+                                                            <label for="procOtrosIngresos">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Otros Ingresos </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procSalario" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoRecursosHumanos') ? : 'disabled' }}>
+                                                            <label for="procSalario">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Salario </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 20px">
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procCombustible" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoCombustible') ? : 'disabled' }}>
+                                                            <label for="procCombustible">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Combustible </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procAceite" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoLubricante') ? : 'disabled' }}>
+                                                            <label for="procAceite">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Aceite </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procEnergia" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoEnergia') ? : 'disabled' }}>
+                                                            <label for="procEnergia">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Energía </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 20px">
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procOtrosGastos" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoOtrosGastos') ? : 'disabled' }}>
+                                                            <label for="procOtrosGastos">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Otros Gastos </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procMateriasPrimas" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoMateriaPrima') ? : 'disabled' }}>
+                                                            <label for="procMateriasPrimas">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Materias Primas </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procDepreciacion" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoDepreciacion') ? : 'disabled' }}>
+                                                            <label for="procDepreciacion">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Depreciación </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 20px">
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procBonificacion" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoBonificacion') ? : 'disabled' }}>
+                                                            <label for="procBonificacion">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Bonificación </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="col-md-3 control-label"></label>
+                                                    <div class="col-md-9">
+                                                        <div class="md-checkbox">
+                                                            <input type="checkbox" id="procComedor" class="md-check checkProcesos" {{ app.session.get('aprobarEstimadoComedor') ? : 'disabled' }}>
+                                                            <label for="procComedor">
+                                                                <span></span>
+                                                                <span class="check"></span>
+                                                                <span class="box"></span>
+                                                                Seleccionar Gastos de comedor </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn default cerrar">Cerrar</button>
+            <button type="button" class="btn btn-secondary" id="btnIniciarProcesos" disabled>Aceptar</button>
+        </div>
+    </div>
+</div>

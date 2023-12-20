@@ -1,0 +1,404 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div id="containerMostrarPlantillaCargo" class="container-fluid" style="display:block">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-car font-green"></i>
+                    <span class="caption-subject bold uppercase">PLANTILLA DE CARGOS</span>
+                </div>
+                {% if plantillaCargos %}
+                    <div class="caption font-green" style="float: right">
+                        <a href="{{ path('exportarPlantillaCargo') }}" class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="portlet-body">
+                <div style="padding-top: 10px">
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title" style="background-color: #2b3643">
+                            <div class="caption">
+                                <i class="fa fa-table"></i>
+                            </div>
+                            <div class="caption bold uppercase" style="float: right">
+                                <a href="#" style="text-decoration: none; color: #ededed;" id="addPlantillaCargo" name="addPlantillaCargo">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                    AGREGAR
+                                </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body " style="background-color: #afbac0 ; overflow-x: auto">
+                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                   id="dataPlantillaCargo">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Código
+                                    </th>
+                                    <th>
+                                        División
+                                    </th>
+                                    <th>
+                                        Centro de Costo
+                                    </th>
+                                    <th>
+                                        Denominación de Cargo
+                                    </th>
+                                    <th class="text-center">
+                                        Grupo de Escala
+                                    </th>
+                                    <th class="text-center">
+                                        Categoría
+                                    </th>
+                                    <th class="text-center">
+                                        Salario
+                                    </th>
+                                    <th class="text-center">
+                                        Cantidad
+                                    </th>
+                                    <th class="text-center">
+                                        Acciones
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for plantilla in plantillaCargos %}
+                                    <tr data-id="{{ plantilla.id }}">
+                                        <td class="text-center">{{ plantilla.denominadorCargo.codigo }}</td>
+                                        <td>{{ plantilla.centroCosto.divisionCentroCosto.nombre }}</td>
+                                        <td>{{ plantilla.centroCosto.nombre }}</td>
+                                        <td>{{ plantilla.denominadorCargo.denominadorCargo }}</td>
+                                        <td class="text-center">{{ plantilla.denominadorCargo.grupoEscala }}</td>
+                                        <td class="text-center">{{ plantilla.denominadorCargo.categoria }}</td>
+                                        <td class="text-center">{{ plantilla.denominadorCargo.salario }}</td>
+                                        <td class="text-center">{{ plantilla.cantidad }}</td>
+                                        <td class="text-center">
+                                            <a href="#" style="margin-top: 5px" class="btn default btn-xs green-stripe edit" data-toggle="tooltip" data-placement="left"
+                                               title="Modificar plantilla de cargo">
+                                                Editar </a>
+                                            <a href="#" style="margin-top: 5px" class="btn default btn-xs red-stripe delete" data-toggle="tooltip" data-placement="left"
+                                               title="Eliminar plantilla de cargo">
+                                                Eliminar </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('Nomencladores/GestionPlantillaCargo/modalAddPlantillaCargo.html.twig') }}
+        {{ include('Nomencladores/GestionPlantillaCargo/modalEditPlantillaCargo.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+
+            (function(){
+                {% if not (is_granted("ROLE_NOMENCLADOR")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'PLANTILLA_CARGOS' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            $('#dataPlantillaCargo').DataTable();
+
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function ()
+            {
+                window.location.href = "{{ path('gestionarPlantillaCargos') }}";
+            });
+
+            $('#addPlantillaCargo').on('click' , function () {
+                $('#modalAddPlantillaCargo').modal('show');
+            });
+
+            $('#addCategoriaCentroCosto').on('change', function () {
+                var html = '';
+                var divisionCentroCosto = $('#addCategoriaCentroCosto').val();
+                if (divisionCentroCosto == '0') {
+                    $("#addCentroCosto").prop('disabled' , true);
+                    $("option").remove('.cambioCentroCosto');
+                }else {
+                    $("option").remove('.cambioCentroCosto');
+                    $("#inicio").after('<option class="cambioCentroCosto"></option>');
+
+                    {% for centro in  centrosCostos %}
+                    var idDivisionCentroCosto = '{{ centro.divisionCentroCosto.id }}';
+
+                    if (idDivisionCentroCosto == divisionCentroCosto) {
+                        var id = {{ centro.id }};
+                        var name = '{{ centro.nombre }}';
+                        html += '<option class="cambioCentroCosto" value="' + id + '">' + name + '</option>';
+
+                    }
+                    {% endfor %}
+                    $(".cambioCentroCosto").replaceWith(html);
+                    $("#addCentroCosto").prop('disabled' , false);
+                }
+            });
+
+            $('#editCategoriaCentroCosto').on('change', function () {
+                var html = '';
+                var divisionCentroCosto = $('#editCategoriaCentroCosto').val();
+                if (divisionCentroCosto == '0') {
+                    $("#editCentroCosto").prop('disabled' , true);
+                    $("option").remove('.cambioCentroCosto');
+                }else {
+                    $("option").remove('.cambioCentroCosto');
+                    $("#inicio2").after('<option class="cambioCentroCosto"></option>');
+
+                    {% for centro in  centrosCostos %}
+                    var idDivisionCentroCosto = '{{ centro.divisionCentroCosto.id }}';
+
+                    if (idDivisionCentroCosto == divisionCentroCosto) {
+                        var id = {{ centro.id }};
+                        var name = '{{ centro.nombre }}';
+                        html += '<option class="cambioCentroCosto" value="' + id + '">' + name + '</option>';
+
+                    }
+                    {% endfor %}
+                    $(".cambioCentroCosto").replaceWith(html);
+                    $("#editCentroCosto").prop('disabled' , false);
+                }
+            });
+
+            $('#addGuardar').on('click',function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalAddPlantillaCargo input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val().trim() == ''){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                $('#modalAddPlantillaCargo select').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val() == '0'){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                if(errores !== 0) return false;
+
+                $('#modalAddPlantillaCargo').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    cantidad: $("#addCantidad").val(),
+                    tipoPlantilla: $("#addTipoPlantilla").val(),
+                    centroCosto: $("#addCentroCosto").val(),
+                    denominadorCargo: $("#addDenominadorCargo").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertPlantillaCargo") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if(data === 'ok'){
+
+                        alertify.alert('<strong>El cargo ha sido insertado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label','Aceptar')
+                            .set('onok', function () {
+                                $('#modalAddPlantillaCargo input').each(function(){
+                                    $(this).val('');
+                                });
+                                window.location.href = "{{ path('gestionarPlantillaCargos') }}";
+                            });
+                    }else{
+                        alertify.alert('<strong>'+ data +'</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label','Aceptar')
+                    }
+                });
+
+            });
+
+            var idPlantillaCargo = '';
+            var cantidad = '';
+            var tipoPlantilla = '';
+            var centroCosto = '';
+            var denominadorCargo = '';
+
+            // función que carga datos en el formulario para editar
+            $('#dataPlantillaCargo tbody').on('click', '.edit', function () {
+
+                var row = $(this).parents('tr');
+                idPlantillaCargo = row.data('id');
+
+                {% for plantilla in plantillaCargos %}
+                var id = parseInt('{{ plantilla.id }}');
+                if( id === idPlantillaCargo)
+                {
+                    $('#editCantidad').val('{{ plantilla.cantidad }}');
+                    $('#editTipoPlantilla').val('{{ plantilla.tipoPlantilla.id }}');
+                    $('#editCentroCosto').val('{{ plantilla.centroCosto.id }}');
+                    $('#editDenominadorCargo').val('{{ plantilla.denominadorCargo.id }}');
+
+                    cantidad = '{{ plantilla.cantidad }}';
+                    tipoPlantilla = '{{ plantilla.tipoPlantilla.id }}';
+                    centroCosto = '{{  plantilla.centroCosto.id }}';
+                    denominadorCargo = '{{  plantilla.denominadorCargo.id }}';
+
+                }
+                {% endfor %}
+                $('#modalEditPlantillaCargo').modal('show');
+            });
+
+            $('#editGuardar').on('click',function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalEditPlantillaCargo input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val().trim() == ''){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                $('#modalEditPlantillaCargo select').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val() == '0'){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                if(errores !== 0) return false;
+
+                $('#modalEditPlantillaCargo').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlantillaCargo : idPlantillaCargo,
+                    tipoPlantilla : $('#editTipoPlantilla').val(),
+                    centroCosto : $('#editCentroCosto').val(),
+                    denominadorCargo : $('#editDenominadorCargo').val(),
+                    cantidad : $('#editCantidad').val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updatePlantillaCargo") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if(data === 'ok'){
+
+                        alertify.alert('<strong>El cargo de la plantilla ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label','Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarPlantillaCargos') }}";
+                            });
+                    }else{
+                        alertify.alert('<strong>'+ data +'</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label','Aceptar')
+                    }
+                });
+
+            });
+
+            $('#dataPlantillaCargo tbody').on('click', '.delete', function () {
+
+                var row = $(this).parents('tr');
+
+                var mat_datos = { idPlantillaCargo: row.data('id') };
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea eliminar de la plantilla el cargo  seleccionado</strong>').set('onok', function(){
+
+                    $(".preload").removeClass('hidden');
+
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("deletePlantillaCargo") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if(data === 'ok'){
+
+                            alertify.alert('<strong>El cargo ha sido eliminado correctamente</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label','Aceptar')
+                                .set('onok', function(){
+                                    row.fadeOut();
+                                });
+                        }else {
+                            alertify.alert('<strong>'+data+'</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label','Aceptar')
+                        }
+                    });
+                });
+            });
+
+
+        });
+    </script>
+{% endblock %}

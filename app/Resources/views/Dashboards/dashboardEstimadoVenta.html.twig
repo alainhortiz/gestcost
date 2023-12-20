@@ -1,0 +1,660 @@
+{% extends 'Dashboards/baseDashboard.html.twig' %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN ROW -->
+    <div id="dashboardVentas" >
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameDivisionVenta" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN DEL PLAN DE VENTAS POR DIVISIONES</span>
+                        </div>
+                        <div class="tools">
+                        <a href="{{ path('exportarPlanEstimadoDivisionVenta') }}" id="btnExportarDivision"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                            <a href="#" class="reload hidden" id="btnAtrasDivisionVenta" data-placement="top"
+                               data-original-title="Regresar">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoDivisionVenta" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameDivisionVentaMensual" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN MENSUAL DEL PLAN DE VENTAS</span>
+                        </div>
+                        <div class="tools">
+                            <a href="#" class="reload hidden" id="btnAtrasDivisionVentaMensual" data-placement="top"
+                               data-original-title="Reiniciar">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoDivisionVentaMensual" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+    </div>
+    <!-- END ROW -->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (app.user.isActive) %}
+                window.location.href = "{{ path('login') }}";
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            var divisionCentroCosto = '';
+            var centroCosto = '';
+            var idCentroCosto = 0;
+            var n;
+            //Ventas
+            var totalEstimadoVentaDivision = [];
+            var totalEstimadoVentaDivisionMes = [];
+            var totalEstimadoVentaCentroCosto = [];
+            var totalEstimadoVentaCentroCostoMes = [];
+
+            //Dashboard de Fondo de Salario
+            $('#linkSalario').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanSalario') }}";
+            });
+
+            //Dashboard de gestion de Combustible
+            $('#linkCombustible').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanCombustible') }}";
+            });
+
+            //Dashboard de gestion de Otros Ingresos
+            $('#linkOtroIngreso').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtroIngreso') }}";
+            });
+
+            //Dashboard gestion de Energía
+            $('#linkEnergia').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanEnergia') }}";
+            });
+
+            //Dashboard gestion de Otros Gastos
+            $('#linkOtroGastos').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtrosGastos') }}";
+            });
+
+            //Dashboard de gestion de Materias Primas
+            $('#linkMateriasPrimas').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanMateriasPrimas') }}";
+            });
+
+            //Dashboard de gestion de Depreciación
+            $('#linkDepreciacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanDepreciacion') }}";
+            });
+
+            //Dashboard de gestion de Bonificación
+            $('#linkBonificacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanBonificacion') }}";
+            });
+
+            //Dashboard de gestion de Gastos de comedor
+            $('#linkComedor').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanComedor') }}";
+            });
+
+            //Dashboard de gestion de Amortización
+            $('#linkAmortizacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanAmortizacion') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkGastoMaterial').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanGastoMaterial') }}";
+            });
+
+            //Dashboard de gestion de Ventas
+            $('#linkVenta').on("click", function () {
+                $('#dashboardVentas').css("display", "block");
+                graficoTotalEstimadoVentaDivision();
+                graficoTotalEstimadoVentaDivisionMes();
+            });
+
+            $('#btnAtrasDivisionVenta').on("click", function () {
+                $('#btnAtrasDivisionVenta').addClass('hidden');
+                graficoTotalEstimadoVentaDivision();
+                inicioMensualVentas();
+                graficoTotalEstimadoVentaDivisionMes();
+                $('#nameDivisionVenta').text(' DISTRIBUCIÓN DEL PLAN DE VENTAS POR DIVISIONES');
+                $('#nameDivisionVentaMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE VENTAS');
+            });
+
+            //Grafico principal de ventas por divisiones
+            {% for graficoTotal in graficosTotalesEstimadosDivisionesVentas %}
+            totalEstimadoVentaDivision.push({
+                name: '{{ graficoTotal['nombre'] }}',
+                y: parseInt('{{ graficoTotal['totalVentaDivision'] }}')
+            });
+            {% endfor %}
+
+            //Grafico principal de ventas por meses
+            {% for graficoTotal in graficosTotalesEstimadosMesesVentas %}
+            totalEstimadoVentaDivisionMes.push({
+                name: '{{ graficoTotal['mes'] }}',
+                y: parseInt('{{ graficoTotal['presupuesto'] }}')
+            });
+            {% endfor %}
+
+            $('#dashboardVentas').css("display", "block");
+            graficoTotalEstimadoVentaDivision();
+            graficoTotalEstimadoVentaDivisionMes();
+
+            //Inicio grafico mensual de ventas
+            function inicioMensualVentas() {
+                totalEstimadoVentaDivisionMes = [];
+                {% for graficoTotal in graficosTotalesEstimadosMesesVentas %}
+                        totalEstimadoVentaDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseInt('{{ graficoTotal['presupuesto'] }}')
+                        });
+                {% endfor %}
+            }
+
+            //Grafico general Plan de Ventas por divisiones
+            function graficoTotalEstimadoVentaDivision() {
+                var valorMax = totalEstimadoVentaDivision.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoVentaDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionVenta', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoVentaDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivision(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de ventas de la division seleccionada
+            function cargarDivision(categoria, presupuesto, colorSeleccionado) {
+
+                var idDivisionCentroCosto = '';
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                    divisionCentroCosto = '{{ division.nombre }}';
+                    if (divisionCentroCosto === categoria) {
+                        idDivisionCentroCosto = {{ division.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    division: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardVentaEstimadoDivisionMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+                    var divisionMensual = obj['divisionMensual'];
+                    var divisionCantroCosto = obj['divisionCentroCosto'];
+
+                    totalEstimadoVentaDivisionMes = [];
+                    for (n = 0; n < divisionMensual.length; n++) {
+                        totalEstimadoVentaDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseFloat(divisionMensual[n]['totalVentaDivisionMes']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    totalEstimadoVentaCentroCosto = [];
+                    for (n = 0; n < divisionCantroCosto.length; n++) {
+                        totalEstimadoVentaCentroCosto.push({
+                            name: divisionCantroCosto[n]['nombre'],
+                            y: parseFloat(divisionCantroCosto[n]['totalVentaCentroCosto']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameDivisionVenta').text(' DISTRIBUCIÓN DEL PLAN DE VENTAS EN LOS CENTROS DE COSTOS DE LA ' + categoria);
+                    $('#nameDivisionVentaMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE VENTAS EN LA ' + categoria);
+                    $('#btnAtrasVentaMapa').addClass('hidden');
+                    $('#btnAtrasDivisionVenta').removeClass('hidden');
+
+                    graficoTotalEstimadoVentaDivisionMes();
+                    graficoTotalEstimadoVentaCentroCosto();
+
+                });
+            }
+
+            //Grafico Plan de Ventas Mensual por divisiones
+            function graficoTotalEstimadoVentaDivisionMes() {
+                var valorMax = totalEstimadoVentaDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoVentaDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionVentaMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoVentaDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de ventas de la division seleccionada
+            function cargarCentroCosto(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for centro in centrosCostos %}
+                    centroCosto = '{{ centro.nombre }}';
+                    if (centroCosto === categoria) {
+                        idCentroCosto = {{ centro.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    centro: idCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardVentaEstimadoCentroCostoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    totalEstimadoVentaCentroCostoMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoVentaCentroCostoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalVentaCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameDivisionVentaMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE VENTAS EN EL ' + categoria);
+                    $('#btnAtrasDivisionVenta').removeClass('hidden');
+
+                    graficoTotalEstimadoVentaCentroCostoMes();
+
+                });
+            }
+
+            //Grafico 2do nivel Plan de Ventas por centro de costos
+            function graficoTotalEstimadoVentaCentroCosto() {
+                var valorMax = totalEstimadoVentaCentroCosto.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoVentaCentroCosto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionVenta', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoVentaCentroCosto,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarCentroCosto(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+             //Grafico mensual plan de ventas del centro de costo seleccionado
+            function graficoTotalEstimadoVentaCentroCostoMes() {
+                var valorMax = totalEstimadoVentaCentroCostoMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoVentaCentroCostoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionVentaMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoVentaCentroCostoMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Fin del dashboard de la gestion de ventas
+
+        });
+    </script>
+
+{% endblock %}

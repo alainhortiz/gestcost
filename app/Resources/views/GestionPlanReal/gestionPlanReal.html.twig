@@ -1,0 +1,938 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/plugins/bootstrap-toastr/toastr.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="portlet light estilosForm center-block" style="width: 40vw">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-search font-green"></i>
+                    <span class="caption-subject bold uppercase">SELECCIONE EL AÑO</span>
+                </div>
+                <div class="tools">
+                    <a href="#" class="collapse">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-lg-8 col-md-8 col-sm-8">
+                        <div class="form-group form-md-line-input  input-icon right">
+                            <select class="form-control" id="yearReal"
+                                    name="yearReal">
+                                {% if planReal %}
+                                    <option value="{{ planReal.year }}">{{ planReal.year }}</option>
+                                {% else %}
+                                    <option value="0">Seleccione ...</option>
+                                {% endif %}
+                                {% for real in  planesReales %}
+                                    <option value="{{ real.year }}">{{ real.year }}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="yearReal">AÑOS</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 20px">
+                        <div class="form-actions noborder">
+                            <button type="button" id="btnBuscarReal"
+                                    class="btn btn-circle green" disabled>
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="portlet light estilosForm" style="display: none" id="mostrarTarjetario">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">REALES</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase"
+                          id="year">{{ planReal.year }}</span>
+                </div>
+                <div class="tools">
+                    <a href="#" class="collapse">
+                    </a>
+                </div>
+                <div class="caption font-green" style="float: right">
+                    <a href="{{ path('exportarPlanRealDivision', {year:planReal.year}) }}"
+                       class="fa fa-file-excel-o fa-2x font-green"
+                       data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                {% import 'Macros/tablas.html.twig' as tabla %}
+                <div class="row">
+                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="tab_tot">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_existe(realMeses) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaTotal" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores(realMeses,serviciosRecibidos) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="tab_ene">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'enero',planReal.isEnero,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesEnero" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'enero') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isEnero == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'enero' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarEnero">Cerrar
+                                                Mes
+                                                de
+                                                Enero
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarEnero"
+                                                    disabled>Cerrar Mes
+                                                de
+                                                Enero
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_feb">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'febrero',planReal.isFebrero,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesFebrero" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'febrero') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isFebrero == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'febrero' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarFebrero">Cerrar
+                                                Mes
+                                                de
+                                                Febrero
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarFebrero" disabled>Cerrar
+                                                Mes
+                                                de
+                                                Febrero
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_mar">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'marzo',planReal.isMarzo,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesMarzo" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'marzo') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isMarzo == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'marzo' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarMarzo">Cerrar
+                                                Mes
+                                                de
+                                                Marzo
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarMarzo" disabled>Cerrar
+                                                Mes
+                                                de
+                                                Marzo
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_abr">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'abril',planReal.isAbril,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesAbril" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'abril') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isAbril == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'abril' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarAbril">Cerrar
+                                                Mes
+                                                de
+                                                Abril
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarAbril"
+                                                    disabled>Cerrar
+                                                Mes
+                                                de
+                                                Abril
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_may">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'mayo',planReal.isMayo,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesMayo" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'mayo') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isMayo == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'mayo' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarMayo">Cerrar Mes
+                                                de
+                                                Mayo
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarMayo" disabled>Cerrar Mes
+                                                de
+                                                Mayo
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_jun">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'junio',planReal.isJunio,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesJunio" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'junio') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isJunio == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'junio' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarJunio">Cerrar Mes
+                                                de
+                                                Junio
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarJunio" disabled>Cerrar Mes
+                                                de
+                                                Junio
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_jul">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'julio',planReal.isJulio,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesJulio" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'julio') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isJulio == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'julio' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarJulio">Cerrar Mes
+                                                de
+                                                Julio
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarJulio" disabled>Cerrar Mes
+                                                de
+                                                Julio
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_ago">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'agosto',planReal.isAgosto,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesAgosto" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'agosto') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isAgosto == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'agosto' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarAgosto">Cerrar Mes
+                                                de
+                                                Agosto
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarAgosto" disabled>Cerrar Mes
+                                                de
+                                                Agosto
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_sep">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'septiembre',planReal.isSeptiembre,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesSeptiembre" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'septiembre') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isSeptiembre == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'septiembre' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarSeptiembre">Cerrar
+                                                Mes
+                                                de
+                                                Septiembre
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarSeptiembre" disabled>Cerrar
+                                                Mes
+                                                de
+                                                Septiembre
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_oct">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'octubre',planReal.isOctubre,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesOctubre" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'octubre') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isOctubre == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'octubre' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarOctubre">Cerrar
+                                                Mes
+                                                de
+                                                Octubre
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarOctubre" disabled>Cerrar
+                                                Mes
+                                                de
+                                                Octubre
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_nov">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'noviembre',planReal.isNoviembre,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesNoviembre" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'noviembre') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isNoviembre == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'noviembre' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarNoviembre">Cerrar
+                                                Mes
+                                                de
+                                                Noviembre
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarNoviembre" disabled>Cerrar
+                                                Mes
+                                                de
+                                                Noviembre
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="tab_dic">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes_existe(realMeses,'diciembre',planReal.isDiciembre,planReal.id) }}
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 20px">
+                                    <div id="tablaMesDiciembre" class="col-lg-12 col-md-12 col-sm-12">
+                                        {{ tabla.tabla_indicadores_mes(realMeses,serviciosRecibidosMeses,'diciembre') }}
+                                    </div>
+                                </div>
+                                {% if planReal.isDiciembre == false and is_granted("ROLE_INICIO_CIERRE_REAL") %}
+                                    {% set break = false %}
+                                    {% for real in realMeses if real.mes == 'diciembre' %}
+                                        {% set break = true %}
+                                    {% endfor %}
+                                    {% if break %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarDiciembre">Cerrar
+                                                Mes
+                                                de
+                                                Diciembre
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="form-actions noborder" style="float: right">
+                                            <button type="button" class="btn btn-secondary " id="btnCerrarDiciembre" disabled>Cerrar
+                                                Mes
+                                                de
+                                                Diciembre
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <ul class="nav nav-tabs tabs-right">
+                            <li class="active">
+                                <a href="#tab_tot" data-toggle="tab">
+                                    Total </a>
+                            </li>
+                            {% if (planReal.isInicio) %}
+                                <li>
+                                    <a href="#tab_ene" data-toggle="tab">
+                                        Ene </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isEnero) %}
+                                <li>
+                                    <a href="#tab_feb" data-toggle="tab">
+                                        Feb </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isFebrero) %}
+                                <li>
+                                    <a href="#tab_mar" data-toggle="tab">
+                                        Mar </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isMarzo) %}
+                                <li>
+                                    <a href="#tab_abr" data-toggle="tab">
+                                        Abr </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isAbril) %}
+                                <li>
+                                    <a href="#tab_may" data-toggle="tab">
+                                        May </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isMayo) %}
+                                <li>
+                                    <a href="#tab_jun" data-toggle="tab">
+                                        Jun </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isJunio) %}
+                                <li>
+                                    <a href="#tab_jul" data-toggle="tab">
+                                        Jul </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isJulio) %}
+                                <li>
+                                    <a href="#tab_ago" data-toggle="tab">
+                                        Ago </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isAgosto) %}
+                                <li>
+                                    <a href="#tab_sep" data-toggle="tab">
+                                        Sep </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isSeptiembre) %}
+                                <li>
+                                    <a href="#tab_oct" data-toggle="tab">
+                                        Oct </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isOctubre) %}
+                                <li>
+                                    <a href="#tab_nov" data-toggle="tab">
+                                        Nov </a>
+                                </li>
+                            {% endif %}
+                            {% if (planReal.isNoviembre) %}
+                                <li>
+                                    <a href="#tab_dic" data-toggle="tab">
+                                        Dic </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/bootstrap-toastr/ui-toastr.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (is_granted("ROLE_REAL")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'REAL' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            $('#dataRealTotalCentroCosto').DataTable();
+            $('#dataRealCentroCosto').DataTable();
+
+            //Declaraciones
+            var idCentroCosto = '';
+
+            if ($("#yearReal").val() !== 0) {
+                $('#mostrarTarjetario').css("display", "block");
+            }
+
+            $('#yearReal').on('change', function () {
+                var idyear = '{{ planReal.year }}';
+
+                if ($("#yearReal").val() === idyear) {
+                    $("#btnBuscarReal").prop('disabled', true);
+                } else {
+                    $("#btnBuscarReal").prop('disabled', false);
+                }
+            });
+
+            $('#btnBuscarReal').on('click', function () {
+                var enlace = "{{ path('localizarPlanReal', {year:'id'}) }}";
+                var ruta = enlace.replace('id', $("#yearReal").val());
+                window.location.href = ruta;
+            });
+
+            $('#dataRealTotalCentroCosto tbody').on('click', '.mostrarTotalDivision', function () {
+
+                var html = '';
+                var row = $(this).parents('tr');
+                idCentroCosto = row.data('id');
+
+                {% for real in realMeses %}
+                var id = parseInt('{{ real.id }}');
+                if (id === idCentroCosto) {
+                    {% import 'Macros/tablas.html.twig' as tabla %}
+                    html = '<div id="tablaTotal" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_division(realMeses,serviciosRecibidosDivision,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                    $("#tablaTotal").replaceWith(html);
+                }
+                {% endfor %}
+            });
+
+            $('#dataRealTotalCentroCosto tbody').on('click', '.mostrarTotalCentro', function () {
+
+                var html = '';
+                var row = $(this).parents('tr');
+                idCentroCosto = row.data('id');
+
+                {% for real in realMeses %}
+                var id = parseInt('{{ real.id }}');
+                if (id === idCentroCosto) {
+                    {% import 'Macros/tablas.html.twig' as tabla %}
+                    html = '<div id="tablaTotal" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_centro(realMeses,serviciosRecibidosCentroCosto,real.centroCosto.nombre) }} +'</div>';
+                    $("#tablaTotal").replaceWith(html);
+                }
+                {% endfor %}
+            });
+
+            $('#dataRealCentroCosto tbody').on('click', '.mostrarDivision', function () {
+
+                var html = '';
+                var row = $(this).parents('tr');
+                idCentroCosto = row.data('id');
+
+                {% for real in realMeses %}
+                var id = parseInt('{{ real.id }}');
+                var mes = '{{ real.mes }}';
+                if (id === idCentroCosto) {
+                    {% import 'Macros/tablas.html.twig' as tabla %}
+                    switch (mes) {
+                        case 'enero':
+                            html = '<div id="tablaMesEnero" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesEnero").replaceWith(html);
+                            break;
+                        case 'febrero':
+                            html = '<div id="tablaMesFebrero" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesFebrero").replaceWith(html);
+                            break;
+                        case 'marzo':
+                            html = '<div id="tablaMesMarzo" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesMarzo").replaceWith(html);
+                            break;
+                        case 'abril':
+                            html = '<div id="tablaMesAbril" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesAbril").replaceWith(html);
+                            break;
+                        case 'mayo':
+                            html = '<div id="tablaMesMayo" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesMayo").replaceWith(html);
+                            break;
+                        case 'junio':
+                            html = '<div id="tablaMesJunio" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesJunio").replaceWith(html);
+                            break;
+                        case 'julio':
+                            html = '<div id="tablaMesJulio" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesJulio").replaceWith(html);
+                            break;
+                        case 'agosto':
+                            html = '<div id="tablaMesAgosto" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesAgosto").replaceWith(html);
+                            break;
+                        case 'septiembre':
+                            html = '<div id="tablaMesSeptiembre" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesSeptiembre").replaceWith(html);
+                            break;
+                        case 'octubre':
+                            html = '<div id="tablaMesOctubre" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesOctubre").replaceWith(html);
+                            break;
+                        case 'noviembre':
+                            html = '<div id="tablaMesNoviembre" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesNoviembre").replaceWith(html);
+                            break;
+                        case 'diciembre':
+                            html = '<div id="tablaMesDiciembre" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_division(realMeses,serviciosRecibidosDivisionMeses,real.mes,real.centroCosto.divisionCentroCosto.nombre) }} +'</div>';
+                            $("#tablaMesDiciembre").replaceWith(html);
+                            break;
+                    }
+                }
+                {% endfor %}
+            });
+
+            $('#dataRealCentroCosto tbody').on('click', '.mostrarCentro', function () {
+
+                var html = '';
+                var row = $(this).parents('tr');
+                idCentroCosto = row.data('id');
+
+                {% for real in realMeses %}
+                var id = parseInt('{{ real.id }}');
+                var mes = '{{ real.mes }}';
+                if (id === idCentroCosto) {
+                    {% import 'Macros/tablas.html.twig' as tabla %}
+                    switch (mes) {
+                        case 'enero':
+                            html = '<div id="tablaMesEnero" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesEnero").replaceWith(html);
+                            break;
+                        case 'febrero':
+                            html = '<div id="tablaMesFebrero" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesFebrero").replaceWith(html);
+                            break;
+                        case 'marzo':
+                            html = '<div id="tablaMesMarzo" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesMarzo").replaceWith(html);
+                            break;
+                        case 'abril':
+                            html = '<div id="tablaMesAbril" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesAbril").replaceWith(html);
+                            break;
+                        case 'mayo':
+                            html = '<div id="tablaMesMayo" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesMayo").replaceWith(html);
+                            break;
+                        case 'junio':
+                            html = '<div id="tablaMesJunio" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesJunio").replaceWith(html);
+                            break;
+                        case 'julio':
+                            html = '<div id="tablaMesJulio" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesJulio").replaceWith(html);
+                            break;
+                        case 'agosto':
+                            html = '<div id="tablaMesAgosto" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesAgosto").replaceWith(html);
+                            break;
+                        case 'septiembre':
+                            html = '<div id="tablaMesSeptiembre" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesSeptiembre").replaceWith(html);
+                            break;
+                        case 'octubre':
+                            html = '<div id="tablaMesOctubre" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesOctubre").replaceWith(html);
+                            break;
+                        case 'noviembre':
+                            html = '<div id="tablaMesNoviembre" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesNoviembre").replaceWith(html);
+                            break;
+                        case 'diciembre':
+                            html = '<div id="tablaMesDiciembre" class="col-lg-12 col-md-12 col-sm-12">' + {{ tabla.tabla_indicadores_mes_centro(realMeses,serviciosRecibidosCentroCostoMeses,real.mes,real.centroCosto.nombre) }} +'</div>';
+                            $("#tablaMesDiciembre").replaceWith(html);
+                            break;
+                    }
+                }
+                {% endfor %}
+            });
+
+            $('#dataRealCentroCosto tbody').on('click', '.delete', function () {
+
+                var row = $(this).parents('tr');
+
+                var mat_datos = {idReal: row.data('id')};
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea eliminar el real del Centro de Costo seleccionado</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("deletePlanRealMensual") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>El real del Centro de Costo ha sido eliminado correctamente</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarPlanesReales') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                        }
+                    });
+                });
+            });
+
+            $('#dataRealTotalCentroCosto tbody').on('click', '.exportarExcelCentro', function () {
+
+                var row = $(this).parents('tr');
+                idCentroCosto = row.data('id');
+
+                var enlace = "{{ path('exportarPlanRealCentroCosto', {year:planReal.year, id:'id'}) }}";
+                var ruta = enlace.replace('id', idCentroCosto);
+                window.location.href = ruta;
+
+            });
+
+            $('#btnCerrarEnero').on('click', function () {
+                cerrarMes('enero');
+            });
+
+            $('#btnCerrarFebrero').on('click', function () {
+                cerrarMes('febrero');
+            });
+
+            $('#btnCerrarMarzo').on('click', function () {
+                cerrarMes('marzo');
+            });
+
+            $('#btnCerrarAbril').on('click', function () {
+                cerrarMes('abril');
+            });
+
+            $('#btnCerrarMayo').on('click', function () {
+                cerrarMes('mayo');
+            });
+
+            $('#btnCerrarJunio').on('click', function () {
+                cerrarMes('junio');
+            });
+
+            $('#btnCerrarJulio').on('click', function () {
+                cerrarMes('julio');
+            });
+
+            $('#btnCerrarAgosto').on('click', function () {
+                cerrarMes('agosto');
+            });
+
+            $('#btnCerrarSeptiembre').on('click', function () {
+                cerrarMes('septiembre');
+            });
+
+            $('#btnCerrarOctubre').on('click', function () {
+                cerrarMes('octubre');
+            });
+
+            $('#btnCerrarNoviembre').on('click', function () {
+                cerrarMes('noviembre');
+            });
+
+            $('#btnCerrarDiciembre').on('click', function () {
+                cerrarMes('diciembre');
+            });
+
+            function cerrarMes(mes) {
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    planReal: {{ planReal.id }},
+                    mes: mes
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("cerrarPlanRealMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data == 'ok') {
+
+                        alertify.alert('<strong>El real del mes ha sido cerrado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarPlanesReales') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            }
+
+        });
+    </script>
+{% endblock %}

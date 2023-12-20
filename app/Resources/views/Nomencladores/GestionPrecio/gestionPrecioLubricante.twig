@@ -1,0 +1,246 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div id="containerMostrartipoCombustible" class="container-fluid" style="display:block">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-car font-green"></i>
+                    <span class="caption-subject bold uppercase">PRECIOS DEL ACEITE {{ tipoAceite.nombre|upper }}</span>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div style="padding-top: 10px">
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title" style="background-color: #2b3643">
+                            <div class="caption">
+                                <i class="fa fa-table"></i>
+                            </div>
+                            <div class="caption bold uppercase" style="float: right;margin-left: 10px">
+                                <a href="{{ path('addPrecioLubricante' , {idTipoAceite:tipoAceite.id}) }}"
+                                   style="text-decoration: none; color: #ededed;">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                    AGREGAR
+                                </a>
+                            </div>
+                            <div class="caption bold uppercase" style="float: right">
+                                <a href="{{ path('gestionarLubricantes') }}"
+                                   style="text-decoration: none; color: #ededed;">
+                                    <span class="glyphicon glyphicon-hand-left"></span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body " style="background-color: #afbac0 ; overflow-x: auto">
+                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                   id="dataPrecioLubricante">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Año
+                                    </th>
+                                    <th class="text-center">
+                                        Mes
+                                    </th>
+                                    <th class="text-center">
+                                        Precio
+                                    </th>
+                                    <th class="text-center">
+                                        Acciones
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for precio in preciosAceite %}
+                                    <tr data-id="{{ precio.id }}">
+                                        <td class="text-center">{{ precio.year }}</td>
+                                        <td class="text-center">{{ precio.mes }}</td>
+                                        {% if precio.mes == 'enero' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'febrero' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'marzo' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'abril' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'mayo' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'junio' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'julio' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'agosto' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'septiembre' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'octubre' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'noviembre' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% elseif precio.mes == 'diciembre' %}
+                                            <td class="text-center">{{ precio.precio }}</td>
+                                        {% endif %}
+                                        <td class="text-center">
+                                            <a href="#" style="margin-top: 5px"
+                                               class="btn default btn-xs green-stripe edit" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Modificar el precio del Aceite">
+                                                Editar </a>
+                                           {# <a href="#" style="margin-top: 5px"
+                                               class="btn default btn-xs red-stripe delete" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Eliminar el precio del Aceite">
+                                                Desactivar </a>#}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('Nomencladores/GestionPrecio/modalEditPrecioAceite.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (is_granted("ROLE_NOMENCLADOR")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'PLANTILLA_TRANSPORTE' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            $('#dataPrecioLubricante').DataTable({
+                "lengthMenu": [12]
+            });
+
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+
+            var idPrecioAceite = 0;
+            var year = 0;
+            var precio = 0;
+            var mes ='';
+
+            // función que carga datos en el formulario para editar
+            $('#dataPrecioLubricante tbody').on('click', '.edit', function () {
+
+                var row = $(this).parents('tr');
+                idPrecioAceite = row.data('id');
+                {% for precio in preciosAceite %}
+                var id = parseInt('{{ precio.id }}');
+                if (id === idPrecioAceite) {
+                    $('#editYear').val({{ precio.year }});
+                    $('#editMes').val('{{ precio.mes }}');
+                    $('#editPrecio').val({{ precio.precio }});
+                    year = {{ precio.year }};
+                    mes = '{{ precio.mes }}';
+                    precio = {{ precio.precio }};
+                }
+                {% endfor %}
+                $('#modalEditPrecioLubricante').modal('show');
+            });
+
+            $('#editGuardar').on('click', function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalEditPrecioLubricante input[type=text]').each(function () {
+
+                    //Validaciones//
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+                if (errores !== 0) return false;
+
+                if ( typeof parseFloat($("#editPrecio")) !== 'number') {
+                    $('#modalEditPrecioLubricante').modal('hide');
+                    alertify.alert('<strong>El precio tiene que ser un número.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $('#modalEditPrecioLubricante').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    year: year,
+                    mes: mes,
+                    precio: parseFloat($('#editPrecio').val()),
+                    idTipoAceite: {{ tipoAceite.id }}
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updatePrecioAceite") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El precio del aceite ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarPrecioLubricante' , {idTipoAceite:tipoAceite.id}) }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $("#editPrecio").keyup(function(event){
+                var tecla = event.which;
+                if (tecla === 188) {
+                    var contenido = $("#editPrecio").val().slice(0,-1);
+                    $("#editPrecio").val(contenido + '.');
+                }
+            });
+
+
+        });
+    </script>
+{% endblock %}

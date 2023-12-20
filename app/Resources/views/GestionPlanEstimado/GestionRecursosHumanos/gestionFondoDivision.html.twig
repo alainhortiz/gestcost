@@ -1,0 +1,1232 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            {% if totalEstimadoFondo == 0 %}
+                <div class="dashboard-stat grey">
+            {% else  %}
+                <div class="dashboard-stat  {{ porcientoDivisionMensual != 100 ? 'red-flamingo' : 'green-haze' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-money"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                        {{ totalEstimadoFondo|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>TOTAL ESTIMADO</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if aprobarEstimadoFondoDivision == false %}
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                <div class="dashboard-stat {{ (totalEstimadoFondo - totalEstimadoDivisionFondo) == 0 ? 'grey' : 'red-flamingo' }}"
+                     id="nameMontoRestanteMostrar">
+                    <div class="visual">
+                        <i class="fa fa-money"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+                            {{ (totalEstimadoFondo - totalEstimadoDivisionFondo)|number_format(0, '.', ',') }}
+                        </div>
+                        <div class="desc">
+                            <strong>ESTIMADO RESTANTE</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-lg-3 col-md-5 col-sm-5 col-xs-5">
+                <div class="dashboard-stat grey-cararra" style="display:none" id="nameMontoRestanteDivisionMostrar">
+                    <div class="visual">
+                        <i class="fa fa-calendar-o"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="nameMontoRestanteDivision">
+                        </div>
+                        <div class="desc">
+                            <strong>ESTIMADO RESTANTE DE LA DIVISIÓN</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% if aprobarEstimadoFondoDivision == false %}
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                <div class="dashboard-stat grey }}"
+                     id="namePromedioTrabajadorMostrar">
+                    <div class="visual">
+                        <i class="fa fa-bank"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="namePromedioTrabajador">
+                            {{ promedioTrabajador }}
+                        </div>
+                        <div class="desc">
+                            <strong>TRABAJADORES</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                <div class="dashboard-stat grey }}"
+                     id="namePromedioTrabajadorRestanteMostrar">
+                    <div class="visual">
+                        <i class="fa fa-bank"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="namePromedioTrabajadorRestante">
+                            {{ promedioTrabajador - promedioTrabajadorDivision }}
+                        </div>
+                        <div class="desc">
+                            <strong>TRABAJADORES RESTANTES </strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN DE RECURSOS HUMANOS POR DIVISIÓN</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                    {% if aprobarEstimadoFondoDivision == true %}
+                        <div class="progress progress-striped active">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40"
+                                 aria-valuemin="0" aria-valuemax="100" style="width: {{ porcientoDivisionMensual }}%">
+                                <span class="sr-only-focusable">{{ porcientoDivisionMensual }}% DISTRIBUCIÓN MENSUAL  </span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="tools">
+                {% if aprobarEstimadoFondoDivision == true %}
+                            <a href="{{ path('exportarPlanEstimadoFondoSalario') }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                {% endif %}
+                    <a href="#" class="reload" id="btnAtrasDivision" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalDivision" data-toggle="tab">
+                            PRESUPUESTO ESTIMADO POR DIVISIÓN </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalDivision">
+                        <form role="form" id="formTotalDivision">
+                            <div class="form-body">
+                                <div class="row">
+                                    {% if aprobarEstimadoFondoDivision == false %}
+                                        <div class="col-lg-3 col-md-3 col-sm-3">
+                                            <div class="portlet">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select class="form-control" id="categoriaCentroCosto"
+                                                                name="categoriaCentroCosto">
+                                                            <option value="0">Seleccione ...</option>
+                                                            {% for division in  divisionCentrosCostos %}
+                                                                <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label for="categoriaCentroCosto">DIVISIÓN</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111">CUP</i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalPresupuestoDivision"
+                                                               name="totalPresupuestoDivision">
+                                                        <label for="totalPresupuestoDivision">TOTAL DEL FONDO DE
+                                                            SALARIO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalPromedioTrabajador"
+                                                               name="totalPromedioTrabajador">
+                                                        <label for="totalPromedioTrabajador">TOTAL DEL PROMEDIO DE
+                                                            TRABAJADORES</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarDivisionFondo" {{ (totalEstimadoFondo - totalEstimadoDivisionFondo) == 0 ? 'disabled' }}>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary ModificarDivisionFondo"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarDivisionFondo" {{ (totalEstimadoFondo - totalEstimadoDivisionFondo) != 0 ? 'disabled' }}>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    <div class="{{ aprobarEstimadoFondoDivision == false ? 'col-lg-9 col-md-9 col-sm-9' : 'col-lg-12 col-md-12 col-sm-12' }}"
+                                         style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet chart" style="margin-top: 20px"
+                                             id="graficoDivisionFondo"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="totalDivisionMes" style="display:none">
+                        <ul class="nav nav-tabs nav-pills">
+                            <li class="active uppercase">
+                                <a href="#" data-toggle="tab" id="nameTabDivisionMes">
+                                    PRESUPUESTO ESTIMADO POR MESES </a>
+                            </li>
+                        </ul>
+                        <form role="form" id="formTotalDivisionMes">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <div class="portlet">
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="enero"
+                                                           name="enero">
+                                                    <label for="enero">Ene.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="febrero"
+                                                           name="febrero">
+                                                    <label for="febrero">Feb.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="marzo"
+                                                           name="marzo">
+                                                    <label for="marzo">Mar.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="abril"
+                                                           name="abril">
+                                                    <label for="abril">Abr.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="mayo"
+                                                           name="mayo">
+                                                    <label for="mayo">May.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="junio"
+                                                           name="junio">
+                                                    <label for="junio">Jun.</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <div class="portlet">
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="julio"
+                                                           name="julio">
+                                                    <label for="julio">Jul.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="agosto"
+                                                           name="agosto">
+                                                    <label for="agosto">Ago.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="septiembre"
+                                                           name="septiembre">
+                                                    <label for="septiembre">Sep.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="octubre"
+                                                           name="octubre">
+                                                    <label for="octubre">Oct.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="noviembre"
+                                                           name="noviembre">
+                                                    <label for="noviembre">Nov.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="diciembre"
+                                                           name="diciembre">
+                                                    <label for="diciembre">Dic.</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-6 col-sm-6">
+                                        <div class="portlet">
+                                            <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 50px">
+                                                <div class="form-actions noborder">
+                                                    <button type="button"
+                                                            class="btn btn-secondary AprobarDivisionMes" disabled>
+                                                        Aprobar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (app.session.get('aprobarEstimadoRecursosHumanos')) and is_granted("ROLE_DISTRIBUIDOR_DIVISION") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_RECURSOS_HUMANOS' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+
+            });
+
+            $('#btnAtrasDivision').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoPlanFondosDivision') }}";
+            });
+
+            //funciones de asigancion del presupuesto por divisiones
+
+            //Declaracion de variables
+            var totalEstimadoFondoDivision = [];
+            var totalEstimadoGSXPPDivision = [];
+            var totalEstimadoPTDivision = [];
+            var totalEstimadoSMDivision = [];
+            var totalEstimadoFondoDivisionMes = [];
+            var totalEstimadoGSXPPDivisionMes = [];
+            var totalEstimadoPTDivisionMes = [];
+            var totalEstimadoSMDivisionMes = [];
+            var montoRestante = 0;
+            var montoRestanteDivision = 0;
+            var montoTotal = 0;
+            var montoAnterior = 0;
+            var divisionCentroCosto = '';
+            var idDivisionCentroCosto = '';
+            var promedioTrabajador = 0;
+            var n;
+            var enero = 0;
+            var febrero = 0;
+            var marzo = 0;
+            var abril = 0;
+            var mayo = 0;
+            var junio = 0;
+            var julio = 0;
+            var agosto = 0;
+            var septiembre = 0;
+            var octubre = 0;
+            var noviembre = 0;
+            var diciembre = 0;
+            var estimadoMes = 0;
+
+            //Arreglo para el grafico de presupuesto asignado por Categorias del plan de ventas activo
+            {% for graficoTotal in graficosTotalesEstimadosDivisionesFondos %}
+            totalEstimadoFondoDivision.push({
+                name: '{{ graficoTotal['nombre'] }}',
+                y: parseInt('{{ graficoTotal['totalSalarioDivision'] }}')
+            });
+            totalEstimadoGSXPPDivision.push({
+                name: '{{ graficoTotal['nombre'] }}',
+                y: parseInt('{{ graficoTotal['totalGastoSalarioPesoProduccion'] }}')
+            });
+            totalEstimadoPTDivision.push({
+                name: '{{ graficoTotal['nombre'] }}',
+                y: parseInt('{{ graficoTotal['totalPromedioTrabajador'] }}')
+            });
+            totalEstimadoSMDivision.push({
+                name: '{{ graficoTotal['nombre'] }}',
+                y: parseInt('{{ graficoTotal['totalSalarioMedio'] }}')
+            });
+            {% endfor %}
+
+            (function () {
+                graficoTotalEstimadoFondoDivision();
+            })();
+
+            //Cargar el presupuesto estimado de la division seleccionada
+            function cargarDivision(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                divisionCentroCosto = '{{ division.nombre }}';
+                if (divisionCentroCosto === categoria) {
+                    {% if aprobarEstimadoFondoDivision == false %}
+                    $('#categoriaCentroCosto').val('{{ division.id }}');
+                    {% endif %}
+                    idDivisionCentroCosto = {{ division.id }};
+                }
+                {% endfor %}
+
+                {% for graficoTotal in graficosTotalesEstimadosDivisionesFondos %}
+                divisionCentroCosto = '{{ graficoTotal['nombre'] }}';
+                if (divisionCentroCosto === categoria) {
+                    promedioTrabajador = {{ graficoTotal['totalPromedioTrabajador'] }};
+                }
+                {% endfor %}
+
+                {% if aprobarEstimadoFondoDivision == false %}
+                $('#totalPromedioTrabajador').val(promedioTrabajador);
+                $('#totalPresupuestoDivision').val(presupuesto);
+                montoAnterior = parseInt(presupuesto);
+                $('#categoriaCentroCosto').prop("disabled", true);
+                $('.AsignarDivisionFondo').prop("disabled", true);
+                $('.ModificarDivisionFondo').prop("disabled", false);
+                $('.Aprobar').prop("disabled", false);
+
+                {% else %}
+
+                //mostrar si existe el grafico mensual
+
+                $('#nameMontoEstimado').text(Highcharts.numberFormat(presupuesto, 0, '.', ','));
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ planEstimado }},
+                    division: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("graficoFondoEstimadoDivisionMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    totalEstimadoFondoDivisionMes = [];
+                    totalEstimadoGSXPPDivisionMes = [];
+                    totalEstimadoPTDivisionMes = [];
+                    totalEstimadoSMDivisionMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoFondoDivisionMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalSalarioDivisionMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoGSXPPDivisionMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalGastoSalarioPesoProduccionDivisionMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoPTDivisionMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalPromedioTrabajadorMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoSMDivisionMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalSalarioMedioDivisionMes']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    estimadoMes = Math.floor(parseInt(presupuesto) / 12);
+
+                    if (totalEstimadoFondoDivisionMes.length === 0) {
+                        $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(presupuesto, 0, '.', ','));
+                        $('#namePromedioTrabajadorRestante').text(promedioTrabajador);
+                        $('#nameTabDivisionMes').text('PRESUPUESTO ESTIMADO POR MESES - ' + (categoria));
+                        $('#nameMontoRestanteMostrar').css("display", "none");
+                        $('#nameMontoRestanteDivisionMostrar').css("display", "block");
+                        $('#totalDivisionMes').css("display", "block");
+                        $('.mesesDivision').prop("placeholder", estimadoMes);
+                    } else {
+                        $('#nameMontoRestanteDivision').text(0);
+                        $('#nameMontoRestanteMostrar').css("display", "block");
+                        $('#nameMontoRestanteDivisionMostrar').css("display", "none");
+                        $('#totalDivisionMes').css("display", "none");
+                        graficoTotalEstimadoFondoDivisionMes();
+                    }
+
+                    montoRestanteDivision = parseInt(presupuesto);
+                });
+                {% endif %}
+            }
+
+            //Grafico general Total presupuesto Estimado por divisiones
+            function graficoTotalEstimadoFondoDivision() {
+                var valorMax = totalEstimadoFondoDivision.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoFondoDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionFondo', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Fondo de Salario Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, '.', ',');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ':  ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Fondo de Salario",
+                            "colorByPoint": true,
+                            "data": totalEstimadoFondoDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivision(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        },
+                        {
+                            "name": "GSXPP",
+                            "colorByPoint": true,
+                            "data": totalEstimadoGSXPPDivision
+                        },
+                        {
+                            "name": "Promedio de Trabajadores",
+                            "colorByPoint": true,
+                            "data": totalEstimadoPTDivision
+                        },
+                        {
+                            "name": "Salario Medio",
+                            "colorByPoint": true,
+                            "data": totalEstimadoSMDivision
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 500
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            $('.AsignarDivisionFondo').on('click', function () {
+
+                if ($("#categoriaCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoDivision").val() === '') {
+                    alertify.alert('<strong>El total de fondo de salario es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPromedioTrabajador").val() === '') {
+                    alertify.alert('<strong>El total del promedio de trabajadores es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = {{ totalEstimadoFondo - totalEstimadoDivisionFondo }};
+
+                if (parseInt($("#totalPresupuestoDivision").val()) > montoRestante) {
+                    alertify.alert('<strong>El total de fondo de salario no puede ser mayor que el monto restante.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoDivision").val(),
+                    promedioTrabajador: $("#totalPromedioTrabajador").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    division: $("#categoriaCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoDivisionFondo") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El total del fondo de salario estimado para esta división ha sido distribuido correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanFondosDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanFondosDivision') }}";
+                            });
+                    }
+                });
+
+            });
+
+            $('.ModificarDivisionFondo').on('click', function () {
+
+                if ($("#categoriaCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoDivision").val() === '') {
+                    alertify.alert('<strong>El total de fondo de salario es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPromedioTrabajador").val() === '') {
+                    alertify.alert('<strong>El total del promedio de trabajadores es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = {{ totalEstimadoFondo - totalEstimadoDivisionFondo }};
+
+                if (montoRestante === 0) {
+                    if (parseInt($("#totalPresupuestoDivision").val()) > montoAnterior) {
+                        alertify.alert('<strong>El total de fondo de salario no puede ser mayor que el monto disponible.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (parseInt($("#totalPresupuestoDivision").val()) > (montoAnterior + montoRestante)) {
+                        alertify.alert('<strong>El total de fondo de salario no puede ser mayor que el monto restante.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoDivision").val(),
+                    promedioTrabajador: $("#totalPromedioTrabajador").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    division: $("#categoriaCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateTotalEstimadoDivisionFondo") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El fondo de salario estimado de esta división ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#categoriaCentroCosto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarDivisionFondo').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanFondosDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#categoriaCentroCosto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarDivisionFondo').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanFondosDivision') }}";
+                            });
+                    }
+                });
+
+            });
+
+            $('.AprobarDivisionFondo').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar el fondo de salario estimado para las divisiones</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ app.session.get('idPlanEstimado') }}
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarPresupuestoEstimadoDivisionFondo") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó el fondo de salario estimado para las divisiones</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanFondosDivision') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                        }
+                    });
+                });
+
+            });
+
+            //fin asignacion del presupuesto total por división
+
+            //funciones distribución del presupuesto mensual por division
+
+            $('.AprobarDivisionMes').on('click', function () {
+
+                if ($('.mesesDivision').val() === '') {
+                    alertify.alert('<strong>El fondo de salario mensual es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                presupuestoDivisionMeses();
+
+                var mat_datos = {
+                    presupuesto: totalEstimadoFondoDivisionMes,
+                    promedioTrabajador: promedioTrabajador,
+                    idPlanEstimado: {{ planEstimado }},
+                    idDivisionCentroCosto: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoFondoDivisionMes") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El fondo de salario mensual para esta división ha sido distribuido correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#nameMontoRestanteDivisionMostrar').css("display", "none");
+                                window.location.href = "{{ path('gestionarEstimadoPlanFondosDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanFondosDivision') }}";
+                            });
+                    }
+                });
+
+
+            });
+
+            function presupuestoDivisionMeses() {
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'enero',
+                    presupuesto: $("#enero").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'febrero',
+                    presupuesto: $("#febrero").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'marzo',
+                    presupuesto: $("#marzo").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'abril',
+                    presupuesto: $("#abril").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'mayo',
+                    presupuesto: $("#mayo").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'junio',
+                    presupuesto: $("#junio").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'julio',
+                    presupuesto: $("#julio").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'agosto',
+                    presupuesto: $("#agosto").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'septiembre',
+                    presupuesto: $("#septiembre").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'octubre',
+                    presupuesto: $("#octubre").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'noviembre',
+                    presupuesto: $("#noviembre").val()
+                });
+
+                totalEstimadoFondoDivisionMes.push({
+                    mes: 'diciembre',
+                    presupuesto: $("#diciembre").val()
+                });
+            }
+
+            function cargarDivisionMeses() {
+                for (n = 0; n < totalEstimadoFondoDivisionMes.length; n++) {
+                    switch (totalEstimadoFondoDivisionMes[n]['name']) {
+                        case 'enero':
+                            $("#enero").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'febrero':
+                            $("#febrero").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'marzo':
+                            $("#marzo").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'abril':
+                            $("#abril").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'mayo':
+                            $("#mayo").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'junio':
+                            $("#junio").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'julio':
+                            $("#julio").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'agosto':
+                            $("#agosto").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'septiembre':
+                            $("#septiembre").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'octubre':
+                            $("#octubre").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'noviembre':
+                            $("#noviembre").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                        case 'diciembre':
+                            $("#diciembre").val(totalEstimadoFondoDivisionMes[n]['y']);
+                            break;
+                    }
+                }
+            }
+
+            $('.mesesDivision').on("change", function () {
+
+                switch ($(this).attr('id')) {
+                    case 'enero':
+                        enero = 0;
+                        enero = parseInt($("#enero").val());
+                        break;
+                    case 'febrero':
+                        febrero = 0;
+                        febrero = parseInt($("#febrero").val());
+                        break;
+                    case 'marzo':
+                        marzo = 0;
+                        marzo = parseInt($("#marzo").val());
+                        break;
+                    case 'abril':
+                        abril = 0;
+                        abril = parseInt($("#abril").val());
+                        break;
+                    case 'mayo':
+                        mayo = 0;
+                        mayo = parseInt($("#mayo").val());
+                        break;
+                    case 'junio':
+                        junio = 0;
+                        junio = parseInt($("#junio").val());
+                        break;
+                    case 'julio':
+                        julio = 0;
+                        julio = parseInt($("#julio").val());
+                        break;
+                    case 'agosto':
+                        agosto = 0;
+                        agosto = parseInt($("#agosto").val());
+                        break;
+                    case 'septiembre':
+                        septiembre = 0;
+                        septiembre = parseInt($("#septiembre").val());
+                        break;
+                    case 'octubre':
+                        octubre = 0;
+                        octubre = parseInt($("#octubre").val());
+                        break;
+                    case 'noviembre':
+                        noviembre = 0;
+                        noviembre = parseInt($("#noviembre").val());
+                        break;
+                    case 'diciembre':
+                        diciembre = 0;
+                        diciembre = parseInt($("#diciembre").val());
+                        break;
+                }
+
+                montoTotal = 0;
+                montoTotal = enero + febrero + marzo + abril + mayo + junio + julio + agosto + septiembre + octubre + noviembre + diciembre;
+                var restante = montoRestanteDivision - montoTotal;
+
+                if ((restante) >= 0) {
+                    if ($(this).val() !== '') {
+                        $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(restante, 0, '.', ','));
+                        if (parseInt(restante) === 0) {
+                            $('.AprobarDivisionMes').prop("disabled", false);
+                        } else {
+                            $('.AprobarDivisionMes').prop("disabled", true);
+                        }
+                    }
+                } else {
+                    alertify.alert('<strong>No tiene fondo de salario disponible.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                        .set('label', 'Aceptar');
+                    montoTotal = 0;
+                    $('.AprobarDivisionMes').prop("disabled", true);
+                    return false;
+                }
+            });
+
+            //Grafico mensual Total presupuesto Estimado por divisiones
+            function graficoTotalEstimadoFondoDivisionMes() {
+                var valorMax = totalEstimadoFondoDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoFondoDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionFondo', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Fondo de Salario Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, '.', ',');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ':  ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Fondo de Salario",
+                            "colorByPoint": true,
+                            "data": totalEstimadoFondoDivisionMes,
+                            events: {
+                                click: function () {
+                                    cargarDivisionMeses();
+                                    $('#nameMontoRestanteDivisionMostrar').css("display", "block");
+                                    $('#totalDivisionMes').css("display", "block");
+                                }
+                            }
+                        },
+                        {
+                            "name": "GSXPP",
+                            "colorByPoint": true,
+                            "data": totalEstimadoGSXPPDivisionMes,
+                            events: {
+                                click: function () {
+                                    cargarDivisionMeses();
+                                    $('#nameMontoRestanteDivisionMostrar').css("display", "block");
+                                    $('#totalDivisionMes').css("display", "block");
+                                }
+                            }
+                        },
+                        {
+                            "name": "Promedio de Trabajadores",
+                            "colorByPoint": true,
+                            "data": totalEstimadoPTDivisionMes,
+                            events: {
+                                click: function () {
+                                    cargarDivisionMeses();
+                                    $('#nameMontoRestanteDivisionMostrar').css("display", "block");
+                                    $('#totalDivisionMes').css("display", "block");
+                                }
+                            }
+                        },
+                        {
+                            "name": "Salario Medio",
+                            "colorByPoint": true,
+                            "data": totalEstimadoSMDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 500
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            // fin funciones distribución del presupuesto mensual por division
+
+        });
+    </script>
+{% endblock %}

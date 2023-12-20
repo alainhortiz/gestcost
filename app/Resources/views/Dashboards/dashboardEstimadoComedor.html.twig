@@ -1,0 +1,651 @@
+{% extends 'Dashboards/baseDashboard.html.twig' %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN ROW -->
+    <div id="dashboardComedor">
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameComedorMostrar" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN GASTOS DE COMEDOR</span>
+                        </div>
+                        <div class="tools">
+                             <a href="{{ path('exportarPlanEstimadoComedor') }}" class="fa fa-file-excel-o fa-2x font-green" data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                             <a href="#" class="reload hidden" id="btnAtrasComedor" data-placement="top" data-original-title="Regresar"></a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoComedor" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameComedorMensual" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN MENSUAL DE GASTOS DE COMEDOR</span>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoComedorMensual" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+    </div>
+    <!-- END ROW -->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (app.user.isActive) %}
+                window.location.href = "{{ path('login') }}";
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            let divisionCentroCosto = '';
+            let centroCosto = '';
+            let idCentroCosto = 0;
+            let n;
+            //Bonificación
+            let totalEstimadoComedorDivision = [];
+            let totalEstimadoComedorDivisionMes = [];
+            let totalEstimadoComedorCentroCosto = [];
+            let totalEstimadoComedorCentroCostoMes = [];
+
+            //Dashboard de gestion de Ventas
+            $('#linkVenta').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanVenta') }}";
+            });
+
+            //Dashboard de gestion de Otros Ingresos
+            $('#linkOtroIngreso').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtroIngreso') }}";
+            });
+
+            //Dashboard de Fondo de Salario
+            $('#linkSalario').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanSalario') }}";
+            });
+
+            //Dashboard de gestion de Combustible
+            $('#linkCombustible').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanCombustible') }}";
+            });
+
+            //Dashboard gestion de Energía
+            $('#linkEnergia').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanEnergia') }}";
+            });
+
+            //Dashboard gestion de Otros Gastos
+            $('#linkOtroGastos').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtrosGastos') }}";
+            });
+
+            //Dashboard de gestion de Materias Primas
+            $('#linkMateriasPrimas').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanMateriasPrimas') }}";
+            });
+
+            //Dashboard de gestion de Amortización
+            $('#linkAmortizacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanAmortizacion') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkGastoMaterial').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanGastoMaterial') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkDepreciacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanDepreciacion') }}";
+            });
+
+            //Dashboard de Bonificación
+            $('#linkBonificacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanBonificacion') }}";
+            });
+
+            //Dashboard de gestion de Gastos de comedor
+            $('#linkComedor').on("click", function () {
+                $('#dashboardComedor').css("display", "block");
+                graficoTotalEstimadoComedorDivision();
+                graficoTotalEstimadoComedorDivisionMes();
+            });
+
+            $('#btnAtrasComedor').on("click", function () {
+                $('#btnAtrasComedor').addClass('hidden');
+                graficoTotalEstimadoComedorDivision();
+                inicioMensualComedor();
+                graficoTotalEstimadoComedorDivisionMes();
+                $('#nameComedorMostrar').text(' DISTRIBUCIÓN DEL PLAN DE GASTOS DE COMEDOR POR DIVISIONES');
+                $('#nameComedorMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE GASTOS DE COMEDOR');
+            });
+
+            //Grafico principal de ventas por divisiones
+            {% for graficoTotal in graficosTotalesEstimadosDivisionesComedores %}
+                    totalEstimadoComedorDivision.push({
+                        name: '{{ graficoTotal['nombre'] }}',
+                        y: parseInt('{{ graficoTotal['totalComedor'] }}')
+                    });
+            {% endfor %}
+
+            //Grafico principal de ventas por meses
+            {% for graficoTotal in graficosTotalesEstimadosMesesComedores %}
+                    totalEstimadoComedorDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseInt('{{ graficoTotal['presupuesto'] }}')
+                    });
+            {% endfor %}
+
+            $('#dashboardComedor').css("display", "block");
+            graficoTotalEstimadoComedorDivision();
+            graficoTotalEstimadoComedorDivisionMes();
+
+            //Inicio grafico mensual de ventas
+            function inicioMensualComedor() {
+                totalEstimadoComedorDivisionMes = [];
+                {% for graficoTotal in graficosTotalesEstimadosMesesComedores %}
+                        totalEstimadoComedorDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseInt('{{ graficoTotal['presupuesto'] }}')
+                        });
+                {% endfor %}
+            }
+
+            //Grafico general Plan de Ventas por divisiones
+            function graficoTotalEstimadoComedorDivision() {
+                let valorMax = totalEstimadoComedorDivision.length - 1;
+                let valorScrollbar = false;
+                if (totalEstimadoComedorDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoComedor', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoComedorDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivisionComedor(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de ventas de la division seleccionada
+            function cargarDivisionComedor(categoria, presupuesto, colorSeleccionado) {
+
+                let idDivisionCentroCosto = '';
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                    divisionCentroCosto = '{{ division.nombre }}';
+                    if (divisionCentroCosto === categoria) {
+                        idDivisionCentroCosto = {{ division.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                let mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    division: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardComedorEstimadoDivisionMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    let obj = JSON.parse(data);
+                    let divisionMensual = obj['divisionMensual'];
+                    let divisionCantroCosto = obj['divisionCentroCosto'];
+
+                    totalEstimadoComedorDivisionMes = [];
+                    for (n = 0; n < divisionMensual.length; n++) {
+                        totalEstimadoComedorDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseFloat(divisionMensual[n]['totalComedor']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    totalEstimadoComedorCentroCosto = [];
+                    for (n = 0; n < divisionCantroCosto.length; n++) {
+                        totalEstimadoComedorCentroCosto.push({
+                            name: divisionCantroCosto[n]['nombre'],
+                            y: parseFloat(divisionCantroCosto[n]['totalComedor']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameComedorMostrar').text(' DISTRIBUCIÓN DEL PLAN DE GASTOS DE COMEDOR EN LOS CENTROS DE COSTOS DE LA ' + categoria);
+                    $('#nameComedorMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE GASTOS DE COMEDOR EN LA ' + categoria);
+                    $('#btnAtrasComedor').removeClass('hidden');
+
+                    graficoTotalEstimadoBonificacionDivisionMes();
+                    graficoTotalEstimadoBonificacionCentroCosto();
+
+                });
+            }
+
+            //Grafico Plan de Ventas Mensual por divisiones
+            function graficoTotalEstimadoComedorDivisionMes() {
+                let valorMax = totalEstimadoComedorDivisionMes.length - 1;
+                let valorScrollbar = false;
+                if (totalEstimadoComedorDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoComedorMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoComedorDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de ventas de la division seleccionada
+            function cargarCentroCostoComedor(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for centro in centrosCostos %}
+                    centroCosto = '{{ centro.nombre }}';
+                    if (centroCosto === categoria) {
+                        idCentroCosto = {{ centro.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                let mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    centro: idCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardComedorEstimadoCentroCostoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    let obj = JSON.parse(data);
+
+                    totalEstimadoComedorCentroCostoMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoComedorCentroCostoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalComedor']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameComedorMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE GASTOS DE COMEDOR EN EL ' + categoria);
+                    $('#btnAtrasComedor').removeClass('hidden');
+
+                    graficoTotalEstimadoComedorCentroCostoMes();
+
+                });
+            }
+
+            //Grafico 2do nivel Plan de Ventas por centro de costos
+            function graficoTotalEstimadoComedorCentroCosto() {
+                let valorMax = totalEstimadoComedorCentroCosto.length - 1;
+                let valorScrollbar = false;
+                if (totalEstimadoComedorCentroCosto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoComedor', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoComedorCentroCosto,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarCentroCostoComedor(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+             //Grafico mensual plan de ventas del centro de costo seleccionado
+            function graficoTotalEstimadoComedorCentroCostoMes() {
+                let valorMax = totalEstimadoComedorCentroCostoMes.length - 1;
+                let valorScrollbar = false;
+                if (totalEstimadoComedorCentroCostoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoComedorMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoComedorCentroCostoMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Fin del dashboard de la gestion de Comedor
+
+
+        });
+    </script>
+
+{% endblock %}

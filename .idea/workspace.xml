@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="16435e12-c3c4-45b0-a28b-c9c3eb2da3c3" name="Default Changelist" comment="Sincronizando la carpeta web." />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings" doNotAsk="true" synchronizationState="SYNCHRONIZE">
+    <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
+    <execution />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="PHP7.2">
+    <include_path>
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php70" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/orm" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/dbal" />
+      <path value="$PROJECT_DIR$/vendor/monolog/monolog" />
+      <path value="$PROJECT_DIR$/vendor/phpoffice/phpexcel" />
+      <path value="$PROJECT_DIR$/vendor/zendframework/zend-escaper" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/cache" />
+      <path value="$PROJECT_DIR$/vendor/phpoffice/phpspreadsheet" />
+      <path value="$PROJECT_DIR$/vendor/psr/cache" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/inflector" />
+      <path value="$PROJECT_DIR$/vendor/phpoffice/phpword" />
+      <path value="$PROJECT_DIR$/vendor/jdorn/sql-formatter" />
+      <path value="$PROJECT_DIR$/vendor/symfony/monolog-bundle" />
+      <path value="$PROJECT_DIR$/vendor/markbaker/complex" />
+      <path value="$PROJECT_DIR$/vendor/sensio/generator-bundle" />
+      <path value="$PROJECT_DIR$/vendor/swiftmailer/swiftmailer" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-apcu" />
+      <path value="$PROJECT_DIR$/vendor/phenx/php-svg-lib" />
+      <path value="$PROJECT_DIR$/vendor/phenx/php-font-lib" />
+      <path value="$PROJECT_DIR$/vendor/pclzip/pclzip" />
+      <path value="$PROJECT_DIR$/vendor/dompdf/dompdf" />
+      <path value="$PROJECT_DIR$/vendor/sabberworm/php-css-parser" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/lexer" />
+      <path value="$PROJECT_DIR$/vendor/sensio/distribution-bundle" />
+      <path value="$PROJECT_DIR$/vendor/symfony/symfony" />
+      <path value="$PROJECT_DIR$/vendor/phpoffice/common" />
+      <path value="$PROJECT_DIR$/vendor/psr/link" />
+      <path value="$PROJECT_DIR$/vendor/twig/twig" />
+      <path value="$PROJECT_DIR$/vendor/sensio/framework-extra-bundle" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php56" />
+      <path value="$PROJECT_DIR$/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/instantiator" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-mbstring" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-icu" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-util" />
+      <path value="$PROJECT_DIR$/vendor/sensiolabs/security-checker" />
+      <path value="$PROJECT_DIR$/vendor/fig/link-util" />
+      <path value="$PROJECT_DIR$/vendor/psr/container" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/doctrine-bundle" />
+      <path value="$PROJECT_DIR$/vendor/psr/simple-cache" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/doctrine-cache-bundle" />
+      <path value="$PROJECT_DIR$/vendor/symfony/phpunit-bridge" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/common" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/annotations" />
+      <path value="$PROJECT_DIR$/vendor/doctrine/collections" />
+      <path value="$PROJECT_DIR$/vendor/incenteev/composer-parameter-handler" />
+      <path value="$PROJECT_DIR$/vendor/markbaker/matrix" />
+      <path value="$PROJECT_DIR$/vendor/paragonie/random_compat" />
+      <path value="$PROJECT_DIR$/vendor/composer" />
+      <path value="$PROJECT_DIR$/vendor/symfony/swiftmailer-bundle" />
+    </include_path>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="showPreview" value="true" />
+  </component>
+  <component name="ProjectId" id="26DE7emrS1tCxStVrHJYvV2mIP1" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+    <ConfirmationsSetting value="2" id="Remove" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="reference.webide.settings.project.settings.php.zend.framework.tool" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\wamp64\www\gestcost\app\Resources\views\GestionPlanEstimado\GestionPlanMateriasPrimas" />
+      <recent name="C:\wamp64\www\gestcost\app\Resources\views\Dashboards" />
+      <recent name="C:\wamp64\www\gestcost\app\Resources\views\GestionPlanEstimado" />
+      <recent name="C:\wamp64\www\gestcost\web\reportes" />
+      <recent name="C:\wamp64\www\gestcost\app\Resources\views\Nomencladores\GestionIniciarProcesos" />
+    </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="s doct" />
+      <command value="s doctrine:generate:entities AppBundle: DivisionCentroCosto.php" />
+      <command value="s doctrine:generate:entities " />
+      <command value="s doctrine:generate:entities" />
+      <command value="s doctrine:generate:entities DivisionCentroCosto.php" />
+      <command value="s doctrine:generate:entities Traza.php" />
+      <command value="s generate:controller --no-interaction IndicadorController.php" />
+      <command value="s generate:controller --no-interaction Indicador" />
+      <command value="s generate:controller --no-interaction AppBundle:Indicador" />
+      <command value="s generate:controller --no-interaction --controller=IndicadorController.php" />
+      <command value="s generate:controller --no-interaction --controller=IndicadorController" />
+      <command value="s generate:controller --no-interaction --controller=AppBundle:Indicador" />
+      <command value="s generate:controller --no-interaction AppBundle:PlanEstimadoBonificacion" />
+      <command value="s generate:controller --no-interaction --controller=AppBundle:PlanEstimadoBonificacion" />
+      <command value="s doctrine:generate:entity" />
+      <command value="s generate:controller --no-interaction --controller=AppBundle:PlanEstimadoComedor" />
+      <command value="s doctrine:generate:entities AppBundle" />
+      <command value="s doctrine:schema:update --force" />
+    </option>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="16435e12-c3c4-45b0-a28b-c9c3eb2da3c3" name="Default Changelist" comment="" />
+      <created>1646949597124</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1646949597124</updated>
+      <workItem from="1646949647748" duration="1410000" />
+      <workItem from="1646951456733" duration="2037000" />
+      <workItem from="1646962688068" duration="504000" />
+      <workItem from="1646963203093" duration="5627000" />
+      <workItem from="1647004265734" duration="52000" />
+      <workItem from="1647809772413" duration="7307000" />
+      <workItem from="1647892494113" duration="2985000" />
+      <workItem from="1648249355257" duration="3643000" />
+      <workItem from="1648322906068" duration="5083000" />
+      <workItem from="1648359203752" duration="43842000" />
+      <workItem from="1648831120699" duration="22450000" />
+      <workItem from="1650299873480" duration="18513000" />
+      <workItem from="1651610115565" duration="664000" />
+      <workItem from="1651764351461" duration="6350000" />
+      <workItem from="1652110952715" duration="8009000" />
+      <workItem from="1652329705474" duration="21572000" />
+      <workItem from="1652352504983" duration="34000" />
+      <workItem from="1652500407013" duration="4273000" />
+      <workItem from="1652540476390" duration="753000" />
+      <workItem from="1652730663670" duration="13729000" />
+      <workItem from="1653453060216" duration="693000" />
+      <workItem from="1653456167008" duration="212000" />
+      <workItem from="1653856424761" duration="106000" />
+      <workItem from="1653860878981" duration="33000" />
+      <workItem from="1653862043024" duration="12000" />
+      <workItem from="1654659663576" duration="2019000" />
+      <workItem from="1654720391916" duration="130000" />
+      <workItem from="1654756076424" duration="315000" />
+      <workItem from="1655242317543" duration="3728000" />
+      <workItem from="1655321057013" duration="348000" />
+      <workItem from="1655328887796" duration="2979000" />
+      <workItem from="1655412498884" duration="638000" />
+      <workItem from="1655435369406" duration="12000" />
+      <workItem from="1655471913869" duration="705000" />
+      <workItem from="1655523796151" duration="845000" />
+      <workItem from="1655559038751" duration="2420000" />
+      <workItem from="1655672564759" duration="92000" />
+      <workItem from="1655707664866" duration="77000" />
+      <workItem from="1655739339414" duration="1490000" />
+      <workItem from="1655915390783" duration="66000" />
+      <workItem from="1656010822153" duration="1242000" />
+      <workItem from="1656077592124" duration="87000" />
+      <workItem from="1656078546478" duration="21000" />
+      <workItem from="1656206043231" duration="188000" />
+      <workItem from="1656207012041" duration="463000" />
+      <workItem from="1656563965844" duration="147000" />
+      <workItem from="1656564461060" duration="349000" />
+      <workItem from="1656821056749" duration="715000" />
+      <workItem from="1656965779920" duration="172000" />
+      <workItem from="1657071809915" duration="1020000" />
+      <workItem from="1659408293445" duration="649000" />
+      <workItem from="1660190455978" duration="1352000" />
+      <workItem from="1660195814925" duration="371000" />
+      <workItem from="1660205633046" duration="114000" />
+      <workItem from="1660270158919" duration="131000" />
+      <workItem from="1660272192164" duration="133000" />
+      <workItem from="1660273252666" duration="222000" />
+      <workItem from="1660292729092" duration="1021000" />
+      <workItem from="1660376575181" duration="652000" />
+      <workItem from="1663097191951" duration="1937000" />
+      <workItem from="1663120450587" duration="8000" />
+      <workItem from="1663189847326" duration="695000" />
+      <workItem from="1663190859552" duration="551000" />
+      <workItem from="1663192291048" duration="514000" />
+      <workItem from="1663622973960" duration="1984000" />
+      <workItem from="1663702681730" duration="611000" />
+      <workItem from="1663953576903" duration="2534000" />
+      <workItem from="1664052591521" duration="606000" />
+      <workItem from="1664118633645" duration="6277000" />
+      <workItem from="1664146034544" duration="1668000" />
+      <workItem from="1664199099525" duration="845000" />
+      <workItem from="1664228262743" duration="1149000" />
+      <workItem from="1664251721529" duration="2919000" />
+      <workItem from="1664667287640" duration="1700000" />
+      <workItem from="1665539665672" duration="12000" />
+      <workItem from="1665612504610" duration="867000" />
+      <workItem from="1666367118508" duration="718000" />
+      <workItem from="1666368049959" duration="320000" />
+      <workItem from="1666368677023" duration="721000" />
+      <workItem from="1666369612433" duration="1517000" />
+      <workItem from="1666549514499" duration="3527000" />
+      <workItem from="1666575432476" duration="317000" />
+      <workItem from="1666582023282" duration="415000" />
+      <workItem from="1666586867814" duration="416000" />
+      <workItem from="1666587566163" duration="8000" />
+      <workItem from="1666815830876" duration="1759000" />
+      <workItem from="1667198512392" duration="2859000" />
+      <workItem from="1667206630905" duration="1730000" />
+      <workItem from="1668005001528" duration="4990000" />
+      <workItem from="1668049678240" duration="3407000" />
+      <workItem from="1668055412191" duration="72000" />
+      <workItem from="1668056440203" duration="692000" />
+      <workItem from="1668098970139" duration="111000" />
+      <workItem from="1668398133870" duration="80000" />
+      <workItem from="1669126151209" duration="631000" />
+      <workItem from="1669387322780" duration="2478000" />
+      <workItem from="1670352276776" duration="175000" />
+      <workItem from="1670352720992" duration="9578000" />
+      <workItem from="1670463314471" duration="1975000" />
+      <workItem from="1670823319096" duration="1399000" />
+      <workItem from="1671130233466" duration="100000" />
+      <workItem from="1671254563723" duration="1303000" />
+      <workItem from="1671288526901" duration="24859000" />
+      <workItem from="1671395065168" duration="24676000" />
+      <workItem from="1671584457610" duration="8504000" />
+      <workItem from="1671665127658" duration="1777000" />
+      <workItem from="1672892637106" duration="1880000" />
+      <workItem from="1673301172211" duration="6432000" />
+      <workItem from="1673329210741" duration="734000" />
+      <workItem from="1673374884825" duration="573000" />
+      <workItem from="1673542134543" duration="84000" />
+      <workItem from="1673820854499" duration="169000" />
+      <workItem from="1673930158722" duration="560000" />
+      <workItem from="1673931085064" duration="37000" />
+      <workItem from="1674068663608" duration="634000" />
+      <workItem from="1674102700116" duration="23000" />
+      <workItem from="1674103021911" duration="24000" />
+      <workItem from="1674184413091" duration="89000" />
+      <workItem from="1674321687249" duration="17000" />
+      <workItem from="1674391811535" duration="267000" />
+      <workItem from="1675160815979" duration="426000" />
+    </task>
+    <task id="LOCAL-00036" summary="Gestión del Real. Ajustes en el frontend.">
+      <created>1652117428058</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1652117428058</updated>
+    </task>
+    <task id="LOCAL-00037" summary="Gestión del real. Ajustes en el front-end.">
+      <created>1652335886286</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1652335886287</updated>
+    </task>
+    <task id="LOCAL-00038" summary="Gestión del real. Ajustes en los roles y permisos del menú principal.">
+      <created>1652335915423</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1652335915423</updated>
+    </task>
+    <task id="LOCAL-00039" summary="Gestión del tipo del combustible. Mostrar cuales han sido los precios establecidos en el año en curso.">
+      <created>1652335997808</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1652335997808</updated>
+    </task>
+    <task id="LOCAL-00040" summary="Gestión del cierre del plan. Ajustes en el front-end.">
+      <created>1652336051519</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1652336051519</updated>
+    </task>
+    <task id="LOCAL-00041" summary="Update versión.">
+      <created>1652336111647</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1652336111647</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Update hgignore.">
+      <created>1652337558030</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1652337558030</updated>
+    </task>
+    <task id="LOCAL-00043" summary="Gestión del aceite. Mostrar cuales han sido los precios establecidos en el año en curso.">
+      <created>1652337590862</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1652337590862</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Ajustes en los roles y permisos del menú principal.">
+      <created>1652340229605</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1652340229605</updated>
+    </task>
+    <task id="LOCAL-00045" summary="Reportes en EXCEL. Ajsutes de los títulos">
+      <created>1652341682490</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1652341682490</updated>
+    </task>
+    <task id="LOCAL-00046" summary="Reportes en EXCEL. Ajsutes en el reporte de Otros Ingresos.">
+      <created>1652342456429</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1652342456429</updated>
+    </task>
+    <task id="LOCAL-00047" summary="Dashboard. Ajsutes en Otros Ingresos.">
+      <created>1652343373857</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1652343373857</updated>
+    </task>
+    <task id="LOCAL-00048" summary="Ajustes en Otros Ingresos en el backend.">
+      <created>1652344692258</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1652344692258</updated>
+    </task>
+    <task id="LOCAL-00049" summary="Ajustes en Fondo de Salario.">
+      <created>1652352258050</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1652352258050</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Gestión para QA. Inicio de base de datos">
+      <created>1652504709990</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1652504709991</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Inicializar procesos del Plan. Ventas">
+      <created>1652743132278</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1652743132279</updated>
+    </task>
+    <task id="LOCAL-00052" summary="Inicializar procesos del Plan. otrosIngresos, salario, combustible, aceite, energia, otrosGastos, materiasPrimas, depreciacion.">
+      <created>1652746109546</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1652746109546</updated>
+    </task>
+    <task id="LOCAL-00053" summary="Generar reporte en EXCEL. Menú, roles y permisos">
+      <created>1670377357423</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1670377357424</updated>
+    </task>
+    <task id="LOCAL-00054" summary="Gestión del indicador Bonificación y Otros. Modelo de datos">
+      <created>1671289958514</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1671289958514</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Gestión del indicador Bonificación y Otros. Lógica del backend">
+      <created>1671296734943</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1671296734943</updated>
+    </task>
+    <task id="LOCAL-00056" summary="Gestión del indicador Bonificación y Otros. Exportar reporte de la distribución por centro de costos.">
+      <created>1671298488533</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1671298488533</updated>
+    </task>
+    <task id="LOCAL-00057" summary="Gestión del indicador Bonificación y Otros. Centro de costos. Lógica del front end.">
+      <created>1671299740068</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1671299740068</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Gestión del indicador Bonificación y Otros. Divisiones. Lógica del front end.">
+      <created>1671300604626</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1671300604626</updated>
+    </task>
+    <task id="LOCAL-00059" summary="Gestión del indicador Bonificación y Otros. Dashboard.">
+      <created>1671305987080</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1671305987080</updated>
+    </task>
+    <task id="LOCAL-00060" summary="Actualizar inicializar plan del año.">
+      <created>1671306297166</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1671306297166</updated>
+    </task>
+    <task id="LOCAL-00061" summary="Gestión del indicador Bonificación y Otros. Divisiones. Distribución general del presupuesto.">
+      <created>1671330738180</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1671330738180</updated>
+    </task>
+    <task id="LOCAL-00062" summary="Gestión del indicador Bonificación y Otros. Divisiones. Menú, roles y permisos.">
+      <created>1671331110826</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1671331110826</updated>
+    </task>
+    <task id="LOCAL-00063" summary="Incio de indicadores del plan">
+      <created>1671348037147</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1671348037147</updated>
+    </task>
+    <task id="LOCAL-00064" summary="Ajustes en la distribución del presupuesto mensual de las divisiones.">
+      <created>1671351183330</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1671351183331</updated>
+    </task>
+    <task id="LOCAL-00065" summary="Gestión del indicador Gastos de Comedor. Modelo de datos">
+      <created>1671396018794</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1671396018796</updated>
+    </task>
+    <task id="LOCAL-00066" summary="Gestión del indicador Gastos de Comedor. Lógica del backend">
+      <created>1671399878025</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1671399878026</updated>
+    </task>
+    <task id="LOCAL-00067" summary="Gestión del indicador Gastos de Comedor. Exportar reporte de la distribución por centro de costos.">
+      <created>1671400263379</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1671400263379</updated>
+    </task>
+    <task id="LOCAL-00068" summary="Gestión del indicador Gastos de Comedor. Lógica del front end.">
+      <created>1671422138717</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1671422138717</updated>
+    </task>
+    <task id="LOCAL-00069" summary="Gestión del indicador Gastos de Comedor. LDashboard.">
+      <created>1671422944573</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1671422944573</updated>
+    </task>
+    <task id="LOCAL-00070" summary="Gestión del indicador Gastos de Comedor. Distribución general del presupuesto.">
+      <created>1671424069442</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1671424069442</updated>
+    </task>
+    <task id="LOCAL-00071" summary="Gestión del indicador Gastos de Comedor. Menú, roles y permisos.">
+      <created>1671424984913</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1671424984913</updated>
+    </task>
+    <task id="LOCAL-00072" summary="Gestión del indicador Gastos de Comedor. Menú, roles y permisos.">
+      <created>1671426009370</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1671426009370</updated>
+    </task>
+    <task id="LOCAL-00073" summary="Gestión de ventas. Ajustes en la distribución mensual">
+      <created>1671429258718</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1671429258719</updated>
+    </task>
+    <task id="LOCAL-00074" summary="Gestión de depreciación. Ajustes en la distribución mensual">
+      <created>1671429542827</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1671429542827</updated>
+    </task>
+    <task id="LOCAL-00075" summary="Gestión de otros ingresos. Ajustes en la distribución mensual">
+      <created>1671429818903</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1671429818903</updated>
+    </task>
+    <task id="LOCAL-00076" summary="Gestión de energía. Ajustes en la distribución mensual">
+      <created>1671430324385</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1671430324385</updated>
+    </task>
+    <task id="LOCAL-00077" summary="Gestión de otros gastos. Ajustes en la distribución mensual">
+      <created>1671430661628</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1671430661628</updated>
+    </task>
+    <task id="LOCAL-00078" summary="Gestión de otros gastos. Ajustes en la distribución mensual">
+      <created>1671437118308</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1671437118308</updated>
+    </task>
+    <task id="LOCAL-00079" summary="Ajustes en los mensajes.">
+      <created>1671440634717</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1671440634718</updated>
+    </task>
+    <task id="LOCAL-00080" summary="Update versión.">
+      <created>1671440677085</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1671440677085</updated>
+    </task>
+    <task id="LOCAL-00081" summary="Ajustes en la gestión del plan de materias primas">
+      <created>1671636888197</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1671636888198</updated>
+    </task>
+    <task id="LOCAL-00082" summary="Controladores. Limpieza de código">
+      <created>1671639247302</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1671639247302</updated>
+    </task>
+    <task id="LOCAL-00083" summary="Repositorios. Limpieza de código">
+      <created>1671641139549</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1671641139549</updated>
+    </task>
+    <task id="LOCAL-00084" summary="Update modelo de datos">
+      <created>1672893887133</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1672893887134</updated>
+    </task>
+    <option name="localTasksCounter" value="85" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Gestión del indicador Bonificación y Otros. Divisiones. Lógica del front end." />
+    <MESSAGE value="Gestión del indicador Bonificación y Otros. Dashboard." />
+    <MESSAGE value="Actualizar inicializar plan del año." />
+    <MESSAGE value="Gestión del indicador Bonificación y Otros. Divisiones. Distribución general del presupuesto." />
+    <MESSAGE value="Gestión del indicador Bonificación y Otros. Divisiones. Menú, roles y permisos." />
+    <MESSAGE value="Incio de indicadores del plan" />
+    <MESSAGE value="Ajustes en la distribución del presupuesto mensual de las divisiones." />
+    <MESSAGE value="Gestión del indicador Gastos de Comedor. Modelo de datos" />
+    <MESSAGE value="Gestión del indicador Gastos de Comedor. Lógica del backend" />
+    <MESSAGE value="Gestión del indicador Gastos de Comedor. Exportar reporte de la distribución por centro de costos." />
+    <MESSAGE value="Gestión del indicador Gastos de Comedor. Lógica del front end." />
+    <MESSAGE value="Gestión del indicador Gastos de Comedor. LDashboard." />
+    <MESSAGE value="Gestión del indicador Gastos de Comedor. Distribución general del presupuesto." />
+    <MESSAGE value="Gestión del indicador Gastos de Comedor. Menú, roles y permisos." />
+    <MESSAGE value="Gestión de ventas. Ajustes en la distribución mensual" />
+    <MESSAGE value="Gestión de depreciación. Ajustes en la distribución mensual" />
+    <MESSAGE value="Gestión de otros ingresos. Ajustes en la distribución mensual" />
+    <MESSAGE value="Gestión de energía. Ajustes en la distribución mensual" />
+    <MESSAGE value="Gestión de otros gastos. Ajustes en la distribución mensual" />
+    <MESSAGE value="Ajustes en los mensajes." />
+    <MESSAGE value="Update versión." />
+    <MESSAGE value="Ajustes en la gestión del plan de materias primas" />
+    <MESSAGE value="Controladores. Limpieza de código" />
+    <MESSAGE value="Repositorios. Limpieza de código" />
+    <MESSAGE value="Update modelo de datos" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update modelo de datos" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/app/Resources/views/Macros/tablas.html.twig</url>
+          <line>767</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/app/Resources/views/GestionPlanEstimado/GestionOtrosIngresos/gestionOtroIngresoCentroCosto.html.twig</url>
+          <line>485</line>
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/app/Resources/views/GestionPlanEstimado/GestionRecursosHumanos/gestionFondoCentroCosto.html.twig</url>
+          <line>41</line>
+          <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/app/Resources/views/GestionPlanEstimado/GestionRecursosHumanos/gestionFondoCentroCosto.html.twig</url>
+          <line>56</line>
+          <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/app/Resources/views/GestionPlanReal/gestionPlanReal.html.twig</url>
+          <line>665</line>
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php-line-method">
+          <url>file://$PROJECT_DIR$/src/AppBundle/Controller/PlanEstimadoVentaController.php</url>
+          <line>392</line>
+          <properties>
+            <option name="className" value="\AppBundle\Controller\PlanEstimadoVentaController" />
+            <option name="methodName" value="insertTotalEstimadoVentaCentroCostoMesAction" />
+          </properties>
+          <option name="timeStamp" value="47" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php-line-method">
+          <url>file://$PROJECT_DIR$/src/AppBundle/Controller/PlanEstimadoVentaController.php</url>
+          <line>361</line>
+          <properties>
+            <option name="className" value="\AppBundle\Controller\PlanEstimadoVentaController" />
+            <option name="methodName" value="aprobarPresupuestoEstimadoCentroCostoVentaAction" />
+          </properties>
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+  <component name="hg4idea.settings">
+    <option name="CHECK_INCOMING_OUTGOING" value="true" />
+    <option name="RECENT_HG_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+</project>

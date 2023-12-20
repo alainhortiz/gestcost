@@ -1,0 +1,125 @@
+<div id="modalEditPlantillaCargo" data-backdrop="static" data-keyboard=false class="modal fade" tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog" style="width: 80vw">
+        <div class="modal-content portlet light estilosForm">
+            <div class="modal-header">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green-sunglo"></i>
+                    <span class="bold uppercase" style="font-size: 17px"> MODIFICAR CARGO DE LA PLANTILLA</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="scroller" style="height: 300px" data-always-visible="1" data-rail-visible1="1">
+                    <div class="row">
+                        <div class="portlet-body form">
+                            <form class="form-horizontal" role="form">
+                                <div class="form-body">
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Tipo de Plantilla</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editTipoPlantilla"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select class="form-control input-group-sm" id="editTipoPlantilla"
+                                                        name="editTipoPlantilla">
+                                                    {% for tipo in  tipoPlantillas %}
+                                                        <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">División</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editCategoriaCentroCosto"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select class="form-control input-group-sm" id="editCategoriaCentroCosto"
+                                                        name="editCategoriaCentroCosto">
+                                                    {% for division in  divisionCentrosCostos %}
+                                                        <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Centro de Costo</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editCentroCosto"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select class="form-control input-group-sm" id="editCentroCosto"
+                                                        name="editCentroCosto">
+                                                    {% for centro in  centrosCostos %}
+                                                        <option id="inicio2" value="{{ centro.id }}">{{ centro.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Denominación de Cargo</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editDenominadorCargo"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select class="form-control input-group-sm" id="editDenominadorCargo"
+                                                        name="editDenominadorCargo">
+                                                    {% for denominador in  denominadorCargos %}
+                                                        <option value="{{ denominador.id }}">{{ denominador.denominadorCargo }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Cantidad</label>
+                                        <div class="col-lg-2 col-md-2 col-sm-2">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editCantidad"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control" placeholder="Teclee la cantidad"
+                                                       id="editCantidad" name="editCantidad">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn default cerrar">Cerrar</button>
+            <button type="button" class="btn btn-secondary" id="editGuardar">Guardar</button>
+        </div>
+    </div>
+</div>

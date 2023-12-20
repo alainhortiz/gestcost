@@ -1,0 +1,666 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            {% if totalEstimadoMateriaPrima == 0 %}
+                <div class="dashboard-stat grey">
+            {% else  %}
+                <div class="dashboard-stat {{ aprobarEstimadoMateriaPrimaDivision == true ? 'green-haze' : 'red-flamingo' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="icon icon-basket-loaded"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                        {{ totalEstimadoMateriaPrima|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>TOTAL ESTIMADO</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if aprobarEstimadoMateriaPrimaDivision == false %}
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                <div class="dashboard-stat {{ (totalEstimadoMateriaPrima - totalEstimadoDivisionMateriaPrima) == 0 ? 'grey' : 'red-flamingo' }}"
+                     id="nameMontoRestanteMostrar">
+                    <div class="visual">
+                        <i class="icon icon-basket-loaded"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+                            {{ (totalEstimadoMateriaPrima - totalEstimadoDivisionMateriaPrima)|number_format(0, '.', ',') }}
+                        </div>
+                        <div class="desc">
+                            <strong>ESTIMADO RESTANTE</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-lg-3 col-md-5 col-sm-5 col-xs-5">
+                <div class="dashboard-stat grey-cararra" style="display:none" id="nameMontoRestanteDivisionMostrar">
+                    <div class="visual">
+                        <i class="icon icon-basket-loaded"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="nameMontoRestanteDivision">
+                        </div>
+                        <div class="desc">
+                            <strong>ESTIMADO RESTANTE DE LA DIVISIÓN</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN ESTIMADO DE GESTIÓN DE MATERIAS PRIMAS POR DIVISIÓN</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                </div>
+                <div class="tools">
+                {% if aprobarEstimadoMateriaPrimaDivision == true %}
+                            <a href="{{ path('exportarPlanEstimadoMateriaPrima') }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                {% endif %}
+                    <a href="#" class="reload" id="btnAtrasMateriaPrima" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalDivision" data-toggle="tab">
+                            PRESUPUESTO ESTIMADO POR DIVISIÓN </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalDivision">
+                        <form role="form" id="formTotalDivision">
+                            <div class="form-body">
+                                <div class="row">
+                                    {% if aprobarEstimadoMateriaPrimaDivision == false %}
+                                        <div class="col-lg-3 col-md-3 col-sm-3">
+                                            <div class="portlet">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select class="form-control" id="categoriaCentroCosto"
+                                                                name="categoriaCentroCosto">
+                                                            <option value="0">Seleccione ...</option>
+                                                            {% for division in  divisionCentrosCostos %}
+                                                                <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label for="categoriaCentroCosto">DIVISIÓN</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalMateriaPrima"
+                                                               name="totalMateriaPrima">
+                                                        <label for="totalMateriaPrima">TOTAL DE PRESUPUESTO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarMateriaPrima" {{ (totalEstimadoMateriaPrima - totalEstimadoDivisionMateriaPrima) == 0 ? 'disabled' }}>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button" class="btn btn-secondary ModificarMateriaPrima"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarMateriaPrima" {{ (totalEstimadoMateriaPrima - totalEstimadoDivisionMateriaPrima) != 0 ? 'disabled' }}>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    <div class="{{ aprobarEstimadoMateriaPrimaDivision == false ? 'col-lg-9 col-md-9 col-sm-9' : 'col-lg-12 col-md-12 col-sm-12' }}"
+                                         style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet chart" style="margin-top: 20px"
+                                             id="graficoMateriaPrima"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function(){
+                {% if not (app.session.get('aprobarEstimadoMateriaPrima')) and is_granted("ROLE_DISTRIBUIDOR_DIVISION") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_MATERIAS_PRIMAS' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+
+            });
+
+            $('#btnAtrasMateriaPrima').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasDivision') }}";
+            });
+
+            //funciones de asigancion del presupuesto por divisiones
+
+            //Declaracion de variables
+            var totalEstimadoMateriaPrimaDivision = [];
+            var totalEstimadoMateriaPrimaDivisionMes = [];
+            var montoRestante = 0;
+            var montoRestanteDivision = 0;
+            var montoTotal = 0;
+            var montoAnterior = 0;
+            var divisionCentroCosto = '';
+            var idDivisionCentroCosto = '';
+            var n;
+
+            //Arreglo para el grafico de presupuesto asignado por Categorias del plan de ventas activo
+            {% for graficoTotal in graficosTotalesEstimadosDivisionesMateriasPrimas %}
+            totalEstimadoMateriaPrimaDivision.push({
+                name: '{{ graficoTotal['nombre'] }}',
+                y: parseInt('{{ graficoTotal['totalMateriaPrima'] }}')
+            });
+            {% endfor %}
+
+            (function () {
+                graficoTotalEstimadoMateriaPrimaDivision();
+            })();
+
+            //Cargar el presupuesto estimado de la division seleccionada
+            function cargarDivision(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                        divisionCentroCosto = '{{ division.nombre }}';
+                        if (divisionCentroCosto === categoria) {
+                            {% if aprobarEstimadoMateriaPrimaDivision == false %}
+                            $('#categoriaCentroCosto').val('{{ division.id }}');
+                            {% endif %}
+                            idDivisionCentroCosto = {{ division.id }};
+                        }
+                {% endfor %}
+
+                {% if aprobarEstimadoMateriaPrimaDivision == false %}
+
+                $('#totalMateriaPrima').val(presupuesto);
+                montoAnterior = parseInt(presupuesto);
+                $('#categoriaCentroCosto').prop("disabled", true);
+                $('.AsignarMateriaPrima').prop("disabled", true);
+                $('.ModificarMateriaPrima').prop("disabled", false);
+                $('.AprobarMateriaPrima').prop("disabled", false);
+
+                {% else %}
+
+                //mostrar si existe el grafico mensual
+
+                $('#nameMontoEstimado').text(Highcharts.numberFormat(presupuesto, 0, '.', ','));
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ planEstimado }},
+                    division: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("graficoMateriaPrimaEstimadoDivisionMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    totalEstimadoMateriaPrimaDivisionMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoMateriaPrimaDivisionMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalMateriaPrima']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    if (totalEstimadoMateriaPrimaDivisionMes.length === 0) {
+                        $('#nameMontoRestanteDivision').text(presupuesto);
+                        $('#nameMontoRestanteMostrar').css("display", "none");
+                        $('#nameMontoRestanteDivisionMostrar').css("display", "block");
+                    } else {
+                        $('#nameMontoRestanteDivision').text(0);
+                        $('#nameMontoRestanteMostrar').css("display", "block");
+                        $('#nameMontoRestanteDivisionMostrar').css("display", "none");
+                        graficoTotalEstimadoMateriaPrimaDivisionMes();
+                    }
+
+                    montoRestanteDivision = parseInt(presupuesto);
+                });
+                {% endif %}
+            }
+
+            //Grafico general Total presupuesto Estimado por categorías
+            function graficoTotalEstimadoMateriaPrimaDivision() {
+                var valorMax = totalEstimadoMateriaPrimaDivision.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoMateriaPrimaDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoMateriaPrima', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'DISTRIBUCIÓN POR DIVISIONES'
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoMateriaPrimaDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivision(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            $('.AsignarMateriaPrima').on('click', function () {
+
+                if ($("#categoriaCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalMateriaPrima").val() === '') {
+                    alertify.alert('<strong>El total de presupuesto es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = {{ totalEstimadoMateriaPrima - totalEstimadoDivisionMateriaPrima }};
+
+                if (parseInt($("#totalMateriaPrima").val()) > montoRestante) {
+                    alertify.alert('<strong>El total de presupuesto no puede ser mayor que el monto restante.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalMateriaPrima").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    division: $("#categoriaCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoDivisionMateriaPrima") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El plan estimado de materias primas para esta división ha asignado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.ModificarMateriaPrima').on('click', function () {
+
+                if ($("#categoriaCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalMateriaPrima").val() === '') {
+                    alertify.alert('<strong>El total de presupuesto es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = {{ totalEstimadoMateriaPrima - totalEstimadoDivisionMateriaPrima }};
+
+                if (montoRestante === 0) {
+                    if (parseInt($("#totalMateriaPrima").val()) > montoAnterior) {
+                        alertify.alert('<strong>El total de presupuesto no puede ser mayor que el monto disponible.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (parseInt($("#totalMateriaPrima").val()) > (montoAnterior + montoRestante)) {
+                        alertify.alert('<strong>El total de presupuesto no puede ser mayor que el monto restante.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalMateriaPrima").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    division: $("#categoriaCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateTotalEstimadoDivisionMateriaPrima") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El plan estimado de materias primas para esta división ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#categoriaCentroCosto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarMateriaPrima').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.AprobarMateriaPrima').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar el presupuesto estimado de materias primas para las divisiones</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ planEstimado }},
+                        division: $("#categoriaCentroCosto").val()
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarPresupuestoEstimadoDivisionMateriaPrima") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó el plan estimado de materias primas para las divisiones</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasDivision') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                        }
+                    });
+                });
+
+            });
+
+            //fin asignacion del presupuesto total por división
+
+            //funciones distribución del presupuesto mensual por division
+
+            //Grafico mensual Total presupuesto Estimado por divisiones
+            function graficoTotalEstimadoMateriaPrimaDivisionMes() {
+                var valorMax = totalEstimadoMateriaPrimaDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoMateriaPrimaDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoMateriaPrima', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'DISTRIBUCIÓN MENSUAL POR DIVISIONES'
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoMateriaPrimaDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            // fin funciones distribución del presupuesto mensual por division
+
+        });
+    </script>
+{% endblock %}

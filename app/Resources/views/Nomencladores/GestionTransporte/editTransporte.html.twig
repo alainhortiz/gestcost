@@ -1,0 +1,508 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="portlet light estilosForm">
+                <div class="portlet-title">
+                    <div class="caption font-green">
+                        <i class="fa fa-automobile font-green-sunglo"></i>
+                        <span class="caption-subject bold uppercase"> MODIFICAR TRANSPORTE</span>
+                    </div>
+                </div>
+                <div class="portlet-body form">
+                    <form role="form" id="editTransporte">
+                        <div class="form-body">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">División</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editDivisionCentroCosto"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select class="form-control input-group-sm" id="editDivisionCentroCosto"
+                                                        name="editDivisionCentroCosto">
+                                                    <option value="{{ transporte.centroCosto.divisionCentroCosto.id }}">{{ transporte.centroCosto.divisionCentroCosto.nombre }}</option>
+                                                    {% for division in  divisionCentrosCostos %}
+                                                        <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Centro de Costo</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editCentroCosto"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select disabled class="form-control input-group-sm"
+                                                        id="editCentroCosto"
+                                                        name="editCentroCosto">
+                                                    <option id="inicio"
+                                                            value="{{ transporte.centroCosto.id }}">{{ transporte.centroCosto.nombre }}</option>
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Marca-Modelo</label>
+                                        <div class="col-md-9 ">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editModeloTransporte"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select class="form-control input-group-sm" id="editModeloTransporte"
+                                                        name="editModeloTransporte">
+                                                    <option value="{{ transporte.modeloTransporte.id }}">{{ transporte.modeloTransporte.nombre }}</option>
+                                                    {% for modelo in  modelosTransportes %}
+                                                        <option value="{{ modelo.id }}">{{ modelo.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 20px">
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Tipo de
+                                            Combustible</label>
+                                        <div class="col-md-9 ">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editTipoCombustible"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select class="form-control input-group-sm" id="editTipoCombustible"
+                                                        name="editTipoCombustible">
+                                                    <option value="{{ transporte.tipoCombustible.id }}">{{ transporte.tipoCombustible.nombre }}</option>
+                                                    {% for tipo in  tiposCombustibles %}
+                                                        <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">No. Activo Fijo</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-comment"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editNoActivoFijo"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control"
+                                                       value="{{ transporte.noActivoFijo }}"
+                                                       id="editNoActivoFijo" name="editNoActivoFijo">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Matrícula</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editMatricula"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control"
+                                                       value="{{ transporte.matricula }}"
+                                                       id="editMatricula" name="editMatricula">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 20px">
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Año</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editYear"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="number" min="1990" class="form-control"
+                                                       value="{{ transporte.year }}"
+                                                       id="editYear" name="editYear">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Color</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-comment"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editColor"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control" value="{{ transporte.color }}"
+                                                       id="editColor" name="editColor">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Chasis</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editChasis"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control" value="{{ transporte.chasis }}"
+                                                       id="editChasis" name="editChasis">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 20px">
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Motor</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editMotor"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control" value="{{ transporte.motor }}"
+                                                       id="editMotor" name="editMotor">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Valor</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-comment"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editValor"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control" value="{{ transporte.valor }}"
+                                                       id="editValor" name="editValor">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Circulación</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b"
+                                                   class="fa fa-exclamation tooltips hidden editCirculacion"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <input type="text" class="form-control"
+                                                       value="{{ transporte.circulacion }}"
+                                                       id="editCirculacion" name="editCirculacion">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 20px">
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label"></label>
+                                        <div class="col-md-9">
+                                            {% if transporte.isLubricante == 1 %}
+                                                <div class="md-checkbox">
+                                                    <input type="checkbox" id="editLubricante" class="md-check" checked>
+                                                    <label for="editLubricante">
+                                                        <span></span>
+                                                        <span class="check"></span>
+                                                        <span class="box"></span>
+                                                        LUBRICANTE </label>
+                                                </div>
+                                            {% else %}
+                                                <div class="md-checkbox">
+                                                    <input type="checkbox" id="editLubricante" class="md-check">
+                                                    <label for="editLubricante">
+                                                        <span></span>
+                                                        <span class="check"></span>
+                                                        <span class="box"></span>
+                                                        LUBRICANTE </label>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4 col-md-4 col-sm-4" id="mostrarTipoLubricante">
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">Tipo de
+                                            Aceite</label>
+                                        <div class="col-md-9 ">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px"
+                                                   class="fa fa-exclamation tooltips hidden  editTipoLubricante"
+                                                   data-placement="bottom"
+                                                   data-original-title="Este campo es obligatorio"></i>
+                                                <select class="form-control input-group-sm" id="editTipoLubricante"
+                                                        name="editTipoLubricante">
+                                                    {% if transporte.isLubricante == 1 %}
+                                                        <option value="{{ transporte.lubricante.id }}">{{ transporte.lubricante.nombre }}</option>
+                                                    {% else %}
+                                                        <option value="0">Seleccione ...</option>
+                                                    {% endif %}
+                                                    {% for tipo in  tiposLubricantes %}
+                                                        <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-actions noborder">
+                            <button type="button" class="btn btn-secondary" id="btnGuardar">Guardar</button>
+                            <button type="button" class="btn btn default" id="btnSalir">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (is_granted("ROLE_NOMENCLADOR")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'PLANTILLA_TRANSPORTE' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function () {
+                window.location.href = "{{ path('gestionarTransportes') }}";
+            });
+
+            var lubricante = 0;
+
+            $('#editLubricante').on('change', function () {
+                if ($('#editLubricante').prop('checked')) {
+                    lubricante = 1;
+                    $('#mostrarTipoLubricante').css("display", "block");
+                } else {
+                    lubricante = 0;
+                    $('#mostrarTipoLubricante').css("display", "none");
+                }
+            });
+
+            $('#editDivisionCentroCosto').on('change', function () {
+                $("#inicio").html('Seleccione ...').val('0');
+                armarSelectCentroCosto();
+            });
+
+            function armarSelectCentroCosto() {
+                var html = '';
+                var divisionCentroCosto = $('#editDivisionCentroCosto').val();
+                $("option").remove('.cambioCentroCosto');
+                $("#inicio").after('<option class="cambioCentroCosto"></option>');
+
+                {% for centro in  centrosCostos %}
+                var idDivisionCentroCosto = '{{ centro.divisionCentroCosto.id }}';
+
+                if (idDivisionCentroCosto == divisionCentroCosto) {
+                    var id = {{ centro.id }};
+                    var name = '{{ centro.nombre }}';
+                    html += '<option class="cambioCentroCosto" value="' + id + '">' + name + '</option>';
+                }
+                {% endfor %}
+                $(".cambioCentroCosto").replaceWith(html);
+                $("#editCentroCosto").prop('disabled', false);
+            }
+
+            $('#btnGuardar').on('click', function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#editTransporte input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+
+                $('#editTransporte input[type=number]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+
+                $('#editTransporte select').each(function () {
+
+                    var name = $(this).prop('name');
+                    if (name != 'editTipoLubricante') {
+                        if ($(this).val() == '0') {
+                            $(this).addClass('input-error');
+                            $('.' + name).removeClass('hidden');
+                            errores++;
+                        } else {
+                            $(this).removeClass('input-error');
+                            $('.' + name).addClass('hidden');
+                        }
+                    }
+                });
+
+                if (errores !== 0) return false;
+
+                if ($('#editLubricante').prop('checked')) {
+                    lubricante = 1;
+                    if ($("#editTipoLubricante").val() === '0') {
+                        alertify.alert('<strong>El tipo de aceite es obligatorio, no puede quedar en blanco.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idTransporte: '{{ transporte.id }}',
+                    matricula: $("#editMatricula").val().toUpperCase(),
+                    year: $("#editYear").val(),
+                    color: $("#editColor").val(),
+                    chasis: $("#editChasis").val().toUpperCase(),
+                    motor: $("#editMotor").val().toUpperCase(),
+                    valor: $("#editValor").val(),
+                    circulacion: $("#editCirculacion").val().toUpperCase(),
+                    noActivoFijo: $("#editNoActivoFijo").val(),
+                    centroCosto: $("#editCentroCosto").val(),
+                    modeloTransporte: $("#editModeloTransporte").val(),
+                    tipoCombustible: $("#editTipoCombustible").val(),
+                    tipoLubricante: $("#editTipoLubricante").val(),
+                    lubricante: lubricante
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateTransporte") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El medio de transporte ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarTransportes') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+        });
+    </script>
+{% endblock %}

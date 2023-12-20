@@ -1,0 +1,31 @@
+{% extends 'Inicio/inicio.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('easyadmin/global/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/global/js/jquery-migrate.min.js') }}"></script>
+    <!-- IMPORTANT! Load jquery-ui.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
+    <script src="{{ asset('easyadmin/plugins/jquery-ui/jquery-ui.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/jquery-slimscroll/jquery.slimscroll.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/global/js/jquery.blockui.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/global/js/jquery.cokie.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/uniform/jquery.uniform.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}"></script>
+    <!-- END CORE PLUGINS -->
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <!-- BEGIN MI PLANTILLA  LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <!-- END GRAFICOS LEVEL PLUGINS -->
+{% endblock %}

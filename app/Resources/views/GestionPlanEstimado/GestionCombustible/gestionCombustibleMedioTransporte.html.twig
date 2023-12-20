@@ -1,0 +1,1024 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="margin-top: 20px">
+            <div class="dashboard-stat  red-flamingo" id="nameMontoEstimadoMostrar">
+                <div class="visual">
+                    <i class="fa fa-automobile"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                    </div>
+                    <div class="desc">
+                        <strong>LITROS ESTIMADOS</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="margin-top: 20px">
+            <div class="dashboard-stat red-flamingo"
+                 id="nameMontoRestanteMostrar">
+                <div class="visual">
+                    <i class="fa fa-automobile"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+
+                    </div>
+                    <div class="desc">
+                        <strong>LITROS RESTANTES</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN DE GESTIÓN  DEL COMBUSTIBLE</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                </div>
+                <div class="tools">
+                    <a href="{{ path('exportarPlanEstimadoCombustible') }}"
+                       class="fa fa-file-excel-o fa-2x font-green"
+                       data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                    <a href="#" class="reload" id="btnAtrasMedioTransporte" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalCentroCosto" data-toggle="tab">
+                            LITROS ESTIMADOS POR MEDIOS DE TRANSPORTES
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalCentroCosto">
+                        <form role="form" id="formTotalCentroCosto">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                        <div class="portlet">
+                                            <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input">
+                                                    <select class="form-control" id="tipoCombustible"
+                                                            name="tipoCombustible">
+                                                        <option value="0">Seleccione ...</option>
+                                                        {% for tipo in  tiposCombustibles %}
+                                                            <option value="{{ tipo.tipoCombustible.id }}">{{ tipo.tipoCombustible.nombre }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <label for="tipoCombustible">TIPO DE COMBUSTIBLE</label>
+                                                </div>
+                                            </div>
+                                            <div id="gestionMensual" style="display:{{ aprobadoEstimadoCombustible == true ? 'none' : 'block' }}">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="tipoTransporte"
+                                                                name="tipoTransporte">
+                                                            <option id="inicioTipo" value="0">Seleccione ...</option>
+                                                        </select>
+                                                        <label for="tipoTransporte">TIPO DE TRANSPORTE</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="transporte"
+                                                                name="transporte">
+                                                            <option id="inicioTransporte" value="0">Seleccione ...
+                                                            </option>
+                                                        </select>
+                                                        <label for="transporte">MEDIOS DE TRANSPORTES</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="mesTransporte"
+                                                                name="mesTransporte">
+                                                            <option id="inicioMes" value="0">Seleccione ...</option>
+                                                        </select>
+                                                        <label for="mesTransporte">DISTRIBUCIÓN POR MES</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalLtsCombustible"
+                                                               name="totalLtsCombustible" disabled>
+                                                        <label for="totalLtsCombustible">
+                                                            LITROS MENSUALES DE COMBUSTIBLE</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarCombustible"
+                                                                disabled>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary ModificarCombustible"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarCombustible"
+                                                                disabled>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9 col-md-9 col-sm-9" style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet-body " style="overflow-x: auto; display: none" id="tablaTransporte">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTransporte">
+                                                <thead>
+                                                <tr>
+                                                    <th class="hidden" style="background: #009490;color: #d6f5f3">
+                                                        ID
+                                                    </th>
+                                                    <th style="background: #009490;color: #d6f5f3">
+                                                        MODELO
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        MATRÍCULA
+                                                    </th>
+                                                    <th style="background: #009490;color: #d6f5f3">
+                                                        CENTRO DE COSTO
+                                                    </th>
+                                                    <th style="background: #009490;color: #d6f5f3">
+                                                        DIVISIÓN
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3" width="2px">
+                                                        ASIGNACIÓN DE COMBUSTIBLE
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3" width="2px">
+                                                        IMPORTE DE COMBUSTIBLE
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        MODIFICAR
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (app.session.get('aprobarEstimadoCombustible')) and is_granted("ROLE_DISTRIBUIDOR_DIVISION") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_COMBUSTIBLE' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            var table = $('#dataTransporte').DataTable();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            $('#transporte').select2({
+                placeholder: 'Seleccione ...',
+                allowClear: true
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+
+            });
+
+            $('#btnAtrasMedioTransporte').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoCombustiblesMediosTransportes') }}";
+            });
+
+            //Declaracion de variables
+            var transportesTipoCombustibleAsignado = [];
+            var precio = 0;
+            var totalLtsCombustible = 0;
+            var totalLtsCombustibleMedioBasico = 0;
+            var montoRestanteCombustible = 0;
+            var montoAnteriorCombustible = 0;
+            var presupuestoMensualCombustible = 0;
+            var idTransporte = 0;
+            var modificar = false;
+            var combustibleAprobado = 0;
+            var enero = 0;
+            var febrero = 0;
+            var marzo = 0;
+            var abril = 0;
+            var mayo = 0;
+            var junio = 0;
+            var julio = 0;
+            var agosto = 0;
+            var septiembre = 0;
+            var octubre = 0;
+            var noviembre = 0;
+            var diciembre = 0;
+            var eneroAnterior = 0;
+            var febreroAnterior = 0;
+            var marzoAnterior = 0;
+            var abrilAnterior = 0;
+            var mayoAnterior = 0;
+            var junioAnterior= 0;
+            var julioAnterior = 0;
+            var agostoAnterior = 0;
+            var septiembreAnterior = 0;
+            var octubreAnterior = 0;
+            var noviembreAnterior = 0;
+            var diciembreAnterior = 0;
+            var cantidad = 0;
+
+            $('#tipoCombustible').on('change', function () {
+                $("#transporte").val('').prop('disabled' , true).select2({
+
+                    placeholder: 'Seleccione ...',
+                    allowClear: true
+                });
+                var html = '';
+                modificar = false;
+                var tipoCombustible = parseInt($('#tipoCombustible').val());
+                if (tipoCombustible === 0) {
+                    $("#tipoTransporte").prop('disabled', true);
+                    $("#transporte").prop('disabled', true);
+                    $("option").remove('.cambioTipo');
+                    $("option").remove('.cambioTransporte');
+                    $('#nameMontoEstimado').text(0);
+                    $(".AprobarCombustible").prop('disabled', true);
+                    $('#totalDivisionMes').css("display", "none");
+                    $("#mesTransporte").prop('disabled', true);
+                    $('#tablaTransporte').css("display", "none");
+                    $('#nameMontoEstimadoMostrar').removeClass("green-haze");
+                    $('#nameMontoEstimadoMostrar').addClass("red-flamingo");
+                    $('#nameMontoRestanteMostrar').removeClass("green-haze");
+                    $('#nameMontoRestanteMostrar').addClass("red-flamingo");
+                } else {
+                    $("option").remove('.cambioTipo');
+                    $("#inicioTipo").after('<option class="cambioTipo"></option>');
+
+                    //Llenar el select de tipo de transporte
+                    {% for tipo in  tiposTransportes %}
+                            var idTipoCombustible = parseInt({{ tipo.idTipoCombustible }});
+                            if (idTipoCombustible === tipoCombustible) {
+                                var id = {{ tipo.id }};
+                                var name = '{{ tipo.nombre }}';
+                                html += '<option class="cambioTipo" value="' + id + '">' + name + '</option>';
+                            }
+                     {% endfor %}
+                    $(".cambioTipo").replaceWith(html);
+                    $("#tipoTransporte").prop('disabled', false);
+
+                    //obtener los litros asignados por tipo de combustible
+
+                    precio = 0;
+                    totalLtsCombustible = 0;
+                    totalLtsCombustibleMedioBasico = 0;
+                    transportesTipoCombustibleAsignado =[];
+                    aprobadoTipoCombustible = false;
+
+                    {% for tipo in  tiposCombustibles %}
+                    var idTipoCombustible =  parseInt({{ tipo.tipoCombustible.id }});
+
+                    if (idTipoCombustible === tipoCombustible) {
+                        totalLtsCombustible = parseInt({{ tipo.lts }});
+                        {% if tipo.aprobadoEstimadoCombustibleMedioTransporte %}
+                             aprobadoTipoCombustible = true;
+                        {% endif %}
+                    }
+                    {% endfor %}
+
+                    {% if graficosTEstimadosCombustiblesMedios %}
+                            {% for medio in  graficosTEstimadosCombustiblesMedios %}
+                               var idTipoCombustible = parseInt({{ medio.tipoCombustibleId }});
+                               var idTransporteActual = parseInt({{ medio.idTransporte }});
+                               if (idTipoCombustible === tipoCombustible) {
+                                    totalLtsCombustibleMedioBasico += parseInt({{ medio['ltsCombustible'] }});
+                                   {% for cant in graficosTEstimadosCombustiblesMediosCantMeses %}
+                                      var idTranspMeses = parseInt({{ cant.idTransporte }});
+                                      if (idTransporteActual ===idTranspMeses) {
+                                          cantidad = parseInt({{ cant.cantidad }});
+                                      }
+                                   {% endfor %}
+                                    transportesTipoCombustibleAsignado.push([
+                                       '{{ medio['idTransporte'] }}',
+                                       '{{ medio['modeloNombre'] }}',
+                                       '{{ medio['matricula'] }}',
+                                       '{{ medio['centro'] }}',
+                                       '{{ medio['division'] }}',
+                                        Highcharts.numberFormat('{{ medio['ltsCombustible'] }}', 2, '.', ','),
+                                        Highcharts.numberFormat('{{ medio['importeCombustible'] }}', 2, '.', ','),
+                                   ]);
+                                }
+                            {% endfor %}
+
+                               if (transportesTipoCombustibleAsignado.length !== 0) {
+                                   $('#tablaTransporte').css("display", "block");
+                                   if (aprobadoTipoCombustible) {
+                                       table = $('#dataTransporte').DataTable( {
+                                           destroy: true,
+                                           data: transportesTipoCombustibleAsignado,
+                                           columns: [
+                                               { class: "hidden" },
+                                               { class: "text-center" },
+                                               { class: "text-center" },
+                                               { class: "text-center"},
+                                               { class: "text-center"},
+                                               { class: "text-center" },
+                                               { class: "text-center" },
+                                               { defaultContent: "<a href='#'>-</a>", class: "text-center" }
+                                           ],
+                                           "lengthMenu": [[6], [6]]
+                                       } );
+                                       $('#nameMontoEstimadoMostrar').removeClass('red-flamingo');
+                                       $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                                       $('#nameMontoEstimadoMostrar').addClass('green-haze');
+                                       $('#nameMontoRestanteMostrar').addClass('green-haze');
+                                   } else {
+                                       table = $('#dataTransporte').DataTable( {
+                                           destroy: true,
+                                           data: transportesTipoCombustibleAsignado,
+                                           columns: [
+                                               { class: "hidden" },
+                                               { class: "text-center" },
+                                               { class: "text-center" },
+                                               { class: "text-center"},
+                                               { class: "text-center"},
+                                               { class: "text-center" },
+                                               { class: "text-center" },
+                                               { defaultContent: "<a href='#' " +
+                                                       " class='btn default btn-xs green-stripe edit' data-toggle='tooltip'" +
+                                                       " data-placement='left'" +
+                                                       " title='Modificar asignación de combustible'>Editar</a>", class: "text-center" }
+                                           ],
+                                               "lengthMenu": [[6], [6]]
+                                       } );
+                                       $('#nameMontoEstimadoMostrar').removeClass('green-haze');
+                                       $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                                       $('#nameMontoEstimadoMostrar').addClass('red-flamingo');
+                                       $('#nameMontoRestanteMostrar').addClass('red-flamingo');
+                                   }
+
+                               } else {
+                                   $('#tablaTransporte').css("display", "none");
+                               }
+                    {% endif %}
+
+                    montoRestanteCombustible = totalLtsCombustible - totalLtsCombustibleMedioBasico;
+
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalLtsCombustible, 0, '.', ','));
+                    $('#nameMontoRestante').text(Highcharts.numberFormat(montoRestanteCombustible, 0, '.', ','));
+
+                    if (montoRestanteCombustible === 0){
+                        $(".AprobarCombustible").prop('disabled', false);
+                    }else {
+                        $(".AprobarCombustible").prop('disabled', true);
+                    }
+                }
+                $("#totalLtsCombustible").val('');
+                $("#totalLtsCombustible").prop('disabled', true);
+                $(".AsignarCombustible").prop('disabled', true);
+                $(".ModificarCombustible").prop('disabled', true);
+                combustibleAprobado = parseInt({{ aprobadoEstimadoCombustible }});
+                if (combustibleAprobado === 1){
+                    $("#gestionMensual").css("display", "none");
+                }else {
+                    if (comprobarAprobacion()) {
+                        $('#dataTransporte a.edit').css("display", "none");
+                        $("#gestionMensual").css("display", "none");
+                        $('#nameMontoEstimadoMostrar').removeClass("red-flamingo");
+                        $('#nameMontoEstimadoMostrar').addClass("green-haze");
+                        $('#nameMontoRestanteMostrar').removeClass("red-flamingo");
+                        $('#nameMontoRestanteMostrar').addClass("green-haze");
+                    } else {
+                        $('#dataTransporte a.edit').css("display", "block");
+                        $("#gestionMensual").css("display", "block");
+                        $('#nameMontoEstimadoMostrar').removeClass("green-haze");
+                        $('#nameMontoEstimadoMostrar').addClass("red-flamingo");
+                        $('#nameMontoRestanteMostrar').removeClass("green-haze");
+                        $('#nameMontoRestanteMostrar').addClass("red-flamingo");
+                    }
+                }
+            });
+
+            function comprobarAprobacion() {
+                var estado = false;
+                {% if tiposCombustiblesAprobados %}
+                        var tipoCombustible = $("#tipoCombustible").val();
+                        {% for aprobacion in tiposCombustiblesAprobados %}
+                                var idTipoCombustible = '{{ aprobacion['tipoCombustible'] }}';
+                                var aprobar = '{{ aprobacion['aprobado'] }}';
+                                if (tipoCombustible === idTipoCombustible) {
+                                    estado = aprobar;
+                                }
+                        {% endfor %}
+                {% endif %}
+                return estado;
+            }
+
+            $('#tipoTransporte').on('change', function () {
+                $("#transporte").val('').prop('disabled' , true).select2({
+
+                    placeholder: 'Seleccione ...',
+                    allowClear: true
+                });
+                var html = '';
+                var tipoTransporte = parseInt($('#tipoTransporte').val());
+                var tipoCombustible = parseInt($('#tipoCombustible').val());
+                if (tipoTransporte === 0) {
+                    $("option").remove('.cambioTransporte');
+                } else {
+                    $("#transporte").val(0);
+                    $("option").remove('.cambioTransporte');
+                    $("#inicioTransporte").after('<option class="cambioTransporte"></option>');
+
+                    //Llenar el select de transporte
+                    {% for tipo in  transportes %}
+                    var idTipoTransporte = parseInt({{ tipo.modeloTransporte.tipoTransporte.id }});
+                    var idTipoCombustible = parseInt({{ tipo.tipoCombustible.id }});
+                    if (idTipoTransporte === tipoTransporte && idTipoCombustible === tipoCombustible) {
+                        var id = {{ tipo.id }};
+                        var name = '{{ tipo.modeloTransporte.nombre ~ ' - Chapa: ' ~ tipo.matricula}}';
+                        html += '<option class="cambioTransporte" value="' + id + '">' + name + '</option>';
+                    }
+                    {% endfor %}
+                    $(".cambioTransporte").replaceWith(html);
+                    $("#transporte").prop('disabled', false);
+                }
+                $("#totalLtsCombustible").val('');
+                $("#totalLtsCombustible").prop('disabled', true);
+                $(".AsignarCombustible").prop('disabled', true);
+                $(".ModificarCombustible").prop('disabled', true);
+            });
+
+            $('#transporte').on('change', function () {
+                var html = '';
+                var transporte = parseInt($('#transporte').val());
+                if (transporte === 0) {
+                    $("#totalLtsCombustible").prop('disabled', true);
+                    $("#totalLtsCombustible").val('');
+                    $("#mesTransporte").val(0);
+                    $("#mesTransporte").prop('disabled', true);
+                    $("option").remove('.cambioMes');
+                } else {
+                    //Llenar los meses
+                    $("option").remove('.cambioMes');
+                    $("#inicioMes").after('<option class="cambioMes"></option>');
+                    {% for mes in  mesesTransportes %}
+                            var id = '{{ mes }}';
+                            var name = '{{ mes }}';
+                            html += '<option class="cambioMes" value="' + id + '">' + name + '</option>';
+                    {% endfor %}
+                    $(".cambioMes").replaceWith(html);
+                    $("#mesTransporte").prop('disabled', false);
+
+                    //verificar si el total de litros restante es menor que 12
+                    if (montoRestanteCombustible < 12) {
+                        $("#mesTransporte").prop('disabled', false);
+                        $("#mesTransporte").val(0);
+                        $("#totalLtsCombustible").val('');
+                        $("#totalLtsCombustible").prop('disabled', true);
+                    } else {
+                        $("#mesTransporte").prop('disabled', true);
+                        $("#totalLtsCombustible").prop('disabled', false);
+                    }
+                }
+                $(".AsignarCombustible").prop('disabled', true);
+                $(".ModificarCombustible").prop('disabled', true);
+            });
+
+            $('#mesTransporte').on('change', function () {
+                var mesTransporte = $('#mesTransporte').val();
+                if (mesTransporte === '0') {
+                    $("#totalLtsCombustible").prop('disabled', true);
+                }else {
+                    if (modificar){
+                        {% for medio in graficosTEstimadosCombustiblesMediosMes %}
+                                var id = parseInt('{{ medio.idTransporte }}');
+                                var idMes = '{{ medio.mes }}';
+                                if( id === idTransporte && idMes === mesTransporte)
+                                {
+                                    $('#totalLtsCombustible').val('{{ medio.ltsCombustible }}');
+                                    $('#totalLtsCombustible').prop("disabled", false);
+                                    montoAnteriorCombustible = parseInt({{ medio.ltsCombustible }});
+                                }
+                        {% endfor %}
+                    }else {
+                        $("#mesTransporte").prop('disabled', false);
+                        $("#totalLtsCombustible").prop('disabled', false);
+                    }
+                }
+            });
+
+            $('#totalLtsCombustible').on("keyup", function () {
+
+                var montoAntes = montoAnteriorCombustible;
+
+                if (!modificar) {
+                    if ($(this).val().trim() != '') {
+                        $('.AsignarCombustible').prop("disabled", false);
+
+                    } else {
+                        $('.AsignarCombustible').prop("disabled", true);
+                    }
+                }else {
+                    if ($(this).val().trim() != montoAntes) {
+                        $('.ModificarCombustible').prop("disabled", false);
+
+                    } else {
+                        $('.ModificarCombustible').prop("disabled", true);
+                    }
+                }
+            });
+
+            $('#dataTransporte').on('click', 'a.edit', function (e) {
+                e.preventDefault();
+                var row = $(this).parents('tr');
+                var fila = table.row(row).data();
+                var html = '';
+
+                idTransporte = parseInt(fila[0]);
+
+                {% for medio in graficosTEstimadosCombustiblesMedios %}
+                        var id = parseInt('{{ medio.idTransporte }}');
+                        if( id === idTransporte)
+                        {
+                            //Cargar meses de asignacion
+
+                            $("option").remove('.cambioMes');
+                            $("#inicioMes").after('<option class="cambioMes"></option>');
+
+                            {% for mes in  graficosTEstimadosCombustiblesMediosMes %}
+                                    var idT = parseInt('{{ mes.idTransporte }}');
+                                    if( idT === idTransporte){
+                                        var id = '{{ mes.mes }}';
+                                        var name = '{{ mes.mes }}';
+                                        html += '<option class="cambioMes" value="' + id + '">' + name + '</option>';
+                                    }
+                            {% endfor %}
+
+                            $(".cambioMes").replaceWith(html);
+                            $("#mesTransporte").prop('disabled', false);
+
+                            var restoCombustible = parseFloat('{{ medio.ltsCombustible }}') % 12;
+
+                            if (restoCombustible === 0 ) {
+                                $('#totalLtsCombustible').val(parseFloat('{{ medio.ltsCombustible }}') / 12);
+                                $('#totalLtsCombustible').prop("disabled", false);
+                                montoAnteriorCombustible = parseFloat({{ medio.ltsCombustible }}) / 12;
+                            }else {
+                                $('#totalLtsCombustible').val('');
+                                $('#totalLtsCombustible').prop("disabled", true);
+                            }
+
+                            $('#tipoTransporte').val('{{ medio.idTipoTransporte }}');
+
+                            //Llenar transporte
+                            var name = '{{ medio.modeloNombre ~ ' - Chapa: ' ~ medio.matricula}}';
+                            $("#transporte").val('').prop('disabled' , true).select2({
+                                placeholder: name
+                            });
+                        }
+                {% endfor %}
+
+                $("#mesTransporte").prop('disabled', false);
+                $('#tipoTransporte').prop("disabled", true);
+                $('.AsignarCombustible').prop("disabled", true);
+                $('.AprobarCombustible').prop("disabled", true);
+                modificar = true;
+            });
+
+            $('.AsignarCombustible').on('click', function () {
+
+                //Validaciones
+                if ($("#tipoCombustible").val() === '0') {
+                    alertify.alert('<strong>El tipo de combustible es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#transporte").val() === 'Seleccione ...') {
+                    alertify.alert('<strong>El medio de transporte es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalLtsCombustible").val() === '') {
+                    alertify.alert('<strong>El total de litros de combustible es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalLtsCombustible").val() === '0') {
+                    alertify.alert('<strong>El total de litros de combustible debe ser mayor que 0.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestanteCombustible = parseFloat(totalLtsCombustible - totalLtsCombustibleMedioBasico);
+
+                var mes = '';
+                if (montoRestanteCombustible < 12) {
+                    presupuestoMensualCombustible = parseInt($("#totalLtsCombustible").val());
+                    mes = $("#mesTransporte").val();
+                } else {
+                    presupuestoMensualCombustible = parseInt($("#totalLtsCombustible").val()) * 12;
+                    mes = '';
+                }
+
+                if (presupuestoMensualCombustible > montoRestanteCombustible) {
+                    alertify.alert('<strong>El total de litros de combustible no puede ser mayor que los litros restantes.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    tipoCombustible: $("#tipoCombustible").val(),
+                    transporte: $("#transporte").val(),
+                    mes: mes,
+                    ltsCombustible: $("#totalLtsCombustible").val(),
+                    idPlanEstimado: {{ planEstimado }}
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertCombustibleMedioTrasporteMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+                        alertify.alert('<strong>La asignación mensual de combustible para este medio de transporte ha asignado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoCombustiblesMediosTransportes') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.ModificarCombustible').on('click', function () {
+
+                //Validaciones
+                if ($("#tipoCombustible").val() === '0') {
+                    alertify.alert('<strong>El tipo de combustible es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#transporte").val() === 'Seleccione ...') {
+                    alertify.alert('<strong>El medio de transporte es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalLtsCombustible").val() === '') {
+                    alertify.alert('<strong>El total de litros de combustible es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalLtsCombustible").val() === '0') {
+                    alertify.alert('<strong>El total de litros de combustible debe ser mayor que 0.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestanteCombustible = parseFloat(totalLtsCombustible - totalLtsCombustibleMedioBasico);
+
+                var mes = '';
+                if ($("#mesTransporte").val() !== '0') {
+                    presupuestoMensualCombustible = parseInt($("#totalLtsCombustible").val());
+                    mes = $("#mesTransporte").val();
+                } else {
+                    presupuestoMensualCombustible = parseInt($("#totalLtsCombustible").val()) * 12;
+                    montoAnteriorCombustible *= 12;
+                    mes = '';
+                }
+
+                if (montoRestanteCombustible === 0) {
+                    if (presupuestoMensualCombustible > montoAnteriorCombustible) {
+                        alertify.alert('<strong>El total de litros de combustible no puede ser mayor que los litros restantes.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (presupuestoMensualCombustible > (montoAnteriorCombustible + montoRestanteCombustible)) {
+                        alertify.alert('<strong>El total de litros de combustible no puede ser mayor que los litros restantes.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    transporte: idTransporte,
+                    mes: mes,
+                    ltsCombustible: $("#totalLtsCombustible").val(),
+                    idPlanEstimado: {{ planEstimado }}
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateCombustibleMedioTrasporteMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El total de combustible para este medio de transporte ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                if (montoRestanteCombustible !== 0) {
+                                    $('.AsignarCombustible').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoCombustiblesMediosTransportes') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.AprobarCombustible').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar la asignación mensual de litros de este tipo de combustible</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ planEstimado }},
+                        tipoCombustible: $("#tipoCombustible").val()
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarCombustibleMedioTrasporteMensual") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó la asignación mensual de litros de este tipo de combustible</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoCombustiblesMediosTransportes') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoCombustiblesMediosTransportes') }}";
+                                });
+                        }
+                    });
+                });
+
+            });
+
+            $('.mesesDivision').on("change", function () {
+
+                switch ($(this).attr('id')) {
+                    case 'enero':
+                        enero = 0;
+                        enero = parseInt($("#enero").val());
+                        break;
+                    case 'febrero':
+                        febrero = 0;
+                        febrero = parseInt($("#febrero").val());
+                        break;
+                    case 'marzo':
+                        marzo = 0;
+                        marzo = parseInt($("#marzo").val());
+                        break;
+                    case 'abril':
+                        abril = 0;
+                        abril = parseInt($("#abril").val());
+                        break;
+                    case 'mayo':
+                        mayo = 0;
+                        mayo = parseInt($("#mayo").val());
+                        break;
+                    case 'junio':
+                        junio = 0;
+                        junio = parseInt($("#junio").val());
+                        break;
+                    case 'julio':
+                        julio = 0;
+                        julio = parseInt($("#julio").val());
+                        break;
+                    case 'agosto':
+                        agosto = 0;
+                        agosto = parseInt($("#agosto").val());
+                        break;
+                    case 'septiembre':
+                        septiembre = 0;
+                        septiembre = parseInt($("#septiembre").val());
+                        break;
+                    case 'octubre':
+                        octubre = 0;
+                        octubre = parseInt($("#octubre").val());
+                        break;
+                    case 'noviembre':
+                        noviembre = 0;
+                        noviembre = parseInt($("#noviembre").val());
+                        break;
+                    case 'diciembre':
+                        diciembre = 0;
+                        diciembre = parseInt($("#diciembre").val());
+                        break;
+                }
+
+                montoTotal = 0;
+                montoTotal = enero + febrero + marzo + abril + mayo + junio + julio + agosto + septiembre + octubre + noviembre + diciembre;
+                var restante = totalLtsCombustible - montoTotal;
+
+                alert(parseInt($("#enero").val()));
+                alert(restante);
+
+                if ((restante) >= 0) {
+                    if ($(this).val() !== '') {
+                        $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(restante, 0, '.', ','));
+                        if (parseInt(restante) === 0) {
+                            $('.AprobarDivisionMes').prop("disabled", false);
+                        } else {
+                            $('.AprobarDivisionMes').prop("disabled", true);
+                        }
+                    }
+                } else {
+                    alertify.alert('<strong>No tiene litros disponibles.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                        .set('label', 'Aceptar');
+                    montoTotal = 0;
+                    $('.AprobarDivisionMes').prop("disabled", true);
+                    return false;
+                }
+            });
+
+            $('.mesesDivision').on("keyup", function () {
+
+                var name = $(this).prop('name');
+                var montoAntes =0;
+
+                switch ($(this).prop('name')) {
+                    case 'enero':
+                        montoAntes = eneroAnterior;
+                        break;
+                    case 'febrero':
+                        montoAntes = febreroAnterior;
+                        break;
+                    case 'marzo':
+                        montoAntes = marzoAnterior;
+                        break;
+                    case 'abril':
+                        montoAntes = abrilAnterior;
+                        break;
+                    case 'mayo':
+                        montoAntes = mayoAnterior;
+                        break;
+                    case 'junio':
+                        montoAntes = junioAnterior;
+                        break;
+                    case 'julio':
+                        montoAntes = julioAnterior;
+                        break;
+                    case 'agosto':
+                        montoAntes = agostoAnterior;
+                        break;
+                    case 'septiembre':
+                        montoAntes = septiembreAnterior;
+                        break;
+                    case 'octubre':
+                        montoAntes = octubreAnterior;
+                        break;
+                    case 'noviembre':
+                        montoAntes = noviembreAnterior;
+                        break;
+                    case 'diciembre':
+                        montoAntes = diciembreAnterior;
+                        break;
+                }
+
+                if (modificar) {
+                    if ($(this).val().trim() != montoAntes) {
+                        $('.ModificarCombustible').prop("disabled", false);
+
+                    } else {
+                        $('.ModificarCombustible').prop("disabled", true);
+                    }
+                }
+            });
+
+        });
+    </script>
+{% endblock %}

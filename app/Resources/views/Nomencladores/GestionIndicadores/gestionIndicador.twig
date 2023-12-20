@@ -1,0 +1,187 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div id="containerMostrarIndicador" class="container-fluid" style="display:block">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green"></i>
+                    <span class="caption-subject bold uppercase">INDICADORES</span>
+                </div>
+                {% if indicadores %}
+                    <div class="caption font-green" style="float: right">
+                        <a href="{{ path('exportarListadoNomencladores' , {nomenclador:'Indicador'}) }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="portlet-body">
+                <div style="padding-top: 10px">
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title" style="background-color: #2b3643">
+                            <div class="caption">
+                                <i class="fa fa-table"></i>
+                            </div>
+                        </div>
+                        <div class="portlet-body " style="background-color: #afbac0;overflow-x: auto">
+                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                   id="dataIndicador">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Código
+                                    </th>
+                                    <th>
+                                        Nombre
+                                    </th>
+                                    <th>
+                                        Asociado a
+                                    </th>
+                                    <th class="text-center">
+                                        Acciones
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for indicador in indicadores %}
+                                    <tr data-id="{{ indicador.id }}">
+                                        <td class="text-center">{{ indicador.codigo }}</td>
+                                        <td>{{ indicador.nombre }}</td>
+                                        <td>{{ indicador.tipoIndicador.nombre }}</td>
+                                        <td class="text-center">
+                                            <a href="#" style="margin-top: 5px"
+                                               class="btn default btn-xs green-stripe edit" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Modificar el Indicador">
+                                                Editar </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('Nomencladores/GestionIndicadores/modalEditIndicador.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (is_granted("ROLE_ADMINISTRADOR") or is_granted("ROLE_SUPERUSUARIO")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ADMINISTRACION' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+
+            $('#dataIndicador').DataTable();
+
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function () {
+                window.location.href = "{{ path('gestionarIndicadores') }}";
+            });
+
+            var idIndicador = '';
+            var codigo = '';
+
+            // función que carga datos en el formulario para editar
+            $('#dataIndicador tbody').on('click', '.edit', function () {
+                var row = $(this).parents('tr');
+                idIndicador = row.data('id');
+
+                {% for indicador in indicadores %}
+                    var id = parseInt('{{ indicador.id }}');
+                    if (id === idIndicador) {
+                        $('#editCodigo').val('{{ indicador.codigo }}');
+                        $('#editNombre').val('{{ indicador.nombre }}');
+                        $('#editAsociado').val('{{ indicador.tipoIndicador.nombre }}');
+                        codigo = '{{ indicador.codigo }}';
+                    }
+                {% endfor %}
+                $('#modalEditIndicador').modal('show');
+            });
+
+            $('#editGuardar').on('click', function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalEditIndicador input[type=text]').each(function () {
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+                $('#modalEditIndicador').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idIndicador: idIndicador,
+                    codigo: $('#editCodigo').val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateIndicador") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El Indicador ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarIndicadores') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+        });
+    </script>
+{% endblock %}

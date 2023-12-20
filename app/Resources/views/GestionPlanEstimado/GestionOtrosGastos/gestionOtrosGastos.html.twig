@@ -1,0 +1,1029 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            {% if totalPresupuestoEstimadoOtroGasto == 0 %}
+                <div class="dashboard-stat grey">
+            {% else  %}
+                <div class="dashboard-stat  {{ porcientoMensual != 100 ? 'red-flamingo' : 'green-haze' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="icon icon-bulb"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                        {{ totalPresupuestoEstimadoOtroGasto|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>PRESUPUESTO ESTIMADO</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if aprobarEstimadoOtroGasto == false %}
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                <div class="dashboard-stat {{ (totalPresupuestoEstimadoOtroGasto - totalEstimadoOtroGasto) == 0 ? 'grey' : 'red-flamingo' }}"
+                     id="nameMontoRestanteMostrar">
+                    <div class="visual">
+                        <i class="icon icon-bulb"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+                            {{ (totalPresupuestoEstimadoOtroGasto - totalEstimadoOtroGasto)|number_format(0, '.', ',') }}
+                        </div>
+                        <div class="desc">
+                            <strong>ESTIMADO RESTANTE</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-lg-3 col-md-5 col-sm-5 col-xs-5">
+                <div class="dashboard-stat grey-cararra" style="display:none" id="nameMontoRestanteDivisionMostrar">
+                    <div class="visual">
+                        <i class="icon icon-bulb"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="nameMontoRestanteDivision">
+                        </div>
+                        <div class="desc">
+                            <strong>ESTIMADO RESTANTE DE LA DIVISIÓN</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN DE OTROS GASTOS MONETARIOS</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                    {% if aprobarEstimadoOtroGasto == true %}
+                        <div class="progress progress-striped active">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40"
+                                 aria-valuemin="0" aria-valuemax="100" style="width: {{ porcientoMensual }}%">
+                                <span class="sr-only-focusable">{{ porcientoMensual }}% DISTRIBUCIÓN MENSUAL  </span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="tools">
+                {% if aprobarEstimadoOtroGasto == true %}
+                 <a href="{{ path('exportarPlanEstimadoOtrosGastos') }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                            {% endif %}
+                    <a href="#" class="reload" id="btnAtrasDivision" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalDivision" data-toggle="tab">
+                            PRESUPUESTO ESTIMADO POR SERVICIOS </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalDivision">
+                        <form role="form" id="formTotalDivision">
+                            <div class="form-body">
+                                <div class="row">
+                                    {% if aprobarEstimadoOtroGasto == false %}
+                                        <div class="col-lg-3 col-md-3 col-sm-3">
+                                            <div class="portlet">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select class="form-control" id="otroGasto"
+                                                                name="otroGasto">
+                                                            <option value="0">Seleccione ...</option>
+                                                            {% for otro in  otrosGastos %}
+                                                                <option value="{{ otro.id }}">{{ otro.nombre }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label for="otroGasto">SERVICIOS</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalPresupuestoDivision"
+                                                               name="totalPresupuestoDivision">
+                                                        <label for="totalPresupuestoDivision">TOTAL DE PRESUPUESTO </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarDivisionOtroGasto" {{ (totalPresupuestoEstimadoOtroGasto - totalEstimadoOtroGasto) == 0 ? 'disabled' }}>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary ModificarDivisionOtroGasto"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarDivisionOtroGasto" {{ (totalPresupuestoEstimadoOtroGasto - totalEstimadoOtroGasto) != 0 ? 'disabled' }}>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    <div class="{{ aprobarEstimadoOtroGasto == false ? 'col-lg-9 col-md-9 col-sm-9' : 'col-lg-12 col-md-12 col-sm-12' }}"
+                                         style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet chart" style="margin-top: 20px"
+                                             id="graficoOtroGasto"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="totalDivisionMes" style="display:none">
+                        <ul class="nav nav-tabs nav-pills">
+                            <li class="active uppercase">
+                                <a href="#" data-toggle="tab" id="nameTabDivisionMes">
+                                    KW ESTIMADO POR MESES </a>
+                            </li>
+                        </ul>
+                        <form role="form" id="formTotalDivisionMes">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <div class="portlet">
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="enero"
+                                                           name="enero">
+                                                    <label for="enero">Ene.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="febrero"
+                                                           name="febrero">
+                                                    <label for="febrero">Feb.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="marzo"
+                                                           name="marzo">
+                                                    <label for="marzo">Mar.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="abril"
+                                                           name="abril">
+                                                    <label for="abril">Abr.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="mayo"
+                                                           name="mayo">
+                                                    <label for="mayo">May.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="junio"
+                                                           name="junio">
+                                                    <label for="junio">Jun.</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <div class="portlet">
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="julio"
+                                                           name="julio">
+                                                    <label for="julio">Jul.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="agosto"
+                                                           name="agosto">
+                                                    <label for="agosto">Ago.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="septiembre"
+                                                           name="septiembre">
+                                                    <label for="septiembre">Sep.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="octubre"
+                                                           name="octubre">
+                                                    <label for="octubre">Oct.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="noviembre"
+                                                           name="noviembre">
+                                                    <label for="noviembre">Nov.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="diciembre"
+                                                           name="diciembre">
+                                                    <label for="diciembre">Dic.</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                        <div class="portlet">
+                                            <div class="col-lg-1 col-md-1 col-sm-12" style="margin-top: 50px">
+                                                <div class="form-actions noborder">
+                                                    <button type="button"
+                                                            class="btn btn-secondary AprobarDivisionMes" disabled>
+                                                        Aprobar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="portlet">
+                                            <div class="col-lg-1 col-md-1 col-sm-12" style="margin-top: 50px">
+                                                <div class="form-actions noborder">
+                                                    <button type="button"
+                                                            class="btn btn-secondary AplicarDivisionMes" disabled>
+                                                        Aplicar sugerencia
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (app.session.get('aprobarEstimadoOtrosGastos')) and is_granted("ROLE_DISTRIBUIDOR_DIVISION") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_OTROS_GASTOS' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            $('#otroGasto').select2({
+                placeholder: 'Seleccione ...',
+                allowClear: true
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+
+            });
+
+            $('#btnAtrasDivision').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastos') }}";
+            });
+
+            //funciones de asigancion del presupuesto por divisiones
+
+            //Declaracion de variables
+            let totalEstimadoPresupuestoOtroGasto = [];
+            let totalEstimadoPresupuestoOtroGastoMes = [];
+            let montoRestante = 0;
+            let montoRestanteDivision = 0;
+            let montoTotal = 0;
+            let montoAnterior = 0;
+            let otroGasto = '';
+            let idOtroGasto = '';
+            let n;
+            let estimadoMes = 0;
+            let restanteMes = 0;
+
+            //Arreglo para el grafico de presupuesto asignado por Categorias del plan de Otros Gastos activo
+            {% for graficoTotal in graficosTotalesEstimadosOtrosGastos %}
+                    totalEstimadoPresupuestoOtroGasto.push({
+                        name: '{{ graficoTotal['nombre'] }}',
+                        y: parseInt('{{ graficoTotal['totalOtroGasto'] }}')
+                    });
+            {% endfor %}
+
+            (function () {
+                graficoTotalEstimadoOtroGasto();
+            })();
+
+            //Cargar el presupuesto estimado de la nomenclador seleccionada
+            function cargarOtroGasto(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for otro in otrosGastos %}
+                        otroGasto = '{{ otro.nombre }}';
+                        if (otroGasto === categoria) {
+                            {% if aprobarEstimadoOtroGasto == false %}
+                            $('#otroGasto').val('{{ otro.id }}');
+                            {% endif %}
+                            idOtroGasto = {{ otro.id }};
+                        }
+                {% endfor %}
+
+                {% if aprobarEstimadoOtroGasto == false %}
+                    $('#totalPresupuestoDivision').val(presupuesto);
+                    montoAnterior = parseInt(presupuesto);
+                    $('#otroGasto').prop("disabled", true);
+                    $('.AsignarDivisionOtroGasto').prop("disabled", true);
+                    $('.ModificarDivisionOtroGasto').prop("disabled", false);
+                    $('.AprobarDivisionOtroGasto').prop("disabled", false);
+
+                {% else %}
+
+                //mostrar si existe el grafico mensual
+
+                $('#nameMontoEstimado').text(Highcharts.numberFormat(presupuesto, 0, '.', ','));
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ planEstimado }},
+                    otroGasto: idOtroGasto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("graficoOtroGastoEstimadoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    totalEstimadoPresupuestoOtroGastoMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoPresupuestoOtroGastoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalOtroGasto']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    estimadoMes = Math.floor(parseInt(presupuesto) / 12);
+                    restanteMes = Math.floor(parseInt(presupuesto) - (estimadoMes * 12));
+
+                    if (totalEstimadoPresupuestoOtroGastoMes.length === 0) {
+                        $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(presupuesto, 0, '.', ','));
+                        $('#nameTabDivisionMes').text('PRESUPUESTO ESTIMADO POR MESES - ' + (categoria));
+                        $('#nameMontoRestanteMostrar').css("display", "none");
+                        $('#nameMontoRestanteDivisionMostrar').css("display", "block");
+                        $('#totalDivisionMes').css("display", "block");
+                        $('.mesesDivision').prop("placeholder", estimadoMes);
+                        $('.AplicarDivisionMes').prop("disabled", false);
+                    } else {
+                        $('#nameMontoRestanteDivision').text(0);
+                        $('#nameMontoRestanteMostrar').css("display", "block");
+                        $('#nameMontoRestanteDivisionMostrar').css("display", "none");
+                        $('#totalDivisionMes').css("display", "none");
+                        $('.AplicarDivisionMes').prop("disabled", true);
+                        graficoTotalEstimadoOtroGastoMes();
+                    }
+
+                    montoRestanteDivision = parseInt(presupuesto);
+                });
+                {% endif %}
+            }
+
+             $('.AplicarDivisionMes').on('click', function () {
+                if (estimadoMes !== 0) {
+                    $('.mesesDivision').prop("value", estimadoMes);
+                    $('.AplicarDivisionMes').prop("disabled", true);
+                    $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(restanteMes, 0, '.', ','));
+                    if (restanteMes === 0) {
+                        $('.AprobarDivisionMes').prop("disabled", false);
+                    }
+                }
+            });
+
+            //Grafico general Total presupuesto Estimado por nomencladores
+            function graficoTotalEstimadoOtroGasto() {
+                var valorMax = totalEstimadoPresupuestoOtroGasto.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoPresupuestoOtroGasto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoOtroGasto', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total de presupuesto estimados',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Total de presupuesto",
+                            "colorByPoint": true,
+                            "data": totalEstimadoPresupuestoOtroGasto,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarOtroGasto(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 500
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            $('.AsignarDivisionOtroGasto').on('click', function () {
+
+                if ($("#otroGasto").val() === '0') {
+                    alertify.alert('<strong>El servicio es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoDivision").val() === '') {
+                    alertify.alert('<strong>El presupuesto es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = {{ totalPresupuestoEstimadoOtroGasto - totalEstimadoOtroGasto }};
+
+                if (parseInt($("#totalPresupuestoDivision").val()) > montoRestante) {
+                    alertify.alert('<strong>El presupuesto no puede ser mayor que el total restante.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoDivision").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    otroGasto: $("#otroGasto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoOtroGasto") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto para este servicio ha sido distribuido correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastos') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.ModificarDivisionOtroGasto').on('click', function () {
+
+                if ($("#otroGasto").val() === '0') {
+                    alertify.alert('<strong>El servicio es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoDivision").val() === '') {
+                    alertify.alert('<strong>El presupuesto es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = {{ totalPresupuestoEstimadoOtroGasto - totalEstimadoOtroGasto }};
+
+                if (montoRestante === 0) {
+                    if (parseInt($("#totalPresupuestoDivision").val()) > montoAnterior) {
+                        alertify.alert('<strong>El presupuesto no puede ser mayor que el monto disponible.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (parseInt($("#totalPresupuestoDivision").val()) > (montoAnterior + montoRestante)) {
+                        alertify.alert('<strong>El presupuesto no puede ser mayor que el monto restante.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoDivision").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    otroGasto: $("#otroGasto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateTotalEstimadoOtroGasto") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto estimado de este servicio ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#otroGasto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarDivisionOtroGasto').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastos') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#otroGasto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarDivisionOtroGasto').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastos') }}";
+                            });
+                    }
+                });
+
+            });
+
+            $('.AprobarDivisionOtroGasto').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar el presupuesto estimado para los servicios</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ app.session.get('idPlanEstimado') }}
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarPresupuestoEstimadoOtroGasto") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó el presupuesto estimado para los servicios</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastos') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                        }
+                    });
+                });
+
+            });
+
+            //fin asignacion del presupuesto total por división
+
+            //funciones distribución del presupuesto mensual por division
+
+            $('.AprobarDivisionMes').on('click', function () {
+
+                if ($('.mesesDivision').val() === '') {
+                    alertify.alert('<strong>El presupuesto mensual es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                presupuestoDivisionMeses();
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: totalEstimadoPresupuestoOtroGastoMes,
+                    idPlanEstimado: {{ planEstimado }},
+                    idOtroGasto: idOtroGasto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoOtroGastoMes") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto mensual para este servicio ha sido distribuido correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#nameMontoRestanteDivisionMostrar').css("display", "none");
+                                window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastos') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastos') }}";
+                            });
+                    }
+                });
+
+
+            });
+
+            function presupuestoDivisionMeses() {
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'enero',
+                    presupuesto: $("#enero").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'febrero',
+                    presupuesto: $("#febrero").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'marzo',
+                    presupuesto: $("#marzo").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'abril',
+                    presupuesto: $("#abril").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'mayo',
+                    presupuesto: $("#mayo").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'junio',
+                    presupuesto: $("#junio").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'julio',
+                    presupuesto: $("#julio").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'agosto',
+                    presupuesto: $("#agosto").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'septiembre',
+                    presupuesto: $("#septiembre").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'octubre',
+                    presupuesto: $("#octubre").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'noviembre',
+                    presupuesto: $("#noviembre").val()
+                });
+
+                totalEstimadoPresupuestoOtroGastoMes.push({
+                    mes: 'diciembre',
+                    presupuesto: $("#diciembre").val()
+                });
+            }
+
+            $('.mesesDivision').on("keyup", function () {
+
+                montoTotal = 0;
+                if (!Number.isNaN(parseInt($("#enero").val()))) {
+                    montoTotal+= parseInt($("#enero").val());
+                }
+                if (!Number.isNaN(parseInt($("#febrero").val()))) {
+                    montoTotal+= parseInt($("#febrero").val());
+                }
+                if (!Number.isNaN(parseInt($("#marzo").val()))) {
+                    montoTotal+= parseInt($("#marzo").val());
+                }
+                if (!Number.isNaN(parseInt($("#abril").val()))) {
+                    montoTotal+= parseInt($("#abril").val());
+                }
+                if (!Number.isNaN(parseInt($("#mayo").val()))) {
+                    montoTotal+= parseInt($("#mayo").val());
+                }
+                if (!Number.isNaN(parseInt($("#junio").val()))) {
+                    montoTotal+= parseInt($("#junio").val());
+                }
+                if (!Number.isNaN(parseInt($("#julio").val()))) {
+                    montoTotal+= parseInt($("#julio").val());
+                }
+                if (!Number.isNaN(parseInt($("#agosto").val()))) {
+                    montoTotal+= parseInt($("#agosto").val());
+                }
+                if (!Number.isNaN(parseInt($("#septiembre").val()))) {
+                    montoTotal+= parseInt($("#septiembre").val());
+                }
+                if (!Number.isNaN(parseInt($("#octubre").val()))) {
+                    montoTotal+= parseInt($("#octubre").val());
+                }
+                if (!Number.isNaN(parseInt($("#noviembre").val()))) {
+                    montoTotal+= parseInt($("#noviembre").val());
+                }
+                if (!Number.isNaN(parseInt($("#diciembre").val()))) {
+                    montoTotal+= parseInt($("#diciembre").val());
+                }
+                let restante = montoRestanteDivision - montoTotal;
+
+                if ((restante) >= 0) {
+                    if ($(this).val() !== '') {
+                        $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(restante, 0, '.', ','));
+                        if (parseInt(restante) === 0) {
+                            $('.AprobarDivisionMes').prop("disabled", false);
+                        } else {
+                            $('.AprobarDivisionMes').prop("disabled", true);
+                            $('.AplicarDivisionMes').prop("disabled", true);
+                        }
+                    }
+                } else {
+                    alertify.alert('<strong>No tiene presupuesto disponible.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                        .set('label', 'Aceptar');
+                    montoTotal = 0;
+                    $('.AprobarDivisionMes').prop("disabled", true);
+                    return false;
+                }
+            });
+
+            //Grafico mensual Total presupuesto Estimado por servicios
+            function graficoTotalEstimadoOtroGastoMes() {
+                var valorMax = totalEstimadoPresupuestoOtroGastoMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoPresupuestoOtroGastoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoOtroGasto', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total de presupuesto estimados',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Total de presupuesto",
+                            "colorByPoint": true,
+                            "data": totalEstimadoPresupuestoOtroGastoMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 500
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            // fin funciones distribución del presupuesto mensual por division
+
+        });
+    </script>
+{% endblock %}

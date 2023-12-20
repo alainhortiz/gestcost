@@ -1,0 +1,324 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div id="containerMostrarModeloTransporte" class="container-fluid" style="display:block">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-car font-green"></i>
+                    <span class="caption-subject bold uppercase">MODELOS DE TRANSPORTES</span>
+                </div>
+                {% if modelosTransportes %}
+                    <div class="caption font-green" style="float: right">
+                        <a href="{{ path('exportarListadoNomencladores' , {nomenclador:'ModeloTransporte'}) }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="portlet-body">
+                <div style="padding-top: 10px">
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title" style="background-color: #2b3643">
+                            <div class="caption">
+                                <i class="fa fa-table"></i>
+                            </div>
+                            <div class="caption bold uppercase" style="float: right">
+                                    <a href="#" style="text-decoration: none; color: #ededed;" id="addModeloTransporte" name="addModeloTransporte">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                        AGREGAR
+                                    </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body " style="background-color: #afbac0 ; overflow-x: auto">
+                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                   id="dataModeloTransporte">
+                                <thead>
+                                <tr>
+                                    <th>
+                                        Tipo de Transporte
+                                    </th>
+                                    <th>
+                                        Nombre
+                                    </th>
+                                    <th class="text-center">
+                                        Acciones
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for modelo in modelosTransportes %}
+                                    <tr data-id="{{ modelo.id }}">
+                                        <td>{{ modelo.tipoTransporte.nombre }}</td>
+                                        <td>{{ modelo.nombre }}</td>
+                                        <td class="text-center">
+                                            <a href="#" style="margin-top: 5px" class="btn default btn-xs green-stripe edit" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Modificar Modelo de Transporte">
+                                                Editar </a>
+                                            <a href="#" style="margin-top: 5px" class="btn default btn-xs red-stripe delete" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Eliminar Modelo de Transporte">
+                                                Borrar </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('Nomencladores/GestionModeloTransporte/modalAddModeloTransporte.html.twig') }}
+        {{ include('Nomencladores/GestionModeloTransporte/modalEditModeloTransporte.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+
+            (function(){
+                {% if not (is_granted("ROLE_NOMENCLADOR")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'PLANTILLA_TRANSPORTE' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            $('#dataModeloTransporte').DataTable();
+
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function ()
+            {
+                window.location.href = "{{ path('gestionarModelosTransportes') }}";
+            });
+
+            $('#addModeloTransporte').on('click' , function () {
+                $('#modalAddModeloTransporte').modal('show');
+            });
+
+            $('#addGuardar').on('click',function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalAddModeloTransporte input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val().trim() == ''){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                $('#modalAddModeloTransporte select').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val() == '0'){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                if(errores !== 0) return false;
+
+                $('#modalAddModeloTransporte').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    tipoTransporte: $("#addTipoTransporte").val(),
+                    nombre: $("#addNombre").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertModeloTransporte") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if(data === 'ok'){
+
+                        alertify.alert('<strong>El modelo de transporte ha sido insertado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label','Aceptar')
+                            .set('onok', function () {
+                                $('#modalAddModeloTransporte input').each(function(){
+                                    $(this).val('');
+                                });
+                                window.location.href = "{{ path('gestionarModelosTransportes') }}";
+                            });
+                    }else{
+                        alertify.alert('<strong>'+ data +'</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label','Aceptar')
+                    }
+                });
+
+            });
+
+            var idModeloTransporte = '';
+            var tipoTransporte = '';
+            var nombre = '';
+
+            // función que carga datos en el formulario para editar
+            $('#dataModeloTransporte tbody').on('click', '.edit', function () {
+
+                var row = $(this).parents('tr');
+                idModeloTransporte = row.data('id');
+
+                {% for modelo in modelosTransportes %}
+                var id = parseInt('{{ modelo.id }}');
+                if( id === idModeloTransporte)
+                {
+                    $('#editNombre').val('{{ modelo.nombre }}');
+                    $('#editTipoTransporte').val('{{ modelo.tipoTransporte.id }}');
+                    tipoTransporte = '{{ modelo.tipoTransporte.id }}';
+                    nombre = '{{ modelo.nombre }}';
+                }
+                {% endfor %}
+                $('#modalEditModeloTransporte').modal('show');
+            });
+
+            $('#editGuardar').on('click',function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalEditModeloTransporte input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val().trim() == ''){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                $('#modalEditModeloTransporte select').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val() == '0'){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                if(errores !== 0) return false;
+
+                $('#modalEditModeloTransporte').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idModeloTransporte : idModeloTransporte,
+                    tipoTransporte : $('#editTipoTransporte').val(),
+                    nombre : $('#editNombre').val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateModeloTransporte") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if(data === 'ok'){
+
+                        alertify.alert('<strong>El modelo de transporte ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label','Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarModelosTransportes') }}";
+                            });
+                    }else{
+                        alertify.alert('<strong>'+ data +'</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label','Aceptar')
+                    }
+                });
+
+            });
+
+            $('#dataModeloTransporte tbody').on('click', '.delete', function () {
+
+                var row = $(this).parents('tr');
+
+                var mat_datos = { idModeloTransporte: row.data('id') };
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea eliminar el modelo de transporte seleccionado</strong>').set('onok', function(){
+
+                    $(".preload").removeClass('hidden');
+
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("deleteModeloTransporte") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if(data === 'ok'){
+
+                            alertify.alert('<strong>El modelo de transporte ha sido eliminado correctamente</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label','Aceptar')
+                                .set('onok', function(){
+                                    window.location.href = "{{ path('gestionarModelosTransportes') }}";
+                                });
+                        }else {
+                            alertify.alert('<strong>'+data+'</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label','Aceptar')
+                        }
+                    });
+                });
+            });
+
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,837 @@
+{% extends 'Dashboards/baseDashboard.html.twig' %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN ROW -->
+    <div id="dashboardOtrosGastos">
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameOtroGasto" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN OTROS GASTOS MONETARIOS</span>
+                        </div>
+                        <div class="tools">
+                             <a href="{{ path('exportarPlanEstimadoOtrosGastos') }}" class="fa fa-file-excel-o fa-2x font-green" data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                             <a href="#" class="reload hidden" id="btnAtrasOtroGasto" data-placement="top" data-original-title="Regresar"></a>
+                             <a href="#" class="reload hidden" id="btnAtrasOtroGastoDivision" data-placement="top" data-original-title="Regresar"></a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoOtroGasto" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameOtroGastoMensual" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN MENSUAL DE OTROS GASTOS MONETARIOS</span>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoOtroGastoMensual" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+    </div>
+    <!-- END ROW -->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (app.user.isActive) %}
+                window.location.href = "{{ path('login') }}";
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            var divisionCentroCosto = '';
+            var centroCosto = '';
+            var idCentroCosto = 0;
+            var n;
+            //Otros Gastos
+            var totalEstimadoOtroGasto = [];
+            var totalEstimadoOtroGastoMes = [];
+            var totalEstimadoOtroGastoDivision = [];
+            var totalEstimadoOtroGastoDivisionMes = [];
+            var totalEstimadoOtroGastoCentroCosto = [];
+            var totalEstimadoOtroGastoCentroCostoMes = [];
+            var otroGasto = '';
+            var idOtroGasto = 0;
+
+            //Dashboard de gestion de Ventas
+            $('#linkVenta').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanVenta') }}";
+            });
+
+            //Dashboard de gestion de Otros Ingresos
+            $('#linkOtroIngreso').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtroIngreso') }}";
+            });
+
+            //Dashboard de Fondo de Salario
+            $('#linkSalario').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanSalario') }}";
+            });
+
+            //Dashboard de gestion de Combustible
+            $('#linkCombustible').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanCombustible') }}";
+            });
+
+            //Dashboard gestion de Energía
+            $('#linkEnergia').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanEnergia') }}";
+            });
+
+            //Dashboard de gestion de Materias Primas
+            $('#linkMateriasPrimas').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanMateriasPrimas') }}";
+            });
+
+            //Dashboard de gestion de Depreciación
+            $('#linkDepreciacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanDepreciacion') }}";
+            });
+
+            //Dashboard de gestion de Bonificación
+            $('#linkBonificacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanBonificacion') }}";
+            });
+
+            //Dashboard de gestion de Gastos de comedor
+            $('#linkComedor').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanComedor') }}";
+            });
+
+            //Dashboard de gestion de Amortización
+            $('#linkAmortizacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanAmortizacion') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkGastoMaterial').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanGastoMaterial') }}";
+            });
+
+            //Dashboard de Otros Gastos Monetarios
+            $('#linkOtroGastos').on("click", function () {
+                $('#dashboardOtrosGastos').css("display", "block");
+                graficoTotalEstimadoOtrosGastos();
+                graficoTotalEstimadoOtroGastoMes();
+            });
+
+            $('#btnAtrasOtroGasto').on("click", function () {
+                $('#btnAtrasOtroGasto').addClass('hidden');
+                graficoTotalEstimadoOtrosGastos();
+                graficoTotalEstimadoOtroGastoMes();
+                $('#nameOtroGasto').text(' DISTRIBUCIÓN OTROS GASTOS MONETARIOS');
+                $('#nameOtroGastoMensual').text(' DISTRIBUCIÓN MENSUAL DE OTROS GASTOS MONETARIOS');
+            });
+
+            $('#btnAtrasOtroGastoDivision').on("click", function () {
+                $('#btnAtrasOtroGasto').removeClass('hidden');
+                $('#btnAtrasOtroGastoDivision').addClass('hidden');
+                graficoTotalEstimadoOtroGastoDivision();
+                graficoTotalEstimadoOtroGastoDivisionMes();
+                $('#nameOtroGasto').text(' DISTRIBUCIÓN DEL SERVICIO DE ' + otroGasto + ' EN LAS DIVISIONES');
+                $('#nameOtroGastoMensual').text(' DISTRIBUCIÓN MENSUAL DEL SERVICIO DE ' + otroGasto);
+            });
+
+            //Grafico principal de otros gastos
+            {% for graficoTotal in graficosTotalesEstimadosOtrosGastos %}
+                    totalEstimadoOtroGasto.push({
+                        name: '{{ graficoTotal['nombre'] }}',
+                        y: parseFloat('{{ graficoTotal['totalOtroGasto'] }}')
+                    });
+            {% endfor %}
+
+            //Grafico principal de otros gastos por meses
+            {% for graficoTotal in graficosTotalesEstimadosMesesOtrosGastos %}
+                    totalEstimadoOtroGastoMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalOtroGasto'] }}')
+                    });
+            {% endfor %}
+
+            $('#dashboardOtrosGastos').css("display", "block");
+            graficoTotalEstimadoOtrosGastos();
+            graficoTotalEstimadoOtroGastoMes();
+
+            //Grafico general de otros gastos
+            function graficoTotalEstimadoOtrosGastos() {
+                var valorMax = totalEstimadoOtroGasto.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoOtroGasto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoOtroGasto', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuestos estimados',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Presupuesto estimado",
+                            "colorByPoint": true,
+                            "data": totalEstimadoOtroGasto,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarOtroGastoDivision(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Grafico Mensual de otros gastos
+            function graficoTotalEstimadoOtroGastoMes() {
+                var valorMax = totalEstimadoOtroGastoMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoOtroGastoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoOtroGastoMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Presupuesto estimado",
+                            "colorByPoint": true,
+                            "data": totalEstimadoOtroGastoMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de otros gastos del servicio seleccionado
+            function cargarOtroGastoDivision(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for otro in otrosGastos %}
+                    otroGasto = '{{ otro.nombre }}';
+                    if (otroGasto === categoria) {
+                        idOtroGasto = {{ otro.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    otroGasto: idOtroGasto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardOtrosGastosEstimadoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+                    var servicioDivision = obj['servicioDivision'];
+                    var servicioMensual = obj['servicioMensual'];
+
+                    totalEstimadoOtroGastoDivision = [];
+                    for (n = 0; n < servicioDivision.length; n++) {
+                        totalEstimadoOtroGastoDivision.push({
+                            name: servicioDivision[n]['division'],
+                            y: parseFloat(servicioDivision[n]['totalOtroGasto']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    totalEstimadoOtroGastoDivisionMes = [];
+                    for (n = 0; n < servicioMensual.length; n++) {
+                        totalEstimadoOtroGastoDivisionMes.push({
+                            name: servicioMensual[n]['mes'],
+                            y: parseFloat(servicioMensual[n]['totalOtroGasto']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameOtroGasto').text(' DISTRIBUCIÓN DEL SERVICIO DE ' + categoria + ' EN LAS DIVISIONES');
+                    $('#nameOtroGastoMensual').text(' DISTRIBUCIÓN MENSUAL DEL SERVICIO DE ' + categoria);
+                    $('#btnAtrasOtroGasto').removeClass('hidden');
+                    $('#btnAtrasOtroGastoDivision').addClass('hidden');
+                    otroGasto = categoria;
+
+                    graficoTotalEstimadoOtroGastoDivision();
+                    graficoTotalEstimadoOtroGastoDivisionMes();
+                });
+            }
+
+            //Cargar los centros de costos de la division seleccionada
+            function cargarOtroGastoCentroCosto(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                    divisionCentroCosto = '{{ division.nombre }}';
+                    if (divisionCentroCosto === categoria) {
+                        idDivisionCentroCosto = {{ division.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    division: idDivisionCentroCosto,
+                    otroGasto: idOtroGasto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardOtroGastoEstimadoCentroCostoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+                    var servicioCentroCosto = obj['servicioCentroCosto'];
+                    var servicioCentroCostoMensual = obj['servicioCentroCostoMensual'];
+
+                    totalEstimadoOtroGastoCentroCosto = [];
+                    for (n = 0; n < servicioCentroCosto.length; n++) {
+                        totalEstimadoOtroGastoCentroCosto.push({
+                            name: servicioCentroCosto[n]['centro'],
+                            y: parseFloat(servicioCentroCosto[n]['totalOtroGasto']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    totalEstimadoOtroGastoCentroCostoMes = [];
+                    for (n = 0; n < servicioCentroCostoMensual.length; n++) {
+                        totalEstimadoOtroGastoCentroCostoMes.push({
+                            name: servicioCentroCostoMensual[n]['mes'],
+                            y: parseFloat(servicioCentroCostoMensual[n]['totalOtroGasto']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameOtroGasto').text(' DISTRIBUCIÓN DEL SERVICIO DE ' + otroGasto + ' EN LA DIVISIÓN ' + categoria);
+                    $('#nameOtroGastoMensual').text(' DISTRIBUCIÓN MENSUAL DEL SERVICIO DE ' + otroGasto + ' EN LA DIVISIÓN ' + categoria);
+                    $('#btnAtrasOtroGastoDivision').removeClass('hidden');
+                    $('#btnAtrasOtroGasto').addClass('hidden');
+
+                    graficoTotalEstimadoOtroGastoCentroCosto();
+                    graficoTotalEstimadoOtroGastoCentroCostoMes();
+
+                });
+            }
+
+            //Grafico 2do nivel por divisiones del servicio seleccionado
+            function graficoTotalEstimadoOtroGastoDivision() {
+                var valorMax = totalEstimadoOtroGastoDivision.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoOtroGastoDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoOtroGasto', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Presupuesto estimado",
+                            "colorByPoint": true,
+                            "data": totalEstimadoOtroGastoDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarOtroGastoCentroCosto(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+             //Grafico mensual del servicio seleccionado
+            function graficoTotalEstimadoOtroGastoDivisionMes() {
+                var valorMax = totalEstimadoOtroGastoDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoOtroGastoDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoOtroGastoMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Presupuesto Estimado",
+                            "colorByPoint": true,
+                            "data": totalEstimadoOtroGastoDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Grafico 2do nivel por centro de costo de la division seleccionada
+            function graficoTotalEstimadoOtroGastoCentroCosto() {
+                var valorMax = totalEstimadoOtroGastoCentroCosto.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoOtroGastoCentroCosto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoOtroGasto', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Presupuesto estimado",
+                            "colorByPoint": true,
+                            "data": totalEstimadoOtroGastoCentroCosto
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+             //Grafico mensual del division seleccionada
+            function graficoTotalEstimadoOtroGastoCentroCostoMes() {
+                var valorMax = totalEstimadoOtroGastoCentroCostoMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoOtroGastoCentroCostoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoOtroGastoMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Presupuesto Estimado",
+                            "colorByPoint": true,
+                            "data": totalEstimadoOtroGastoCentroCostoMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Fin del dashboard de Otros Gastos Monetarios
+
+
+        });
+    </script>
+
+{% endblock %}

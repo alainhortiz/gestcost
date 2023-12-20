@@ -1,0 +1,1277 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            <div class="dashboard-stat  grey" id="nameMontoEstimadoMostrar">
+                <div class="visual">
+                    <i class="icon icon-bulb"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                    </div>
+                    <div class="desc">
+                        <strong>TOTAL ESTIMADO</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            <div class="dashboard-stat grey"
+                 id="nameMontoRestanteMostrar">
+                <div class="visual">
+                    <i class="icon icon-bulb"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+
+                    </div>
+                    <div class="desc">
+                        <strong>ESTIMADO RESTANTE</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN DE OTROS GASTOS MONETARIOS POR DIVISIÓN</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                </div>
+                <div class="tools">
+                    <a href="{{ path('exportarPlanEstimadoOtrosGastos') }}"
+                       class="fa fa-file-excel-o fa-2x font-green"
+                       data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                    <a href="#" class="reload" id="btnAtrasDivision" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalDivision" data-toggle="tab">
+                            PRESUPUESTO ESTIMADO DE OTROS GASTOS POR DIVISIÓN
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalDivision">
+                        <form role="form" id="formTotalDivision">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                        <div class="portlet">
+                                            <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input">
+                                                    <select class="form-control" id="otroGasto"
+                                                            name="otroGasto">
+                                                        <option value="0">Seleccione ...</option>
+                                                        {% for otro in  otrosGastos %}
+                                                            <option value="{{ otro.id }}">{{ otro.nombre }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <label for="otroGasto">SERVICIO</label>
+                                                </div>
+                                            </div>
+                                            <div id="gestionMensual" >
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="mesCentroCosto"
+                                                                name="mesCentroCosto">
+                                                            <option id="inicioMes" value="0">Seleccione ...</option>
+                                                        </select>
+                                                        <label for="mesCentroCosto">MES</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select class="form-control" id="divisionCentroCosto"
+                                                                name="divisionCentroCosto" disabled>
+                                                            <option value="0">Seleccione ...</option>
+                                                            {% for division in  divisionCentrosCostos %}
+                                                                <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label for="divisionCentroCosto">DIVISIÓN</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalPresupuestoDivision"
+                                                               name="totalPresupuestoDivision" disabled>
+                                                        <label for="totalPresupuestoDivision">TOTAL DE
+                                                            PRESUPUESTO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarDivisionOtroGasto"
+                                                                disabled>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary ModificarDivisionOtroGasto"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarDivisionOtroGasto"
+                                                                disabled>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9 col-md-9 col-sm-9" style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet chart" style="margin-top: 20px; display: none"
+                                             id="progresoDistribucion">
+                                            <span class="caption-subject bold uppercase"
+                                                  style="font-size: 19px;color: #005850">
+                                                ESTADO DE LA DISTRIBUCIÓN MENSUAL
+                                            </span>
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">ENERO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="eneroStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="eneroValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">FEBRERO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="febreroStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="febreroValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">MARZO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="marzoStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="marzoValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">ABRIL</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="abrilStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="abrilValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                #}
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">MAYO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="mayoStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="mayoValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">JUNIO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="junioStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="junioValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">JULIO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="julioStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="julioValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">AGOSTO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="agostoStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="agostoValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">SEPTIEMBRE</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="septiembreStatus"
+                                                             class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="septiembreValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">OCTUBRE</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="octubreStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="octubreValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">NOVIEMBRE</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="noviembreStatus"
+                                                             class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="noviembreValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">DICIEMBRE</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="diciembreStatus"
+                                                             class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="diciembreValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="portlet chart" style="margin-top: 20px; display:none"
+                                             id="graficoDivisionOtroGasto"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (app.session.get('aprobarEstimadoOtrosGastosDivision')) and is_granted("ROLE_DISTRIBUIDOR_DIVISION") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_OTROS_GASTOS' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            $('#otroGasto').select2({
+                placeholder: 'Seleccione ...',
+                allowClear: true
+            });
+
+            //Declaracion de variables
+            var totalEstimadoOtroGastoDivisionMes = [];
+            var meses = [];
+            var montoRestante = 0;
+            var montoAnterior = 0;
+            var presupuesto = 0;
+            var totalOtroGasto = 0;
+            var totalOtroGastoMes = 0;
+            var totalOtroGastoDivisionMes = 0;
+            var n;
+            var enero = 0;
+            var febrero = 0;
+            var marzo = 0;
+            var abril = 0;
+            var mayo = 0;
+            var junio = 0;
+            var julio = 0;
+            var agosto = 0;
+            var septiembre = 0;
+            var octubre = 0;
+            var noviembre = 0;
+            var diciembre = 0;
+            var eneroDivision = 0;
+            var febreroDivision = 0;
+            var marzoDivision = 0;
+            var abrilDivision = 0;
+            var mayoDivision = 0;
+            var junioDivision = 0;
+            var julioDivision = 0;
+            var agostoDivision = 0;
+            var septiembreDivision = 0;
+            var octubreDivision = 0;
+            var noviembreDivision = 0;
+            var diciembreDivision = 0;
+            var estadoEnero = 0;
+            var estadoFebrero = 0;
+            var estadoMarzo = 0;
+            var estadoAbril = 0;
+            var estadoMayo = 0;
+            var estadoJunio = 0;
+            var estadoJulio = 0;
+            var estadoAgosto = 0;
+            var estadoSeptiembre = 0;
+            var estadoOctubre = 0;
+            var estadoNoviembre = 0;
+            var estadoDiciembre = 0;
+            var totalEstadoMeses = 0;
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+            });
+
+            $('#btnAtrasDivision').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastosDivision') }}";
+            });
+
+            $('#otroGasto').on('change', function () {
+                var html = '';
+                var otroGasto = $('#otroGasto').val();
+                if (otroGasto === '0') {
+                    $("#divisionCentroCosto").prop('disabled', true);
+                    $("#mesCentroCosto").prop('disabled', true);
+                    $("option").remove('.cambioMes');
+                    $('#nameMontoEstimado').text(0);
+                    $('#nameMontoRestante').text(0);
+                    $('#gestionMensual').css("display", "none");
+                    $('#progresoDistribucion').css("display", "none");
+                    $('#graficoOtroGastoDivision').css("display", "none");
+                    $(".AprobarDivisionOtroGasto").prop('disabled', true);
+                    $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                    $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                    $('#nameMontoRestanteMostrar').addClass('grey');
+                    $('#nameMontoEstimadoMostrar').removeClass('red-flamingo');
+                    $('#nameMontoEstimadoMostrar').removeClass('green-haze');
+                    $('#nameMontoEstimadoMostrar').addClass('grey');
+                } else {
+
+                    cargarMeses();
+
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalOtroGasto, 0, '.', ','));
+
+                    iniciarMesesEstados();
+
+                    //armar el estado de distribucion mensual
+                    {% if graficosOtroGastoEstimadoDivisionMensual %}
+                    {% for mes in  graficosOtroGastoEstimadoDivisionMensual %}
+                            var idOtroGasto = '{{ mes['servicio'] }}';
+
+                            if (idOtroGasto === otroGasto) {
+                                totalOtroGastoDivisionMes = parseInt({{ mes['totalOtroGasto'] }});
+                                calcularMesesTotalDivision('{{ mes['mes'] }}');
+                            }
+                    {% endfor %}
+                    cargarMesesEstadoDivision();
+                    if (totalEstadoMeses === 1200) {
+                        $(".AprobarDivisionOtroGasto").prop('disabled', false);
+                    } else {
+                        $(".AprobarDivisionOtroGasto").prop('disabled', true);
+                    }
+                    {% else %}
+                    totalOtroGastoDivisionMes = 0;
+                    totalEstadoMeses = 0;
+                    {% endif %}
+                    $('#graficoDivisionOtroGasto').css("display", "none");
+                    $('#progresoDistribucion').css("display", "block");
+                }
+                $("#totalPresupuestoDivision").val('');
+                $("#totalPresupuestoDivision").prop('disabled', true);
+                $(".AsignarDivisionOtroGasto").prop('disabled', true);
+                $(".ModificarDivisionOtroGasto").prop('disabled', true);
+                if (comprobarAprobacion()) {
+                    $('#nameMontoEstimadoMostrar').removeClass('grey');
+                    $('#nameMontoEstimadoMostrar').removeClass('red-flamingo');
+                    $('#nameMontoRestanteMostrar').removeClass('grey');
+                    $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                    $('#nameMontoEstimadoMostrar').addClass('green-haze');
+                    $('#nameMontoRestanteMostrar').addClass('green-haze');
+                    $('#gestionMensual').css("display", "none");
+                } else {
+                    $('#nameMontoEstimadoMostrar').removeClass('green-haze');
+                    $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                    if (otroGasto === '0') {
+                        $('#nameMontoEstimadoMostrar').addClass('grey');
+                        $('#nameMontoRestanteMostrar').addClass('grey');
+                    } else {
+                        $('#nameMontoEstimadoMostrar').addClass('red-flamingo');
+                        $('#nameMontoRestanteMostrar').addClass('red-flamingo');
+                    }
+                    $('#gestionMensual').css("display", "block");
+                }
+            });
+
+            function comprobarAprobacion() {
+                var estado = false;
+                {% if serviciosAprobados %}
+                        var otroGasto = $("#otroGasto").val();
+                        {% for aprobacion in serviciosAprobados %}
+                        var idOtroGasto = '{{ aprobacion['otroGasto'] }}';
+                        var aprobar = '{{ aprobacion['aprobado'] }}';
+                        if (otroGasto === idOtroGasto) {
+                            estado = aprobar;
+                        }
+                        {% endfor %}
+                {% endif %}
+                return estado;
+            }
+
+            function iniciarMesesEstados() {
+                eneroDivision = 0;
+                febreroDivision = 0;
+                marzoDivision = 0;
+                abrilDivision = 0;
+                mayoDivision = 0;
+                junioDivision = 0;
+                julioDivision = 0;
+                agostoDivision = 0;
+                septiembreDivision = 0;
+                octubreDivision = 0;
+                noviembreDivision = 0;
+                diciembreDivision = 0;
+                $('#eneroStatus').css("width", '1%');
+                $('#eneroValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#febreroStatus').css("width", '1%');
+                $('#febreroValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#marzoStatus').css("width", '1%');
+                $('#marzoValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#abrilStatus').css("width", '1%');
+                $('#abrilValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#mayoStatus').css("width", '1%');
+                $('#mayoValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#junioStatus').css("width", '1%');
+                $('#junioValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#julioStatus').css("width", '1%');
+                $('#julioValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#agostoStatus').css("width", '1%');
+                $('#agostoValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#septiembreStatus').css("width", '1%');
+                $('#septiembreValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#octubreStatus').css("width", '1%');
+                $('#octubreValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#noviembreStatus').css("width", '1%');
+                $('#noviembreValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#diciembreStatus').css("width", '1%');
+                $('#diciembreValue').text('% DISTRIBUCIÓN MENSUAL');
+            }
+
+            function calcularMesesTotalDivision(mes) {
+                switch (mes) {
+                    case 'enero':
+                        eneroDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'febrero':
+                        febreroDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'marzo':
+                        marzoDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'abril':
+                        abrilDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'mayo':
+                        mayoDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'junio':
+                        junioDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'julio':
+                        julioDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'agosto':
+                        agostoDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'septiembre':
+                        septiembreDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'octubre':
+                        octubreDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'noviembre':
+                        noviembreDivision += totalOtroGastoDivisionMes;
+                        break;
+                    case 'diciembre':
+                        diciembreDivision += totalOtroGastoDivisionMes;
+                        break;
+                }
+            }
+
+            function cargarMesesEstadoDivision() {
+                totalEstadoMeses = 0;
+                estadoEnero = (eneroDivision / enero) * 100;
+                if (estadoEnero === 100) {
+                    $('#eneroStatus').removeClass('progress-bar-danger');
+                    $('#eneroStatus').addClass('progress-bar-success');
+                } else {
+                    $('#eneroStatus').removeClass('progress-bar-success');
+                    $('#eneroStatus').addClass('progress-bar-danger');
+                }
+                $('#eneroStatus').css("width", parseInt(estadoEnero) + '%');
+                $('#eneroValue').text(parseInt(estadoEnero) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoFebrero = (febreroDivision / febrero) * 100;
+                if (estadoFebrero === 100) {
+                    $('#febreroStatus').removeClass('progress-bar-danger');
+                    $('#febreroStatus').addClass('progress-bar-success');
+                } else {
+                    $('#febreroStatus').removeClass('progress-bar-success');
+                    $('#febreroStatus').addClass('progress-bar-danger');
+                }
+                $('#febreroStatus').css("width", parseInt(estadoFebrero) + '%');
+                $('#febreroValue').text(parseInt(estadoFebrero) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoMarzo = (marzoDivision / marzo) * 100;
+                if (estadoMarzo === 100) {
+                    $('#marzoStatus').removeClass('progress-bar-danger');
+                    $('#marzoStatus').addClass('progress-bar-success');
+                } else {
+                    $('#marzoStatus').removeClass('progress-bar-success');
+                    $('#marzoStatus').addClass('progress-bar-danger');
+                }
+                $('#marzoStatus').css("width", parseInt(estadoMarzo) + '%');
+                $('#marzoValue').text(parseInt(estadoMarzo) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoAbril = (abrilDivision / abril) * 100;
+                if (estadoAbril === 100) {
+                    $('#abrilStatus').removeClass('progress-bar-danger');
+                    $('#abrilStatus').addClass('progress-bar-success');
+                } else {
+                    $('#abrilStatus').removeClass('progress-bar-success');
+                    $('#abrilStatus').addClass('progress-bar-danger');
+                }
+                $('#abrilStatus').css("width", parseInt(estadoAbril) + '%');
+                $('#abrilValue').text(parseInt(estadoAbril) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoMayo = (mayoDivision / mayo) * 100;
+                if (estadoMayo === 100) {
+                    $('#mayoStatus').removeClass('progress-bar-danger');
+                    $('#mayoStatus').addClass('progress-bar-success');
+                } else {
+                    $('#mayoStatus').removeClass('progress-bar-success');
+                    $('#mayoStatus').addClass('progress-bar-danger');
+                }
+                $('#mayoStatus').css("width", parseInt(estadoMayo) + '%');
+                $('#mayoValue').text(parseInt(estadoMayo) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoJunio = (junioDivision / junio) * 100;
+                if (estadoJunio === 100) {
+                    $('#junioStatus').removeClass('progress-bar-danger');
+                    $('#junioStatus').addClass('progress-bar-success');
+                } else {
+                    $('#junioStatus').removeClass('progress-bar-success');
+                    $('#junioStatus').addClass('progress-bar-danger');
+                }
+                $('#junioStatus').css("width", parseInt(estadoJunio) + '%');
+                $('#junioValue').text(parseInt(estadoJunio) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoJulio = (julioDivision / julio) * 100;
+                if (estadoJulio === 100) {
+                    $('#julioStatus').removeClass('progress-bar-danger');
+                    $('#julioStatus').addClass('progress-bar-success');
+                } else {
+                    $('#julioStatus').removeClass('progress-bar-success');
+                    $('#julioStatus').addClass('progress-bar-danger');
+                }
+                $('#julioStatus').css("width", parseInt(estadoJulio) + '%');
+                $('#julioValue').text(parseInt(estadoJulio) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoAgosto = (agostoDivision / agosto) * 100;
+                if (estadoAgosto === 100) {
+                    $('#agostoStatus').removeClass('progress-bar-danger');
+                    $('#agostoStatus').addClass('progress-bar-success');
+                } else {
+                    $('#agostoStatus').removeClass('progress-bar-success');
+                    $('#agostoStatus').addClass('progress-bar-danger');
+                }
+                $('#agostoStatus').css("width", parseInt(estadoAgosto) + '%');
+                $('#agostoValue').text(parseInt(estadoAgosto) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoSeptiembre = (septiembreDivision / septiembre) * 100;
+                if (estadoSeptiembre === 100) {
+                    $('#septiembreStatus').removeClass('progress-bar-danger');
+                    $('#septiembreStatus').addClass('progress-bar-success');
+                } else {
+                    $('#septiembreStatus').removeClass('progress-bar-success');
+                    $('#septiembreStatus').addClass('progress-bar-danger');
+                }
+                $('#septiembreStatus').css("width", parseInt(estadoSeptiembre) + '%');
+                $('#septiembreValue').text(parseInt(estadoSeptiembre) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoOctubre = (octubreDivision / octubre) * 100;
+                if (estadoOctubre === 100) {
+                    $('#octubreStatus').removeClass('progress-bar-danger');
+                    $('#octubreStatus').addClass('progress-bar-success');
+                } else {
+                    $('#octubreStatus').removeClass('progress-bar-success');
+                    $('#octubreStatus').addClass('progress-bar-danger');
+                }
+                $('#octubreStatus').css("width", parseInt(estadoOctubre) + '%');
+                $('#octubreValue').text(parseInt(estadoOctubre) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoNoviembre = (noviembreDivision / noviembre) * 100;
+                if (estadoNoviembre === 100) {
+                    $('#noviembreStatus').removeClass('progress-bar-danger');
+                    $('#noviembreStatus').addClass('progress-bar-success');
+                } else {
+                    $('#noviembreStatus').removeClass('progress-bar-success');
+                    $('#noviembreStatus').addClass('progress-bar-danger');
+                }
+                $('#noviembreStatus').css("width", parseInt(estadoNoviembre) + '%');
+                $('#noviembreValue').text(parseInt(estadoNoviembre) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoDiciembre = (diciembreDivision / diciembre) * 100;
+                if (estadoDiciembre === 100) {
+                    $('#diciembreStatus').removeClass('progress-bar-danger');
+                    $('#diciembreStatus').addClass('progress-bar-success');
+                } else {
+                    $('#diciembreStatus').removeClass('progress-bar-success');
+                    $('#diciembreStatus').addClass('progress-bar-danger');
+                }
+                $('#diciembreStatus').css("width", parseInt(estadoDiciembre) + '%');
+                $('#diciembreValue').text(parseInt(estadoDiciembre) + '% DISTRIBUCIÓN MENSUAL');
+
+                totalEstadoMeses = estadoEnero + estadoFebrero + estadoMarzo + estadoAbril + estadoMayo + estadoJunio + estadoJulio + estadoAgosto + estadoSeptiembre + estadoOctubre + estadoNoviembre + estadoDiciembre;
+            }
+
+            function cargarMesesEstado(mes, tope) {
+                switch (mes) {
+                    case 'enero':
+                        enero = 0;
+                        enero = tope;
+                        break;
+                    case 'febrero':
+                        febrero = 0;
+                        febrero = tope;
+                        break;
+                    case 'marzo':
+                        marzo = 0;
+                        marzo = tope;
+                        break;
+                    case 'abril':
+                        abril = 0;
+                        abril = tope;
+                        break;
+                    case 'mayo':
+                        mayo = 0;
+                        mayo = tope;
+                        break;
+                    case 'junio':
+                        junio = 0;
+                        junio = tope;
+                        break;
+                    case 'julio':
+                        julio = 0;
+                        julio = tope;
+                        break;
+                    case 'agosto':
+                        agosto = 0;
+                        agosto = tope;
+                        break;
+                    case 'septiembre':
+                        septiembre = 0;
+                        septiembre = tope;
+                        break;
+                    case 'octubre':
+                        octubre = 0;
+                        octubre = tope;
+                        break;
+                    case 'noviembre':
+                        noviembre = 0;
+                        noviembre = tope;
+                        break;
+                    case 'diciembre':
+                        diciembre = 0;
+                        diciembre = tope;
+                        break;
+                }
+            }
+
+            function cargarMeses() {
+                var html = '';
+                var otroGasto = $('#otroGasto').val();
+                $("option").remove('.cambioMes');
+                $("#inicioMes").after('<option class="cambioMes"></option>');
+                totalOtroGasto = 0;
+                {% for mes in  graficosOtroGastoEstimadoMensual %}
+                var idOtroGasto = '{{ mes['otroGasto'] }}';
+
+                if (idOtroGasto === otroGasto) {
+                    totalOtroGasto += parseInt({{ mes['totalOtroGasto'] }});
+                    var id = '{{ mes['mes'] }}';
+                    var name = '{{ mes['mes'] }}';
+                    html += '<option class="cambioMes" value="' + id + '">' + name + '</option>';
+
+                    //Cargar los presupuestos estimados de las servicios por meses
+                    cargarMesesEstado('{{ mes['mes'] }}', Math.floor(parseInt({{ mes['totalOtroGasto'] }})));
+                }
+                {% endfor %}
+                $(".cambioMes").replaceWith(html);
+                $("#mesCentroCosto").prop('disabled', false);
+            }
+
+            $('#mesCentroCosto').on('change', function () {
+                var otroGasto = $('#otroGasto').val();
+                var mesSeleccionado = $('#mesCentroCosto').val();
+                if (mesSeleccionado === '0') {
+                    totalOtroGastoMes = 0;
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalOtroGastoMes, 0, '.', ','));
+                    $('#divisionCentroCosto').val(0);
+                    $("#divisionCentroCosto").prop('disabled', true);
+                    $("#totalPresupuestoDivision").val('');
+                    $("#totalPresupuestoDivision").prop('disabled', true);
+                    $('#graficoDivisionOtroGasto').css("display", "none");
+                    $('#progresoDistribucion').css("display", "block");
+                    $('.ModificarDivisionOtroGasto').prop("disabled", true);
+                } else {
+                    totalOtroGastoMes = 0;
+                    {% for mes in  graficosOtroGastoEstimadoMensual %}
+                    var idOtroGasto = '{{ mes['otroGasto'] }}';
+                    var mes = '{{ mes['mes'] }}';
+
+                    if (idOtroGasto === otroGasto && mes === mesSeleccionado) {
+                        totalOtroGastoMes = parseInt({{ mes['totalOtroGasto'] }});
+                    }
+                    {% endfor %}
+                    totalOtroGastoDivisionMes = 0;
+                    {% if graficosOtroGastoEstimadoDivisionMensual %}
+                            {% for mes in  graficosOtroGastoEstimadoDivisionMensual %}
+                            var idOtroGasto = '{{ mes['servicio'] }}';
+                            var mes = '{{ mes['mes'] }}';
+
+                            if (idOtroGasto === otroGasto && mes === mesSeleccionado) {
+                                totalOtroGastoDivisionMes += parseInt({{ mes['totalOtroGasto'] }});
+                            }
+                            {% endfor %}
+                    {% else %}
+                            totalOtroGastoDivisionMes = 0;
+                    {% endif %}
+
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalOtroGastoMes, 0, '.', ','));
+                    $('#nameMontoRestante').text(Highcharts.numberFormat(totalOtroGastoMes - totalOtroGastoDivisionMes, 0, '.', ','));
+                    var valor = totalOtroGastoMes - totalOtroGastoDivisionMes;
+                    if (valor === 0) {
+                        $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                        $('#nameMontoRestanteMostrar').addClass('green-haze');
+                    } else {
+                        $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                        $('#nameMontoRestanteMostrar').addClass('red-flamingo');
+                    }
+                    $("#divisionCentroCosto").val(0);
+                    $("#divisionCentroCosto").prop('disabled', false);
+                    $("#totalPresupuestoDivision").val('');
+                    $("#totalPresupuestoDivision").prop('disabled', true);
+                    $('#graficoDivisionOtroGasto').css("display", "none");
+                    $('#progresoDistribucion').css("display", "block");
+                }
+            });
+
+            $('#divisionCentroCosto').on('change', function () {
+                var divisionCentroCosto = $('#divisionCentroCosto').val();
+                if (divisionCentroCosto === '0') {
+                    $("#totalPresupuestoDivision").val('');
+                    $("#totalPresupuestoDivision").prop('disabled', true);
+                    $('#graficoDivisionOtroGasto').css("display", "none");
+                    $('#progresoDistribucion').css("display", "block");
+                } else {
+                    $("#totalPresupuestoDivision").val('');
+                    if (totalEstadoMeses !== 1200) {
+                        $("#totalPresupuestoDivision").prop('disabled', false);
+                    }
+                    //Grafico del centro de costo seleccionado por meses
+                    cargarGraficoDivisionMeses();
+                    /*}*/
+                }
+            });
+
+            function cargarGraficoDivisionMeses() {
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ planEstimado }},
+                    otroGasto: $('#otroGasto').val(),
+                    division: $('#divisionCentroCosto').val()
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("graficoOtroGastoEstimadoDivisionMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    meses = [];
+                    totalEstimadoOtroGastoDivisionMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoOtroGastoDivisionMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalOtroGasto'])
+                        });
+                    }
+
+                    if (totalEstimadoOtroGastoDivisionMes.length === 0) {
+                        $('#graficoDivisionOtroGasto').css("display", "none");
+                        $('#progresoDistribucion').css("display", "block");
+                    } else {
+                        $('#graficoDivisionOtroGasto').css("display", "block");
+                        $('#progresoDistribucion').css("display", "none");
+                        graficoTotalEstimadoOtroGastoDivisionMes();
+                    }
+
+                });
+            }
+
+            $('#totalPresupuestoDivision').on("keyup", function () {
+                if ($('.ModificarDivisionOtroGasto').prop("disabled")) {
+                    if ($(this).val().trim() != '') {
+                        $('.AsignarDivisionOtroGasto').prop("disabled", false);
+
+                    } else {
+                        $('.AsignarDivisionOtroGasto').prop("disabled", true);
+                    }
+                }
+            });
+
+            //Cargar el presupuesto estimado del centro de costo seleccionada
+            function cargarDivision(categoria, presupuesto) {
+                var divisionSeleccionada = parseInt($('#divisionCentroCosto').val());
+
+                var mesSeleccionado = categoria;
+                var divisionActual = '';
+
+                {% for graficoTotal in graficosOtroGastoEstimadoDivisionMensual %}
+                divisionActual = parseInt({{ graficoTotal['division'] }});
+                if (divisionActual === divisionSeleccionada) {
+                    $('#totalPresupuestoDivision').val(presupuesto);
+                    $('#mesCentroCosto').val(mesSeleccionado);
+                    montoAnterior = parseFloat(presupuesto);
+                    $('.AsignarDivisionOtroGasto').prop("disabled", true);
+                    $('.AprobarDivisionOtroGasto').prop("disabled", true);
+                    $('.ModificarDivisionOtroGasto').prop("disabled", false);
+                }
+                {% endfor %}
+            }
+
+            $('.AsignarDivisionOtroGasto').on('click', function () {
+
+                if ($("#otroGasto").val() === '0') {
+                    alertify.alert('<strong>El servicio es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#divisionCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#mesCentroCosto").val() === '0') {
+                    alertify.alert('<strong>El mes es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoDivision").val() === '') {
+                    alertify.alert('<strong>El presupuesto estimado es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = parseInt(totalOtroGastoMes - totalOtroGastoDivisionMes);
+
+                if (parseFloat($("#totalPresupuestoDivision").val()) > montoRestante) {
+                    alertify.alert('<strong>El presupuesto no puede ser mayor que el monto restante.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoDivision").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    otroGasto: $("#otroGasto").val(),
+                    division: $("#divisionCentroCosto").val(),
+                    mes: $("#mesCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoDivisionOtroGasto") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto estimado para este servicio para esta división ha asignado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                /*window.location.href = "{#{{ path('gestionarEstimadoPlanOtrosGastosDivision') }}#}";*/
+                                window.location.reload();
+                                obtenerValores();
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.ModificarDivisionOtroGasto').on('click', function () {
+
+                if ($("#otroGasto").val() === '0') {
+                    alertify.alert('<strong>El servicio es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#divisionCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#mesCentroCosto").val() === '0') {
+                    alertify.alert('<strong>El mes es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoDivision").val() === '') {
+                    alertify.alert('<strong>El presupuesto estimado es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = parseInt(totalOtroGastoMes - totalOtroGastoDivisionMes);
+
+                if (montoRestante === 0) {
+                    if (parseInt($("#totalPresupuestoDivision").val()) > montoAnterior) {
+                        alertify.alert('<strong>El presupuesto estimado no puede ser mayor que el monto disponible.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (parseInt($("#totalPresupuestoDivision").val()) > (montoAnterior + montoRestante)) {
+                        alertify.alert('<strong>El presupuesto no puede ser mayor que el monto restante.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoDivision").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    otroGasto: $("#otroGasto").val(),
+                    division: $("#divisionCentroCosto").val(),
+                    mes: $("#mesCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateTotalEstimadoDivisionOtroGasto") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto estimado de este servicio para esta división ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#centroCosto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarDivisionOtroGasto').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastosDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.AprobarDivisionOtroGasto').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar el presupuesto mensual estimado de este servicio para las divisiones</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ planEstimado }},
+                        otroGasto: $("#otroGasto").val()
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarPresupuestoEstimadoDivisionOtroGasto") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó el presupuesto mensual estimado de este servicio para las divisiones</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastosDivision') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanOtrosGastosDivision') }}";
+                                });
+                        }
+                    });
+                });
+
+            });
+
+            //fin asignacion del presupuesto total por centro de costo
+
+            function obtenerValores() {
+
+                $('#otroGasto').val({{app.session.get('servicio')}});
+                $('#mesCentroCosto').val('{{app.session.get('mes')}}');
+
+            }
+
+            //funciones distribución del presupuesto mensual por centro de costo
+
+            //Grafico mensual Total presupuesto Estimado por Centros de Costos
+            function graficoTotalEstimadoOtroGastoDivisionMes()  {
+                var valorMax = totalEstimadoOtroGastoDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoOtroGastoDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionOtroGasto', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total de presupuesto estimados',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Total de presupuesto",
+                            "colorByPoint": true,
+                            "data": totalEstimadoOtroGastoDivisionMes,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivision(oEvent.point.name, oEvent.point.y);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 500
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Fin funciones distribución del presupuesto mensual por Centros de Costos
+
+        });
+    </script>
+{% endblock %}

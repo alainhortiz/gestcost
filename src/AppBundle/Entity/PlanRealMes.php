@@ -1,0 +1,1351 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OrderBy;
+use Doctrine\ORM\Mapping\UniqueConstraint;
+
+/**
+ * PlanRealMes
+ *
+ * @ORM\Table(name="plan_real_mes",uniqueConstraints={@UniqueConstraint(name="IDX__UNIQUETUPLA50", columns={"mes","centro_costo_id", "plan_real_id"})})
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\PlanRealMesRepository")
+ */
+class PlanRealMes
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="mes", type="string", length=10)
+     */
+    private $mes;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="venta", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $venta = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="otroIngreso", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $otroIngreso = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="ingresoTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $ingresoTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="utilidad", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $utilidad = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoFuerzaTrabajo", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoFuerzaTrabajo = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="fondoSalario", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $fondoSalario = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="salario", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $salario = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="salarioDirecto", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $salarioDirecto = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="salarioIndirecto", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $salarioIndirecto = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="salarioAdministrativo", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $salarioAdministrativo = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="vacaciones", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $vacaciones = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="seguridadSocial", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $seguridadSocial = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="impuestoFuerzaTrabajo", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $impuestoFuerzaTrabajo = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoMaterial", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoMaterial = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="materiaPrima", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $materiaPrima = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="combustibleLubricante", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $combustibleLubricante = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="energia", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $energia = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="depreciacion", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $depreciacion = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="otroGasto", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $otroGasto = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="servicioRecibido", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $servicioRecibido = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoFinanciero", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoFinanciero = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="impuestoTerrestre", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $impuestoTerrestre = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="otroGastoMonetario", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $otroGastoMonetario = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoComedor", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoComedor = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="bonificacion", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $bonificacion = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoxPerdida", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoxPerdida = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoTotalIngresoTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoTotalIngresoTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoSalarioTotalProduccionTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoSalarioTotalProduccionTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoSalarioDirectoProduccionTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoSalarioDirectoProduccionTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoSalarioIndAdmProduccionTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoSalarioIndAdmProduccionTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="costoPPesoVentaTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $costoPPesoVentaTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="gastoTotalPIngresoTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $gastoTotalPIngresoTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="productividadMensualSVentaTotal", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $productividadMensualSVentaTotal = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="perdidaAlimento", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $perdidaAlimento = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="valorAgregadoBruto", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $valorAgregadoBruto = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="promedioTrabajador", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $promedioTrabajador = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="utilidadPIngresosTotales", type="decimal", precision=18, scale=2, nullable=true)
+     */
+    private $utilidadPIngresosTotales = 0;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="CentroCosto",inversedBy="planRealMeses")
+     */
+    protected $centroCosto;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="PlanReal",inversedBy="planRealMeses")
+     */
+    protected $planReal;
+
+    /**
+     * @ORM\OneToMany(targetEntity="PlanRealMesServicio", mappedBy="planRealMes" , cascade={"remove"})
+     * @OrderBy({"id" = "ASC"})
+     */
+    private $planRealMesesServicios;
+
+    /**
+     * Constructor.
+     */
+    public function __construct()
+    {
+        $this->planRealMesesServicios = new ArrayCollection();
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set mes
+     *
+     * @param string $mes
+     *
+     * @return PlanRealMes
+     */
+    public function setMes($mes)
+    {
+        $this->mes = $mes;
+
+        return $this;
+    }
+
+    /**
+     * Get mes
+     *
+     * @return string
+     */
+    public function getMes()
+    {
+        return $this->mes;
+    }
+
+    /**
+     * Set venta
+     *
+     * @param string $venta
+     *
+     * @return PlanRealMes
+     */
+    public function setVenta($venta)
+    {
+        $this->venta = $venta;
+
+        return $this;
+    }
+
+    /**
+     * Get venta
+     *
+     * @return string
+     */
+    public function getVenta()
+    {
+        return $this->venta;
+    }
+
+    /**
+     * Set otroIngreso
+     *
+     * @param string $otroIngreso
+     *
+     * @return PlanRealMes
+     */
+    public function setOtroIngreso($otroIngreso)
+    {
+        $this->otroIngreso = $otroIngreso;
+
+        return $this;
+    }
+
+    /**
+     * Get otroIngreso
+     *
+     * @return string
+     */
+    public function getOtroIngreso()
+    {
+        return $this->otroIngreso;
+    }
+
+    /**
+     * Set ingresoTotal
+     *
+     * @param string $ingresoTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setIngresoTotal($ingresoTotal)
+    {
+        $this->ingresoTotal = $ingresoTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get ingresoTotal
+     *
+     * @return string
+     */
+    public function getIngresoTotal()
+    {
+        return $this->ingresoTotal;
+    }
+
+    /**
+     * Set gastoTotal
+     *
+     * @param string $gastoTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoTotal($gastoTotal)
+    {
+        $this->gastoTotal = $gastoTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoTotal
+     *
+     * @return string
+     */
+    public function getGastoTotal()
+    {
+        return $this->gastoTotal;
+    }
+
+    /**
+     * Set utilidad
+     *
+     * @param string $utilidad
+     *
+     * @return PlanRealMes
+     */
+    public function setUtilidad($utilidad)
+    {
+        $this->utilidad = $utilidad;
+
+        return $this;
+    }
+
+    /**
+     * Get utilidad
+     *
+     * @return string
+     */
+    public function getUtilidad()
+    {
+        return $this->utilidad;
+    }
+
+    /**
+     * Set gastoFuerzaTrabajo
+     *
+     * @param string $gastoFuerzaTrabajo
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoFuerzaTrabajo($gastoFuerzaTrabajo)
+    {
+        $this->gastoFuerzaTrabajo = $gastoFuerzaTrabajo;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoFuerzaTrabajo
+     *
+     * @return string
+     */
+    public function getGastoFuerzaTrabajo()
+    {
+        return $this->gastoFuerzaTrabajo;
+    }
+
+    /**
+     * Set fondoSalario
+     *
+     * @param string $fondoSalario
+     *
+     * @return PlanRealMes
+     */
+    public function setFondoSalario($fondoSalario)
+    {
+        $this->fondoSalario = $fondoSalario;
+
+        return $this;
+    }
+
+    /**
+     * Get fondoSalario
+     *
+     * @return string
+     */
+    public function getFondoSalario()
+    {
+        return $this->fondoSalario;
+    }
+
+    /**
+     * Set salario
+     *
+     * @param string $salario
+     *
+     * @return PlanRealMes
+     */
+    public function setSalario($salario)
+    {
+        $this->salario = $salario;
+
+        return $this;
+    }
+
+    /**
+     * Get salario
+     *
+     * @return string
+     */
+    public function getSalario()
+    {
+        return $this->salario;
+    }
+
+    /**
+     * Set vacaciones
+     *
+     * @param string $vacaciones
+     *
+     * @return PlanRealMes
+     */
+    public function setVacaciones($vacaciones)
+    {
+        $this->vacaciones = $vacaciones;
+
+        return $this;
+    }
+
+    /**
+     * Get vacaciones
+     *
+     * @return string
+     */
+    public function getVacaciones()
+    {
+        return $this->vacaciones;
+    }
+
+    /**
+     * Set seguridadSocial
+     *
+     * @param string $seguridadSocial
+     *
+     * @return PlanRealMes
+     */
+    public function setSeguridadSocial($seguridadSocial)
+    {
+        $this->seguridadSocial = $seguridadSocial;
+
+        return $this;
+    }
+
+    /**
+     * Get seguridadSocial
+     *
+     * @return string
+     */
+    public function getSeguridadSocial()
+    {
+        return $this->seguridadSocial;
+    }
+
+    /**
+     * Set impuestoFuerzaTrabajo
+     *
+     * @param string $impuestoFuerzaTrabajo
+     *
+     * @return PlanRealMes
+     */
+    public function setImpuestoFuerzaTrabajo($impuestoFuerzaTrabajo)
+    {
+        $this->impuestoFuerzaTrabajo = $impuestoFuerzaTrabajo;
+
+        return $this;
+    }
+
+    /**
+     * Get impuestoFuerzaTrabajo
+     *
+     * @return string
+     */
+    public function getImpuestoFuerzaTrabajo()
+    {
+        return $this->impuestoFuerzaTrabajo;
+    }
+
+    /**
+     * Set gastoMaterial
+     *
+     * @param string $gastoMaterial
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoMaterial($gastoMaterial)
+    {
+        $this->gastoMaterial = $gastoMaterial;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoMaterial
+     *
+     * @return string
+     */
+    public function getGastoMaterial()
+    {
+        return $this->gastoMaterial;
+    }
+
+    /**
+     * Set materiaPrima
+     *
+     * @param string $materiaPrima
+     *
+     * @return PlanRealMes
+     */
+    public function setMateriaPrima($materiaPrima)
+    {
+        $this->materiaPrima = $materiaPrima;
+
+        return $this;
+    }
+
+    /**
+     * Get materiaPrima
+     *
+     * @return string
+     */
+    public function getMateriaPrima()
+    {
+        return $this->materiaPrima;
+    }
+
+    /**
+     * Set combustibleLubricante
+     *
+     * @param string $combustibleLubricante
+     *
+     * @return PlanRealMes
+     */
+    public function setCombustibleLubricante($combustibleLubricante)
+    {
+        $this->combustibleLubricante = $combustibleLubricante;
+
+        return $this;
+    }
+
+    /**
+     * Get combustibleLubricante
+     *
+     * @return string
+     */
+    public function getCombustibleLubricante()
+    {
+        return $this->combustibleLubricante;
+    }
+
+    /**
+     * Set energia
+     *
+     * @param string $energia
+     *
+     * @return PlanRealMes
+     */
+    public function setEnergia($energia)
+    {
+        $this->energia = $energia;
+
+        return $this;
+    }
+
+    /**
+     * Get energia
+     *
+     * @return string
+     */
+    public function getEnergia()
+    {
+        return $this->energia;
+    }
+
+    /**
+     * Set depreciacion
+     *
+     * @param string $depreciacion
+     *
+     * @return PlanRealMes
+     */
+    public function setDepreciacion($depreciacion)
+    {
+        $this->depreciacion = $depreciacion;
+
+        return $this;
+    }
+
+    /**
+     * Get depreciacion
+     *
+     * @return string
+     */
+    public function getDepreciacion()
+    {
+        return $this->depreciacion;
+    }
+
+    /**
+     * Set otroGasto
+     *
+     * @param string $otroGasto
+     *
+     * @return PlanRealMes
+     */
+    public function setOtroGasto($otroGasto)
+    {
+        $this->otroGasto = $otroGasto;
+
+        return $this;
+    }
+
+    /**
+     * Get otroGasto
+     *
+     * @return string
+     */
+    public function getOtroGasto()
+    {
+        return $this->otroGasto;
+    }
+
+    /**
+     * Set servicioRecibido
+     *
+     * @param string $servicioRecibido
+     *
+     * @return PlanRealMes
+     */
+    public function setServicioRecibido($servicioRecibido)
+    {
+        $this->servicioRecibido = $servicioRecibido;
+
+        return $this;
+    }
+
+    /**
+     * Get servicioRecibido
+     *
+     * @return string
+     */
+    public function getServicioRecibido()
+    {
+        return $this->servicioRecibido;
+    }
+
+    /**
+     * Set gastoFinanciero
+     *
+     * @param string $gastoFinanciero
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoFinanciero($gastoFinanciero)
+    {
+        $this->gastoFinanciero = $gastoFinanciero;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoFinanciero
+     *
+     * @return string
+     */
+    public function getGastoFinanciero()
+    {
+        return $this->gastoFinanciero;
+    }
+
+    /**
+     * Set impuestoTerrestre
+     *
+     * @param string $impuestoTerrestre
+     *
+     * @return PlanRealMes
+     */
+    public function setImpuestoTerrestre($impuestoTerrestre)
+    {
+        $this->impuestoTerrestre = $impuestoTerrestre;
+
+        return $this;
+    }
+
+    /**
+     * Get impuestoTerrestre
+     *
+     * @return string
+     */
+    public function getImpuestoTerrestre()
+    {
+        return $this->impuestoTerrestre;
+    }
+
+    /**
+     * Set otroGastoMonetario
+     *
+     * @param string $otroGastoMonetario
+     *
+     * @return PlanRealMes
+     */
+    public function setOtroGastoMonetario($otroGastoMonetario)
+    {
+        $this->otroGastoMonetario = $otroGastoMonetario;
+
+        return $this;
+    }
+
+    /**
+     * Get otroGastoMonetario
+     *
+     * @return string
+     */
+    public function getOtroGastoMonetario()
+    {
+        return $this->otroGastoMonetario;
+    }
+
+    /**
+     * Set gastoComedor
+     *
+     * @param string $gastoComedor
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoComedor($gastoComedor)
+    {
+        $this->gastoComedor = $gastoComedor;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoComedor
+     *
+     * @return string
+     */
+    public function getGastoComedor()
+    {
+        return $this->gastoComedor;
+    }
+
+    /**
+     * Set gastoxPerdida
+     *
+     * @param string $gastoxPerdida
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoxPerdida($gastoxPerdida)
+    {
+        $this->gastoxPerdida = $gastoxPerdida;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoxPerdida
+     *
+     * @return string
+     */
+    public function getGastoxPerdida()
+    {
+        return $this->gastoxPerdida;
+    }
+
+    /**
+     * Set gastoTotalIngresoTotal
+     *
+     * @param string $gastoTotalIngresoTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoTotalIngresoTotal($gastoTotalIngresoTotal)
+    {
+        $this->gastoTotalIngresoTotal = $gastoTotalIngresoTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoTotalIngresoTotal
+     *
+     * @return string
+     */
+    public function getGastoTotalIngresoTotal()
+    {
+        return $this->gastoTotalIngresoTotal;
+    }
+
+    /**
+     * Set gastoSalarioTotalProduccionTotal
+     *
+     * @param string $gastoSalarioTotalProduccionTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoSalarioTotalProduccionTotal($gastoSalarioTotalProduccionTotal)
+    {
+        $this->gastoSalarioTotalProduccionTotal = $gastoSalarioTotalProduccionTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoSalarioTotalProduccionTotal
+     *
+     * @return string
+     */
+    public function getGastoSalarioTotalProduccionTotal()
+    {
+        return $this->gastoSalarioTotalProduccionTotal;
+    }
+
+    /**
+     * Set gastoSalarioDirectoProduccionTotal
+     *
+     * @param string $gastoSalarioDirectoProduccionTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoSalarioDirectoProduccionTotal($gastoSalarioDirectoProduccionTotal)
+    {
+        $this->gastoSalarioDirectoProduccionTotal = $gastoSalarioDirectoProduccionTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoSalarioDirectoProduccionTotal
+     *
+     * @return string
+     */
+    public function getGastoSalarioDirectoProduccionTotal()
+    {
+        return $this->gastoSalarioDirectoProduccionTotal;
+    }
+
+    /**
+     * Set gastoSalarioIndAdmProduccionTotal
+     *
+     * @param string $gastoSalarioIndAdmProduccionTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoSalarioIndAdmProduccionTotal($gastoSalarioIndAdmProduccionTotal)
+    {
+        $this->gastoSalarioIndAdmProduccionTotal = $gastoSalarioIndAdmProduccionTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoSalarioIndAdmProduccionTotal
+     *
+     * @return string
+     */
+    public function getGastoSalarioIndAdmProduccionTotal()
+    {
+        return $this->gastoSalarioIndAdmProduccionTotal;
+    }
+
+    /**
+     * Set costoPPesoVentaTotal
+     *
+     * @param string $costoPPesoVentaTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setCostoPPesoVentaTotal($costoPPesoVentaTotal)
+    {
+        $this->costoPPesoVentaTotal = $costoPPesoVentaTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get costoPPesoVentaTotal
+     *
+     * @return string
+     */
+    public function getCostoPPesoVentaTotal()
+    {
+        return $this->costoPPesoVentaTotal;
+    }
+
+    /**
+     * Set gastoTotalPIngresoTotal
+     *
+     * @param string $gastoTotalPIngresoTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setGastoTotalPIngresoTotal($gastoTotalPIngresoTotal)
+    {
+        $this->gastoTotalPIngresoTotal = $gastoTotalPIngresoTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get gastoTotalPIngresoTotal
+     *
+     * @return string
+     */
+    public function getGastoTotalPIngresoTotal()
+    {
+        return $this->gastoTotalPIngresoTotal;
+    }
+
+    /**
+     * Set productividadMensualSVentaTotal
+     *
+     * @param string $productividadMensualSVentaTotal
+     *
+     * @return PlanRealMes
+     */
+    public function setProductividadMensualSVentaTotal($productividadMensualSVentaTotal)
+    {
+        $this->productividadMensualSVentaTotal = $productividadMensualSVentaTotal;
+
+        return $this;
+    }
+
+    /**
+     * Get productividadMensualSVentaTotal
+     *
+     * @return string
+     */
+    public function getProductividadMensualSVentaTotal()
+    {
+        return $this->productividadMensualSVentaTotal;
+    }
+
+    /**
+     * Set perdidaAlimento
+     *
+     * @param string $perdidaAlimento
+     *
+     * @return PlanRealMes
+     */
+    public function setPerdidaAlimento($perdidaAlimento)
+    {
+        $this->perdidaAlimento = $perdidaAlimento;
+
+        return $this;
+    }
+
+    /**
+     * Get perdidaAlimento
+     *
+     * @return string
+     */
+    public function getPerdidaAlimento()
+    {
+        return $this->perdidaAlimento;
+    }
+
+    /**
+     * Set valorAgregadoBruto
+     *
+     * @param string $valorAgregadoBruto
+     *
+     * @return PlanRealMes
+     */
+    public function setValorAgregadoBruto($valorAgregadoBruto)
+    {
+        $this->valorAgregadoBruto = $valorAgregadoBruto;
+
+        return $this;
+    }
+
+    /**
+     * Get valorAgregadoBruto
+     *
+     * @return string
+     */
+    public function getValorAgregadoBruto()
+    {
+        return $this->valorAgregadoBruto;
+    }
+
+    /**
+     * Set promedioTrabajador
+     *
+     * @param string $promedioTrabajador
+     *
+     * @return PlanRealMes
+     */
+    public function setPromedioTrabajador($promedioTrabajador)
+    {
+        $this->promedioTrabajador = $promedioTrabajador;
+
+        return $this;
+    }
+
+    /**
+     * Get promedioTrabajador
+     *
+     * @return string
+     */
+    public function getPromedioTrabajador()
+    {
+        return $this->promedioTrabajador;
+    }
+
+    /**
+     * Set utilidadPIngresosTotales
+     *
+     * @param string $utilidadPIngresosTotales
+     *
+     * @return PlanRealMes
+     */
+    public function setUtilidadPIngresosTotales($utilidadPIngresosTotales)
+    {
+        $this->utilidadPIngresosTotales = $utilidadPIngresosTotales;
+
+        return $this;
+    }
+
+    /**
+     * Get utilidadPIngresosTotales
+     *
+     * @return string
+     */
+    public function getUtilidadPIngresosTotales()
+    {
+        return $this->utilidadPIngresosTotales;
+    }
+
+    /**
+     * Set centroCosto
+     *
+     * @param \AppBundle\Entity\CentroCosto $centroCosto
+     *
+     * @return PlanRealMes
+     */
+    public function setCentroCosto(\AppBundle\Entity\CentroCosto $centroCosto = null)
+    {
+        $this->centroCosto = $centroCosto;
+
+        return $this;
+    }
+
+    /**
+     * Get centroCosto
+     *
+     * @return \AppBundle\Entity\CentroCosto
+     */
+    public function getCentroCosto()
+    {
+        return $this->centroCosto;
+    }
+
+    /**
+     * Set planReal
+     *
+     * @param \AppBundle\Entity\PlanReal $planReal
+     *
+     * @return PlanRealMes
+     */
+    public function setPlanReal(\AppBundle\Entity\PlanReal $planReal = null)
+    {
+        $this->planReal = $planReal;
+
+        return $this;
+    }
+
+    /**
+     * Get planReal
+     *
+     * @return \AppBundle\Entity\PlanReal
+     */
+    public function getPlanReal()
+    {
+        return $this->planReal;
+    }
+
+    /**
+     * Add planRealMesesServicio
+     *
+     * @param \AppBundle\Entity\PlanRealMesServicio $planRealMesesServicio
+     *
+     * @return PlanRealMes
+     */
+    public function addPlanRealMesesServicio(\AppBundle\Entity\PlanRealMesServicio $planRealMesesServicio)
+    {
+        $this->planRealMesesServicios[] = $planRealMesesServicio;
+
+        return $this;
+    }
+
+    /**
+     * Remove planRealMesesServicio
+     *
+     * @param \AppBundle\Entity\PlanRealMesServicio $planRealMesesServicio
+     */
+    public function removePlanRealMesesServicio(\AppBundle\Entity\PlanRealMesServicio $planRealMesesServicio)
+    {
+        $this->planRealMesesServicios->removeElement($planRealMesesServicio);
+    }
+
+    /**
+     * Get planRealMesesServicios
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPlanRealMesesServicios()
+    {
+        return $this->planRealMesesServicios;
+    }
+
+    /**
+     * Set salarioDirecto
+     *
+     * @param string $salarioDirecto
+     *
+     * @return PlanRealMes
+     */
+    public function setSalarioDirecto($salarioDirecto)
+    {
+        $this->salarioDirecto = $salarioDirecto;
+
+        return $this;
+    }
+
+    /**
+     * Get salarioDirecto
+     *
+     * @return string
+     */
+    public function getSalarioDirecto()
+    {
+        return $this->salarioDirecto;
+    }
+
+    /**
+     * Set salarioIndirecto
+     *
+     * @param string $salarioIndirecto
+     *
+     * @return PlanRealMes
+     */
+    public function setSalarioIndirecto($salarioIndirecto)
+    {
+        $this->salarioIndirecto = $salarioIndirecto;
+
+        return $this;
+    }
+
+    /**
+     * Get salarioIndirecto
+     *
+     * @return string
+     */
+    public function getSalarioIndirecto()
+    {
+        return $this->salarioIndirecto;
+    }
+
+    /**
+     * Set salarioAdministrativo
+     *
+     * @param string $salarioAdministrativo
+     *
+     * @return PlanRealMes
+     */
+    public function setSalarioAdministrativo($salarioAdministrativo)
+    {
+        $this->salarioAdministrativo = $salarioAdministrativo;
+
+        return $this;
+    }
+
+    /**
+     * Get salarioAdministrativo
+     *
+     * @return string
+     */
+    public function getSalarioAdministrativo()
+    {
+        return $this->salarioAdministrativo;
+    }
+
+    /**
+     * Set bonificacion
+     *
+     * @param string $bonificacion
+     *
+     * @return PlanRealMes
+     */
+    public function setBonificacion($bonificacion)
+    {
+        $this->bonificacion = $bonificacion;
+
+        return $this;
+    }
+
+    /**
+     * Get bonificacion
+     *
+     * @return string
+     */
+    public function getBonificacion()
+    {
+        return $this->bonificacion;
+    }
+}

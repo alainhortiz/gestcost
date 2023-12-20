@@ -1,0 +1,687 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            <div class="dashboard-stat grey" id="nameMontoMostrar">
+                <div class="visual">
+                    <i class="icon icon-bulb"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                    </div>
+                    <div class="desc">
+                        <strong>TOTAL ESTIMADO</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            <div class="dashboard-stat grey"
+                 id="nameMontoRestanteMostrar">
+                <div class="visual">
+                    <i class="icon icon-bulb"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+
+                    </div>
+                    <div class="desc">
+                        <strong>ESTIMADO RESTANTE</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN ESTIMADO DE GESTIÓN DE MATERIAS PRIMAS POR CENTRO DE COSTO</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                </div>
+                <div class="tools">
+                    <a href="{{ path('exportarPlanEstimadoMateriaPrima') }}"
+                       class="fa fa-file-excel-o fa-2x font-green"
+                       data-toggle="tooltip" data-placement="left" title="Exportar a Excel"> </a>
+                    <a href="#" class="reload" id="btnAtrasCentroCosto" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalCentroCosto" data-toggle="tab">
+                            PRESUPUESTO ESTIMADO POR CENTROS DE COSTOS
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalCentroCosto">
+                        <form role="form" id="formTotalCentroCosto">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                        <div class="portlet">
+                                            <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input">
+                                                    <select class="form-control" id="divisionCentroCosto"
+                                                            name="divisionCentroCosto">
+                                                        <option value="0">Seleccione ...</option>
+                                                        {% for division in  divisionCentrosCostos %}
+                                                            <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <label for="divisionCentroCosto">DIVISIÓN</label>
+                                                </div>
+                                            </div>
+                                            <div id="gestionMensual">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="centroCosto"
+                                                                name="centroCosto">
+                                                            <option id="inicioCentroCosto" value="0">Seleccione ...
+                                                            </option>
+                                                        </select>
+                                                        <label for="centroCosto">CENTRO DE COSTO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalPresupuestoCentroCosto"
+                                                               name="totalPresupuestoCentroCosto" disabled>
+                                                        <label for="totalPresupuestoCentroCosto">TOTAL DE
+                                                            PRESUPUESTO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarCentroCostoMateriaPrima"
+                                                                disabled>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary ModificarCentroCostonMateriaPrima"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarCentroCostoMateriaPrima"
+                                                                disabled>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9 col-md-9 col-sm-9" style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet chart" style="margin-top: 20px; display:none"
+                                             id="graficoMateriaPrima"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (app.session.get('aprobarEstimadoMateriaPrimaDivision')) and is_granted("ROLE_DISTRIBUIDOR_CENTRO") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_MATERIAS_PRIMAS' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            var totalEstimadoMateriaPrimaDivision = [];
+            var totalEstimadoMateriaPrimaCentroCosto = [];
+            var totalMateriaPrimaDivision = 0;
+            var totalMateriaPrimaCentroCosto = 0;
+            var montoRestante = 0;
+            var montoAnterior = 0;
+            var presupuesto = 0;
+            var n;
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+
+            });
+
+            $('#btnAtrasCentroCosto').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasCentroCosto') }}";
+            });
+
+            $('#divisionCentroCosto').on('change', function () {
+                var html = '';
+                var divisionCentroCosto = $('#divisionCentroCosto').val();
+                if (divisionCentroCosto === '0') {
+                    $("#centroCosto").prop('disabled', true);
+                    $("#centroCosto").val(0);
+                    $("option").remove('.cambioCentroCosto');
+                    $("option").remove('.cambioMes');
+                    $('#nameMontoEstimado').text(0);
+                    $('#nameMontoRestante').text(0);
+                    $('#gestionMensual').css("display", "none");
+                    $('#graficoMateriaPrima').css("display", "none");
+                    $(".AprobarCentroCostoMateriaPrima").prop('disabled', true);
+                    $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                    $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                    $('#nameMontoRestanteMostrar').addClass('grey');
+                    $('#nameMontoMostrar').removeClass('green-haze');
+                    $('#nameMontoMostrar').removeClass('red-flamingo');
+                    $('#nameMontoMostrar').addClass('grey');
+                } else {
+                    $("option").remove('.cambioCentroCosto');
+                    $("#inicioCentroCosto").after('<option class="cambioCentroCosto"></option>');
+                    {% for centro in  centrosCostos %}
+                    var idDivisionCentroCosto = '{{ centro.divisionId }}';
+
+                    if (idDivisionCentroCosto === divisionCentroCosto) {
+                        var id = {{ centro.id }};
+                        var name = '{{ centro.nombre }}';
+                        html += '<option class="cambioCentroCosto" value="' + id + '">' + name + '</option>';
+                    }
+                    {% endfor %}
+                    $(".cambioCentroCosto").replaceWith(html);
+                    calcularTotalDivision();
+                    calcularTotalCentroCosto();
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalMateriaPrimaDivision, 0, '.', ','));
+                    $('#nameMontoRestante').text(Highcharts.numberFormat(totalMateriaPrimaDivision - totalMateriaPrimaCentroCosto, 0, '.', ','));
+                    var valor = totalMateriaPrimaDivision - totalMateriaPrimaCentroCosto;
+                    if (valor === 0) {
+                        $('#nameMontoRestanteMostrar').removeClass('grey');
+                        $('#nameMontoRestanteMostrar').addClass('green-haze');
+                        $('#nameMontoMostrar').removeClass('grey');
+                        $('#nameMontoMostrar').addClass('green-haze');
+                        $(".AprobarCentroCostoMateriaPrima").prop('disabled', false);
+                        $("#centroCosto").prop('disabled', true);
+                    } else {
+                        $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                        $('#nameMontoMostrar').removeClass('green-haze');
+                        if (divisionCentroCosto === '0') {
+                            $('#nameMontoRestanteMostrar').addClass('grey');
+                            $('#nameMontoMostrar').addClass('grey');
+                        } else {
+                            $('#nameMontoRestanteMostrar').addClass('red-flamingo');
+                            $('#nameMontoMostrar').addClass('red-flamingo');
+                        }
+                        $(".AprobarCentroCostoMateriaPrima").prop('disabled', true);
+                        $("#centroCosto").prop('disabled', false);
+                    }
+
+                    //armar el grafico de distribucion por centros de costos de la division selccionada
+                    {% if graficosMateriaPrimaEstimadoCentroCosto %}
+                    totalEstimadoMateriaPrimaCentroCosto = [];
+                    {% for materia in  graficosMateriaPrimaEstimadoCentroCosto %}
+                    var idDivisionCentroCosto = '{{ materia['id'] }}';
+
+                    if (idDivisionCentroCosto === divisionCentroCosto) {
+                        totalEstimadoMateriaPrimaCentroCosto.push({
+                            name: '{{ materia['centro'] }}',
+                            y: parseInt('{{ materia['totalMateriaPrima'] }}')
+                        });
+                    }
+                    {% endfor %}
+                    $('#graficoMateriaPrima').css("display", "block");
+                    graficoTotalEstimadoMateriaPrimaCentroCosto();
+                    {% else %}
+                    $('#graficoMateriaPrima').css("display", "none");
+                    {% endif %}
+                }
+                $("#totalPresupuestoCentroCosto").val('');
+                $("#totalPresupuestoCentroCosto").prop('disabled', true);
+                $(".AsignarCentroCostoMateriaPrima").prop('disabled', true);
+                $(".ModificarCentroCostonMateriaPrima").prop('disabled', true);
+                if (comprobarAprobacion()) {
+                    $('#gestionMensual').css("display", "none");
+                } else {
+                    $('#gestionMensual').css("display", "block");
+                }
+            });
+
+            function comprobarAprobacion() {
+                var estado = false;
+                {% if divisionesAprobadas %}
+                var division = $("#divisionCentroCosto").val();
+                {% for aprobacion in divisionesAprobadas %}
+                var idDivision = '{{ aprobacion['division'] }}';
+                var aprobar = '{{ aprobacion['aprobado'] }}';
+                if (division === idDivision) {
+                    estado = aprobar;
+                }
+                {% endfor %}
+                {% endif %}
+                return estado;
+            }
+
+            function calcularTotalDivision() {
+                var divisionCentroCosto = $('#divisionCentroCosto').val();
+                totalMateriaPrimaDivision = 0;
+                {% for materia in  graficosMateriaPrimaEstimadoDivision %}
+                var idDivisionCentroCosto = '{{ materia['division'] }}';
+
+                if (idDivisionCentroCosto === divisionCentroCosto) {
+                    totalMateriaPrimaDivision += parseInt({{ materia['totalMateriaPrima'] }});
+                }
+                {% endfor %}
+            }
+
+            function calcularTotalCentroCosto() {
+                var divisionCentroCosto = $('#divisionCentroCosto').val();
+                totalMateriaPrimaCentroCosto = 0;
+                {% for materia in  graficosMateriaPrimaEstimadoCentroCosto %}
+                var idDivisionCentroCosto = '{{ materia['id'] }}';
+
+                if (idDivisionCentroCosto === divisionCentroCosto) {
+                    totalMateriaPrimaCentroCosto += parseInt({{ materia['totalMateriaPrima'] }});
+                }
+                {% endfor %}
+            }
+
+            $('#centroCosto').on('change', function () {
+                var centroCosto = $('#centroCosto').val();
+                if (centroCosto === '0') {
+                    $("#totalPresupuestoCentroCosto").val('');
+                    $("#totalPresupuestoCentroCosto").prop('disabled', true);
+                    $('#graficoMateriaPrima').css("display", "none");
+                } else {
+                    $("#totalPresupuestoCentroCosto").val('');
+                    $("#totalPresupuestoCentroCosto").prop('disabled', false);
+                }
+            });
+
+            $('#totalPresupuestoCentroCosto').on("keyup", function () {
+                if ($('.ModificarCentroCostonMateriaPrima').prop("disabled")) {
+                    if ($(this).val().trim() != '') {
+                        $('.AsignarCentroCostoMateriaPrima').prop("disabled", false);
+
+                    } else {
+                        $('.AsignarCentroCostoMateriaPrima').prop("disabled", true);
+                    }
+                }
+            });
+
+            //Cargar el presupuesto estimado del centro de costo seleccionada
+            function cargarCentroCosto(categoria, presupuesto, colorSeleccionado) {
+                var centroCostoSeleccionado = categoria;
+                var centroCostoActual = 0;
+                var centroCostoGrafico = 0;
+                var nameCentroCosto = '';
+                {% for centro in centrosCostos %}
+                nameCentroCosto = '{{ centro.nombre }}';
+                if (nameCentroCosto === centroCostoSeleccionado) {
+                    centroCostoActual = {{ centro.id }};
+                }
+                {% endfor %}
+
+                {% for graficoTotal in graficosMateriaPrimaEstimadoCentroCosto %}
+                centroCostoGrafico = parseInt({{ graficoTotal['centroId'] }});
+                if (centroCostoActual === centroCostoGrafico) {
+                    $('#totalPresupuestoCentroCosto').val(presupuesto);
+                    $("#totalPresupuestoCentroCosto").prop('disabled', false);
+                    $('#centroCosto').val(centroCostoActual);
+                    montoAnterior = parseInt(presupuesto);
+                    $('.AsignarCentroCostoMateriaPrima').prop("disabled", true);
+                    $('.AprobarCentroCostoMateriaPrima').prop("disabled", true);
+                    $('.ModificarCentroCostonMateriaPrima').prop("disabled", false);
+                }
+                {% endfor %}
+            }
+
+            $('.AsignarCentroCostoMateriaPrima').on('click', function () {
+
+                if ($("#divisionCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#centroCosto").val() === '0') {
+                    alertify.alert('<strong>El centro de costo es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoCentroCosto").val() === '') {
+                    alertify.alert('<strong>El presupuesto estimado es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = parseInt(totalMateriaPrimaDivision - totalMateriaPrimaCentroCosto);
+
+                if (parseFloat($("#totalPresupuestoCentroCosto").val()) > montoRestante) {
+                    alertify.alert('<strong>El presupuesto no puede ser mayor que el monto restante.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoCentroCosto").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    centroCosto: $("#centroCosto").val(),
+                    division: $("#divisionCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoCentroCostoMateriaPrima") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto estimado para este centro de costo ha asignado correctamente.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasCentroCosto') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasCentroCosto') }}";
+                            });
+                    }
+                });
+
+            });
+
+            $('.ModificarCentroCostonMateriaPrima').on('click', function () {
+
+                if ($("#divisionCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#centroCosto").val() === '0') {
+                    alertify.alert('<strong>El centro de costo es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoCentroCosto").val() === '') {
+                    alertify.alert('<strong>El presupuesto estimado es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = parseInt(totalMateriaPrimaDivision - totalMateriaPrimaCentroCosto);
+
+                if (montoRestante === 0) {
+                    if (parseInt($("#totalPresupuestoCentroCosto").val()) > montoAnterior) {
+                        alertify.alert('<strong>El presupuesto estimado no puede ser mayor que el monto disponible.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (parseInt($("#totalPresupuestoCentroCosto").val()) > (montoAnterior + montoRestante)) {
+                        alertify.alert('<strong>El presupuesto no puede ser mayor que el monto restante.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoCentroCosto").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    centroCosto: $("#centroCosto").val(),
+                    division: $("#divisionCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateTotalEstimadoCentroCostoMateriaPrima") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto estimado de este centro de costo ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#centroCosto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarCentroCostoMateriaPrima').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasCentroCosto') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.AprobarCentroCostoMateriaPrima').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar el presupuesto estimado para los centros de costos de esta división</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ planEstimado }},
+                        division: $("#divisionCentroCosto").val()
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarPresupuestoEstimadoCentroCostoMateriaPrima") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó el presupuesto estimado para los centros de costos</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasCentroCosto') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanMateriasPrimasCentroCosto') }}";
+                                });
+                        }
+                    });
+                });
+
+            });
+
+            //fin asignacion del presupuesto total por centro de costo
+
+            //funciones distribución del presupuesto mensual por centro de costo
+
+            //Grafico general Total presupuesto Estimado por categorías
+            function graficoTotalEstimadoMateriaPrimaCentroCosto() {
+                var valorMax = totalEstimadoMateriaPrimaCentroCosto.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoMateriaPrimaCentroCosto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoMateriaPrima', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'DISTRIBUCIÓN POR CENTROS DE COSTOS'
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Total de presupuesto",
+                            "colorByPoint": true,
+                            "data": totalEstimadoMateriaPrimaCentroCosto,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarCentroCosto(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            // fin funciones distribución del presupuesto mensual por Centros de Costos
+
+        });
+    </script>
+{% endblock %}

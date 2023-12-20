@@ -1,0 +1,651 @@
+{% extends 'Dashboards/baseDashboard.html.twig' %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN ROW -->
+    <div id="dashboardDepreciacion">
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameDepreciacionMostrar" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN DEPRECIACIÓN</span>
+                        </div>
+                        <div class="tools">
+                             <a href="{{ path('exportarPlanEstimadoDepreciacion') }}" class="fa fa-file-excel-o fa-2x font-green" data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                             <a href="#" class="reload hidden" id="btnAtrasDepreciacion" data-placement="top" data-original-title="Regresar"></a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoDepreciacion" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameDepreciacionMensual" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN MENSUAL DE DEPRECIACIÓN</span>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoDepreciacionMensual" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+    </div>
+    <!-- END ROW -->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (app.user.isActive) %}
+                window.location.href = "{{ path('login') }}";
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            var divisionCentroCosto = '';
+            var centroCosto = '';
+            var idCentroCosto = 0;
+            var n;
+            //Depreciacion
+            var totalEstimadoDepreciacionDivision = [];
+            var totalEstimadoDepreciacionDivisionMes = [];
+            var totalEstimadoDepreciacionCentroCosto = [];
+            var totalEstimadoDepreciacionCentroCostoMes = [];
+
+            //Dashboard de gestion de Ventas
+            $('#linkVenta').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanVenta') }}";
+            });
+
+            //Dashboard de gestion de Otros Ingresos
+            $('#linkOtroIngreso').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtroIngreso') }}";
+            });
+
+            //Dashboard de Fondo de Salario
+            $('#linkSalario').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanSalario') }}";
+            });
+
+            //Dashboard de gestion de Combustible
+            $('#linkCombustible').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanCombustible') }}";
+            });
+
+            //Dashboard gestion de Energía
+            $('#linkEnergia').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanEnergia') }}";
+            });
+
+            //Dashboard gestion de Otros Gastos
+            $('#linkOtroGastos').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtrosGastos') }}";
+            });
+
+            //Dashboard de gestion de Materias Primas
+            $('#linkMateriasPrimas').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanMateriasPrimas') }}";
+            });
+
+            //Dashboard de gestion de Amortización
+            $('#linkAmortizacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanAmortizacion') }}";
+            });
+
+            //Dashboard de gestion de Bonificación
+            $('#linkBonificacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanBonificacion') }}";
+            });
+
+            //Dashboard de gestion de Gastos de comedor
+            $('#linkComedor').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanComedor') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkGastoMaterial').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanGastoMaterial') }}";
+            });
+
+            //Dashboard de gestion de Depreciación
+            $('#linkDepreciacion').on("click", function () {
+                $('#dashboardDepreciacion').css("display", "block");
+                graficoTotalEstimadoDepreciacionDivision();
+                graficoTotalEstimadoDepreciacionDivisionMes();
+            });
+
+            $('#btnAtrasDepreciacion').on("click", function () {
+                $('#btnAtrasDepreciacion').addClass('hidden');
+                graficoTotalEstimadoDepreciacionDivision();
+                inicioMensualDepreciacion();
+                graficoTotalEstimadoDepreciacionDivisionMes();
+                $('#nameDepreciacionMostrar').text(' DISTRIBUCIÓN DEL PLAN DE DEPRECIACIÓN POR DIVISIONES');
+                $('#nameDepreciacionMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE DEPRECIACIÓN');
+            });
+
+            //Grafico principal de ventas por divisiones
+            {% for graficoTotal in graficosTotalesEstimadosDivisionesDepreciaciones %}
+                    totalEstimadoDepreciacionDivision.push({
+                        name: '{{ graficoTotal['nombre'] }}',
+                        y: parseInt('{{ graficoTotal['totalDepreciacion'] }}')
+                    });
+            {% endfor %}
+
+            //Grafico principal de ventas por meses
+            {% for graficoTotal in graficosTotalesEstimadosMesesDepreciaciones %}
+                    totalEstimadoDepreciacionDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseInt('{{ graficoTotal['presupuesto'] }}')
+                    });
+            {% endfor %}
+
+            $('#dashboardDepreciacion').css("display", "block");
+            graficoTotalEstimadoDepreciacionDivision();
+            graficoTotalEstimadoDepreciacionDivisionMes();
+
+            //Inicio grafico mensual de ventas
+            function inicioMensualDepreciacion() {
+                totalEstimadoDepreciacionDivisionMes = [];
+                {% for graficoTotal in graficosTotalesEstimadosMesesDepreciaciones %}
+                        totalEstimadoDepreciacionDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseInt('{{ graficoTotal['presupuesto'] }}')
+                        });
+                {% endfor %}
+            }
+
+            //Grafico general Plan de Ventas por divisiones
+            function graficoTotalEstimadoDepreciacionDivision() {
+                var valorMax = totalEstimadoDepreciacionDivision.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoDepreciacionDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDepreciacion', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoDepreciacionDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivisionDepreciacion(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de ventas de la division seleccionada
+            function cargarDivisionDepreciacion(categoria, presupuesto, colorSeleccionado) {
+
+                var idDivisionCentroCosto = '';
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                    divisionCentroCosto = '{{ division.nombre }}';
+                    if (divisionCentroCosto === categoria) {
+                        idDivisionCentroCosto = {{ division.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    division: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardDepreciacionEstimadoDivisionMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+                    var divisionMensual = obj['divisionMensual'];
+                    var divisionCantroCosto = obj['divisionCentroCosto'];
+
+                    totalEstimadoDepreciacionDivisionMes = [];
+                    for (n = 0; n < divisionMensual.length; n++) {
+                        totalEstimadoDepreciacionDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseFloat(divisionMensual[n]['totalDepreciacion']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    totalEstimadoDepreciacionCentroCosto = [];
+                    for (n = 0; n < divisionCantroCosto.length; n++) {
+                        totalEstimadoDepreciacionCentroCosto.push({
+                            name: divisionCantroCosto[n]['nombre'],
+                            y: parseFloat(divisionCantroCosto[n]['totalDepreciacion']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameDepreciacionMostrar').text(' DISTRIBUCIÓN DEL PLAN DE DEPRECIACIÓN EN LOS CENTROS DE COSTOS DE LA ' + categoria);
+                    $('#nameDepreciacionMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE DEPRECIACIÓN EN LA ' + categoria);
+                    $('#btnAtrasDepreciacion').removeClass('hidden');
+
+                    graficoTotalEstimadoDepreciacionDivisionMes();
+                    graficoTotalEstimadoDepreciacionCentroCosto();
+
+                });
+            }
+
+            //Grafico Plan de Ventas Mensual por divisiones
+            function graficoTotalEstimadoDepreciacionDivisionMes() {
+                var valorMax = totalEstimadoDepreciacionDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoDepreciacionDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDepreciacionMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoDepreciacionDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de ventas de la division seleccionada
+            function cargarCentroCostoDepreciacion(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for centro in centrosCostos %}
+                    centroCosto = '{{ centro.nombre }}';
+                    if (centroCosto === categoria) {
+                        idCentroCosto = {{ centro.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    centro: idCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardDepreciacionEstimadoCentroCostoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    totalEstimadoDepreciacionCentroCostoMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoDepreciacionCentroCostoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalDepreciacion']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameDepreciacionMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE DEPRECIACIÓN EN EL ' + categoria);
+                    $('#btnAtrasDepreciacion').removeClass('hidden');
+
+                    graficoTotalEstimadoDepreciacionCentroCostoMes();
+
+                });
+            }
+
+            //Grafico 2do nivel Plan de Ventas por centro de costos
+            function graficoTotalEstimadoDepreciacionCentroCosto() {
+                var valorMax = totalEstimadoDepreciacionCentroCosto.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoDepreciacionCentroCosto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDepreciacion', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoDepreciacionCentroCosto,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarCentroCostoDepreciacion(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+             //Grafico mensual plan de ventas del centro de costo seleccionado
+            function graficoTotalEstimadoDepreciacionCentroCostoMes() {
+                var valorMax = totalEstimadoDepreciacionCentroCostoMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoDepreciacionCentroCostoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDepreciacionMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoDepreciacionCentroCostoMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Fin del dashboard de la gestion de Depreciación
+
+
+        });
+    </script>
+
+{% endblock %}

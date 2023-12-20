@@ -1,0 +1,500 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">AGREGAR PRECIO {{ tipoAceite.nombre|upper }}</span>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalCentroCosto">
+                        <form role="form" id="formTotalCentroCosto">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-3 col-sm-12">
+                                        <div class="portlet">
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <input type="number" min="{{ app.session.get('yearActivo') }}"
+                                                               value="{{ app.session.get('yearActivo') }}"
+                                                               class="form-control"
+                                                               id="year"
+                                                               name="year">
+                                                        <label for="year">AÑO</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select class="form-control" id="mesPrecio"
+                                                                name="mesPrecio">
+                                                            <option value="0">Seleccione ...</option>
+                                                            {% for mes in  mesesTransportes %}
+                                                                <option value="{{ mes }}">{{ mes }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label for="mesPrecio">MES</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-6 col-md-6 col-sm-6" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="addPrecio"
+                                                               name="addPrecio" disabled>
+                                                        <label for="addPrecio">
+                                                            PRECIO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 35px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AdicionarMes"
+                                                                disabled><i
+                                                                    class="fa fa-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 35px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary LimpiarMes"
+                                                                disabled><i
+                                                                    class="fa fa-refresh"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-6 col-md-6 col-sm-6" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary" id="btnGuardar"
+                                                                disabled>
+                                                            Guardar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6 col-sm-6" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button" class="btn btn default" id="btnSalir">
+                                                            Cancelar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9 col-md-9 col-sm-12" style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet-body " style="overflow-x: auto; display: block"
+                                             id="tablaPrecio">
+                                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                                   id="dataPrecio">
+                                                <thead>
+                                                <tr>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Ene.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Feb.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Mar.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Abr.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        May.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Jun.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Jul.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Ago.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Sep.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Oct.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Nov.
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        Dic.
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (is_granted("ROLE_NOMENCLADOR")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'PLANTILLA_TRANSPORTE' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            //--------- Declaraciones -----------------//
+            var enero = 0;
+            var febrero = 0;
+            var marzo = 0;
+            var abril = 0;
+            var mayo = 0;
+            var junio = 0;
+            var julio = 0;
+            var agosto = 0;
+            var septiembre = 0;
+            var octubre = 0;
+            var noviembre = 0;
+            var diciembre = 0;
+            var preciosMeses = [];
+
+            var table = $('#dataPrecio').DataTable({
+                columns: [
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"}
+                ],
+                "searching": false,
+                "paging": false,
+                "info": false
+            });
+
+            //--------- abandonar el formulario -----------------//
+            $('#btnSalir').on('click', function () {
+                window.location.href = "{{ path('gestionarPrecioLubricante' , {idTipoAceite:tipoAceite.id}) }}";
+            });
+
+            //--------- validaciones -----------------//
+
+            $('#mesPrecio').on('change', function () {
+                var mesPrecio = $('#mesPrecio').val();
+                if (mesPrecio === '0') {
+                    $("#addPrecio").prop('disabled', true);
+                } else {
+                    $("#addPrecio").val('');
+                    $("#addPrecio").prop('disabled', false);
+                }
+                });
+
+            $('#addPrecio').on('keyup', function () {
+                var addPrecio = $('#addPrecio').val();
+                if (addPrecio === '0' || addPrecio === '') {
+                    $(".AdicionarMes").prop('disabled', true);
+                } else {
+                    $(".AdicionarMes").prop('disabled', false);
+                }
+            });
+
+            $('.AdicionarMes').on('click', function () {
+                //Adicionar la fila en el dataTable de precios mensuales
+                var precio = parseFloat($("#addPrecio").val());
+                cargarMeses();
+                //Establecer este precio para los meses restantes
+                alertify.confirm('Basic: false').set('message', '<strong>Desea establecer este precio a los meses restantes?</strong>').set('onok', function () {
+                    if (enero===0) enero = precio;
+                    if (febrero===0) febrero = precio;
+                    if (marzo===0) marzo = precio;
+                    if (abril===0) abril = precio;
+                    if (mayo===0)  mayo = precio;
+                    if (junio===0) junio = precio;
+                    if (julio===0) julio = precio;
+                    if (agosto===0) agosto = precio;
+                    if (septiembre===0) septiembre = precio;
+                    if (octubre===0) octubre = precio;
+                    if (noviembre===0) noviembre = precio;
+                    if (diciembre===0) diciembre = precio;
+
+                    //Limpiar la tabla
+                    table.clear();
+                    //Adicionar la fila
+                    table.row.add([
+                        enero,
+                        febrero,
+                        marzo,
+                        abril,
+                        mayo,
+                        junio,
+                        julio,
+                        agosto,
+                        septiembre,
+                        octubre,
+                        noviembre,
+                        diciembre
+                    ]).draw(false);
+                });
+                //Limpiar la tabla
+                table.clear();
+                //Adicionar la fila
+                table.row.add([
+                    enero,
+                    febrero,
+                    marzo,
+                    abril,
+                    mayo,
+                    junio,
+                    julio,
+                    agosto,
+                    septiembre,
+                    octubre,
+                    noviembre,
+                    diciembre
+                ]).draw(false);
+                limpiarControles();
+                $(".AdicionarMes").prop('disabled', true);
+                $(".AsignarPrecio").prop('disabled', false);
+                $(".LimpiarMes").prop('disabled', false);
+                $("#btnGuardar").prop('disabled', false);
+
+            });
+
+            $('.LimpiarMes').on('click', function () {
+                //Borrar los datos del datatable
+                enero = 0;
+                febrero = 0;
+                marzo = 0;
+                abril = 0;
+                mayo = 0;
+                junio = 0;
+                julio = 0;
+                agosto = 0;
+                septiembre = 0;
+                octubre = 0;
+                noviembre = 0;
+                diciembre = 0;
+                table.clear().draw(false);
+                limpiarControles();
+                $(".AdicionarMes").prop('disabled', true);
+                $(".AsignarPrecio").prop('disabled', true);
+                $(".LimpiarMes").prop('disabled', true);
+
+            });
+
+            $('#btnGuardar').on('click', function () {
+
+                llenarMesesPrecios();
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    year: $("#year").val(),
+                    idTipoAceite: {{ tipoAceite.id }},
+                    preciosMeses: preciosMeses
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertPrecioAceite") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El precio ha sido insertado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarPrecioLubricante' , {idTipoAceite:tipoAceite.id}) }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            function cargarMeses() {
+                switch ($('#mesPrecio').val()) {
+                    case 'enero':
+                        enero = 0;
+                        enero = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'febrero':
+                        febrero = 0;
+                        febrero = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'marzo':
+                        marzo = 0;
+                        marzo = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'abril':
+                        abril = 0;
+                        abril = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'mayo':
+                        mayo = 0;
+                        mayo = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'junio':
+                        junio = 0;
+                        junio = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'julio':
+                        julio = 0;
+                        julio = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'agosto':
+                        agosto = 0;
+                        agosto = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'septiembre':
+                        septiembre = 0;
+                        septiembre = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'octubre':
+                        octubre = 0;
+                        octubre = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'noviembre':
+                        noviembre = 0;
+                        noviembre = parseFloat($("#addPrecio").val());
+                        break;
+                    case 'diciembre':
+                        diciembre = 0;
+                        diciembre = parseFloat($("#addPrecio").val());
+                        break;
+                }
+            }
+
+            function limpiarControles() {
+                    $('#mesPrecio').val(0);
+                    $('#addPrecio').val('');
+                    $("#addPrecio").prop('disabled', true);
+            }
+
+            function llenarMesesPrecios() {
+                preciosMeses =[];
+                preciosMeses.push({
+                    mes: 'enero',
+                    precio: enero
+                });
+
+                preciosMeses.push({
+                    mes: 'febrero',
+                    precio: febrero
+                });
+
+                preciosMeses.push({
+                    mes: 'marzo',
+                    precio: marzo
+                });
+
+                preciosMeses.push({
+                    mes: 'abril',
+                    precio: abril
+                });
+
+                preciosMeses.push({
+                    mes: 'mayo',
+                    precio: mayo
+                });
+
+                preciosMeses.push({
+                    mes: 'junio',
+                    precio: junio
+                });
+
+                preciosMeses.push({
+                    mes: 'julio',
+                    precio: julio
+                });
+
+                preciosMeses.push({
+                    mes: 'agosto',
+                    precio: agosto
+                });
+
+                preciosMeses.push({
+                    mes: 'septiembre',
+                    precio: septiembre
+                });
+
+                preciosMeses.push({
+                    mes: 'octubre',
+                    precio: octubre
+                });
+
+                preciosMeses.push({
+                    mes: 'noviembre',
+                    precio: noviembre
+                });
+
+                preciosMeses.push({
+                    mes: 'diciembre',
+                    precio: diciembre
+                });
+            }
+
+            $("#addPrecio").keyup(function(event){
+                var tecla = event.which;
+                if (tecla === 188) {
+                    var contenido = $("#addPrecio").val().slice(0,-1);
+                    $("#addPrecio").val(contenido + '.');
+                }
+            });
+
+        });
+    </script>
+{% endblock %}

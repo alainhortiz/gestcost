@@ -1,0 +1,53 @@
+<div id="modalAddTipoCombustible" data-backdrop="static" data-keyboard=false class="modal fade" tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog" style="width: 60vw">
+        <div class="modal-content portlet light estilosForm">
+            <div class="modal-header">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green-sunglo"></i>
+                    <span class="bold uppercase" style="font-size: 17px"> AGREGAR TIPO DE COMBUSTIBLE</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="scroller" style="height: 160px" data-always-visible="1" data-rail-visible1="1">
+                    <div class="row">
+                        <div class="portlet-body form">
+                            <form class="form-horizontal" role="form">
+                                <div class="form-body">
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Código</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b" class="fa fa-exclamation tooltips hidden addCodigo" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <input type="text" class="form-control" placeholder="Teclee el código" id="addCodigo" name="addCodigo">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Nombre</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-comment"></i>
+												</span>
+                                                <i style="color: #dc141b" class="fa fa-exclamation tooltips hidden addNombre" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <input type="text" class="form-control" placeholder="Teclee el nombre" id="addNombre" name="addNombre">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn default cerrar">Cerrar</button>
+            <button type="button" class="btn btn-secondary" id="addGuardar">Guardar</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,823 @@
+{% extends 'Dashboards/baseDashboard.html.twig' %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN ROW -->
+    <div id="dashboardSalario">
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameDivisionFondo" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN DEL FONDO DE SALARIO POR DIVISIONES</span>
+                        </div>
+                        <div class="tools">
+                        <a href="{{ path('exportarPlanEstimadoFondoSalario') }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                            <a href="#" class="reload hidden" id="btnAtrasDivisionFondo" data-placement="top"
+                               data-original-title="Regresar">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoDivisionFondo" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameDivisionFondoMensual" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN MENSUAL DEL FONDO DE SALARIO</span>
+                        </div>
+                        <div class="tools">
+                            <a href="#" class="reload hidden" id="btnAtrasDivisionFondoMensual" data-placement="top"
+                               data-original-title="Reiniciar">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoDivisionFondoMensual" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+    </div>
+    <!-- END ROW -->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (app.user.isActive) %}
+                window.location.href = "{{ path('login') }}";
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            var divisionCentroCosto = '';
+            var centroCosto = '';
+            var idCentroCosto = 0;
+            var n;
+            //Salario
+            var totalEstimadoFondoDivision = [];
+            var totalEstimadoGSPPDivision = [];
+            var totalEstimadoPTDivision = [];
+            var totalEstimadoSMDivision = [];
+            var totalEstimadoFondoDivisionMes = [];
+            var totalEstimadoGSPPDivisionMes = [];
+            var totalEstimadoPTDivisionMes = [];
+            var totalEstimadoSMDivisionMes = [];
+            var totalEstimadoFondoCentroCosto = [];
+            var totalEstimadoGSPPCentroCosto = [];
+            var totalEstimadoPTCentroCosto = [];
+            var totalEstimadoSMCentroCosto = [];
+            var totalEstimadoFondoCentroCostoMes = [];
+            var totalEstimadoGSPPCentroCostoMes = [];
+            var totalEstimadoPTCentroCostoMes = [];
+            var totalEstimadoSMCentroCostoMes = [];
+
+            //Dashboard de gestion de Ventas
+            $('#linkVenta').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanVenta') }}";
+            });
+
+            //Dashboard de gestion de Otros Ingresos
+            $('#linkOtroIngreso').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtroIngreso') }}";
+            });
+
+            //Dashboard de gestion de Combustible
+            $('#linkCombustible').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanCombustible') }}";
+            });
+
+            //Dashboard gestion de Energía
+            $('#linkEnergia').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanEnergia') }}";
+            });
+
+            //Dashboard gestion de Otros Gastos
+            $('#linkOtroGastos').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtrosGastos') }}";
+            });
+
+            //Dashboard de gestion de Materias Primas
+            $('#linkMateriasPrimas').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanMateriasPrimas') }}";
+            });
+
+            //Dashboard de gestion de Depreciación
+            $('#linkDepreciacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanDepreciacion') }}";
+            });
+
+            //Dashboard de gestion de Bonificación
+            $('#linkBonificacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanBonificacion') }}";
+            });
+
+            //Dashboard de gestion de Gastos de comedor
+            $('#linkComedor').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanComedor') }}";
+            });
+
+            //Dashboard de gestion de Amortización
+            $('#linkAmortizacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanAmortizacion') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkGastoMaterial').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanGastoMaterial') }}";
+            });
+
+            //Dashboard de Fondo de Salario
+            $('#linkSalario').on("click", function () {
+                $('#dashboardSalario').css("display", "block");
+                graficoTotalEstimadoFondoDivision();
+                graficoTotalEstimadoFondoDivisionMes();
+            });
+
+            $('#btnAtrasDivisionFondo').on("click", function () {
+                $('#btnAtrasDivisionFondo').addClass('hidden');
+                graficoTotalEstimadoFondoDivision();
+                inicioMensualFondos();
+                graficoTotalEstimadoFondoDivisionMes();
+                $('#nameDivisionFondo').text(' DISTRIBUCIÓN DEL FONDO DE SALARIO POR DIVISIONES');
+                $('#nameDivisionFondoMensual').text(' DISTRIBUCIÓN MENSUAL DEL FONDO DE SALARIO');
+            });
+
+            //Grafico principal de fondo de salario por divisiones
+            {% for graficoTotal in graficosTotalesEstimadosDivisionesFondos %}
+                    totalEstimadoFondoDivision.push({
+                        name: '{{ graficoTotal['nombre'] }}',
+                        y: parseFloat('{{ graficoTotal['totalSalarioDivision'] }}')
+                    });
+                    totalEstimadoGSPPDivision.push({
+                        name: '{{ graficoTotal['nombre'] }}',
+                        y: parseFloat('{{ graficoTotal['totalGastoSalarioPesoProduccion'] }}')
+                    });
+                    totalEstimadoPTDivision.push({
+                        name: '{{ graficoTotal['nombre'] }}',
+                        y: parseInt('{{ graficoTotal['totalPromedioTrabajador'] }}')
+                    });
+                    totalEstimadoSMDivision.push({
+                        name: '{{ graficoTotal['nombre'] }}',
+                        y: parseFloat('{{ graficoTotal['totalSalarioMedio'] }}')
+                    });
+            {% endfor %}
+
+            //Grafico principal de fondos por meses
+            {% for graficoTotal in graficosTotalesEstimadosMesesFondos %}
+                    totalEstimadoFondoDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalSalarioDivisionMes'] }}')
+                    });
+                    totalEstimadoGSPPDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalGastoSalarioPesoProduccionDivisionMes'] }}')
+                    });
+                    totalEstimadoPTDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseInt('{{ graficoTotal['totalPromedioTrabajadorMes'] }}')
+                    });
+                    totalEstimadoSMDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalSalarioMedioDivisionMes'] }}')
+                    });
+            {% endfor %}
+
+            $('#dashboardSalario').css("display", "block");
+            graficoTotalEstimadoFondoDivision();
+            graficoTotalEstimadoFondoDivisionMes();
+
+            //Inicio grafico mensual de fondo de salario
+            function inicioMensualFondos() {
+                totalEstimadoFondoDivisionMes = [];
+                totalEstimadoGSPPDivisionMes = [];
+                totalEstimadoPTDivisionMes = [];
+                totalEstimadoSMDivisionMes = [];
+                {% for graficoTotal in graficosTotalesEstimadosMesesFondos %}
+                    totalEstimadoFondoDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalSalarioDivisionMes'] }}')
+                    });
+                    totalEstimadoGSPPDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalGastoSalarioPesoProduccionDivisionMes'] }}')
+                    });
+                    totalEstimadoPTDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseInt('{{ graficoTotal['totalPromedioTrabajadorMes'] }}')
+                    });
+                    totalEstimadoSMDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalSalarioMedioDivisionMes'] }}')
+                    });
+                {% endfor %}
+            }
+
+            //Grafico general Plan de Fondo de Salario por divisiones
+            function graficoTotalEstimadoFondoDivision() {
+                var valorMax = totalEstimadoFondoDivision.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoFondoDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionFondo', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Fondo de salario estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' fondo asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Fondo de Salario",
+                            "colorByPoint": true,
+                            "data": totalEstimadoFondoDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivisionFondo(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        },
+                        {
+                            "name": "GSXPP",
+                            "colorByPoint": true,
+                            "data": totalEstimadoGSPPDivision
+                        },
+                        {
+                            "name": "Promedio de Trabajadores",
+                            "colorByPoint": true,
+                            "data": totalEstimadoPTDivision
+                        },
+                        {
+                            "name": "Salario Medio",
+                            "colorByPoint": true,
+                            "data": totalEstimadoSMDivision
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de fondos de la division seleccionada
+            function cargarDivisionFondo(categoria, presupuesto, colorSeleccionado) {
+
+                var idDivisionCentroCosto = '';
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                    divisionCentroCosto = '{{ division.nombre }}';
+                    if (divisionCentroCosto === categoria) {
+                        idDivisionCentroCosto = {{ division.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    division: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardSalarioEstimadoDivisionMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+                    var divisionMensual = obj['divisionMensual'];
+                    var divisionCantroCosto = obj['divisionCentroCosto'];
+
+                    totalEstimadoFondoDivisionMes = [];
+                    totalEstimadoGSPPDivisionMes = [];
+                    totalEstimadoPTDivisionMes = [];
+                    totalEstimadoSMDivisionMes = [];
+                    for (n = 0; n < divisionMensual.length; n++) {
+                        totalEstimadoFondoDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseFloat(divisionMensual[n]['totalSalarioDivisionMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoGSPPDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseFloat(divisionMensual[n]['totalGastoSalarioPesoProduccionDivisionMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoPTDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseInt(divisionMensual[n]['totalPromedioTrabajadorMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoSMDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseFloat(divisionMensual[n]['totalEstimadoSMDivisionMes']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    totalEstimadoFondoCentroCosto = [];
+                    totalEstimadoGSPPCentroCosto = [];
+                    totalEstimadoPTCentroCosto = [];
+                    totalEstimadoSMCentroCosto = [];
+                    for (n = 0; n < divisionCantroCosto.length; n++) {
+                        totalEstimadoFondoCentroCosto.push({
+                            name: divisionCantroCosto[n]['centro'],
+                            y: parseFloat(divisionCantroCosto[n]['totalSalarioCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoGSPPCentroCosto.push({
+                            name: divisionCantroCosto[n]['centro'],
+                            y: parseFloat(divisionCantroCosto[n]['totalGastoSalarioPesoProduccionCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoPTCentroCosto.push({
+                            name: divisionCantroCosto[n]['centro'],
+                            y: parseInt(divisionCantroCosto[n]['totalPromedioTrabajadorCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoSMCentroCosto.push({
+                            name: divisionCantroCosto[n]['centro'],
+                            y: parseFloat(divisionCantroCosto[n]['totalSalarioMedioCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameDivisionFondo').text(' DISTRIBUCIÓN DEL SALARIO EN LOS CENTROS DE COSTOS DE LA ' + categoria);
+                    $('#nameDivisionFondoMensual').text(' DISTRIBUCIÓN MENSUAL DEL PLAN DE SALARIO EN LA ' + categoria);
+                    $('#btnAtrasFondoInicio').addClass('hidden');
+                    $('#btnAtrasDivisionFondo').removeClass('hidden');
+
+                    graficoTotalEstimadoFondoDivisionMes();
+                    graficoTotalEstimadoFondoCentroCosto();
+                });
+            }
+
+            //Grafico Plan de Fondo Mensual por divisiones
+            function graficoTotalEstimadoFondoDivisionMes() {
+                var valorMax = totalEstimadoFondoDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoFondoDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionFondoMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Fondo de salario estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' fondo asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Fondo de Salario",
+                            "colorByPoint": true,
+                            "data": totalEstimadoFondoDivisionMes
+                        },
+                        {
+                            "name": "GSXPP",
+                            "colorByPoint": true,
+                            "data": totalEstimadoGSPPDivisionMes
+                        },
+                        {
+                            "name": "Promedio de Trabajadores",
+                            "colorByPoint": true,
+                            "data": totalEstimadoPTDivisionMes
+                        },
+                        {
+                            "name": "Salario Medio",
+                            "colorByPoint": true,
+                            "data": totalEstimadoSMDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de fondo de la division seleccionada
+            function cargarCentroCostoFondo(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for centro in centrosCostos %}
+                    centroCosto = '{{ centro.nombre }}';
+                    if (centroCosto === categoria) {
+                        idCentroCosto = {{ centro.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    centro: idCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardFondoEstimadoCentroCostoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    totalEstimadoFondoCentroCostoMes = [];
+                    totalEstimadoGSPPCentroCostoMes = [];
+                    totalEstimadoPTCentroCostoMes = [];
+                    totalEstimadoSMCentroCostoMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoFondoCentroCostoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalSalarioCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoGSPPCentroCostoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalGastoSalarioPesoProduccionCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoPTCentroCostoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseInt(obj[n]['totalPromedioTrabajadorCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoSMCentroCostoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalSalarioMedioCentroCostoMes']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    $('#nameDivisionFondoMensual').text(' DISTRIBUCIÓN MENSUAL DEL FONDO DE SALARIO EN EL ' + categoria);
+                    $('#btnAtrasDivisionFondo').removeClass('hidden');
+
+                    graficoTotalEstimadoFondoCentroCostoMes();
+
+                });
+            }
+
+            //Grafico 2do nivel Plan de Fondo por centro de costos
+            function graficoTotalEstimadoFondoCentroCosto() {
+                var valorMax = totalEstimadoFondoCentroCosto.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoFondoCentroCosto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionFondo', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Fondo de salario estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' fondo asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Fondo de Salario",
+                            "colorByPoint": true,
+                            "data": totalEstimadoFondoCentroCosto,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarCentroCostoFondo(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        },
+                        {
+                            "name": "GSXPP",
+                            "colorByPoint": true,
+                            "data": totalEstimadoGSPPCentroCosto
+                        },
+                        {
+                            "name": "Promedio de Trabajadores",
+                            "colorByPoint": true,
+                            "data": totalEstimadoPTCentroCosto
+                        },
+                        {
+                            "name": "Salario Medio",
+                            "colorByPoint": true,
+                            "data": totalEstimadoSMCentroCosto
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+             //Grafico mensual plan de fondos del centro de costo seleccionado
+            function graficoTotalEstimadoFondoCentroCostoMes() {
+                var valorMax = totalEstimadoFondoCentroCostoMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoFondoCentroCostoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionFondoMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Fondo de salario estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' fondo asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Fondo de Salario",
+                            "colorByPoint": true,
+                            "data": totalEstimadoFondoCentroCostoMes
+                        },
+                        {
+                            "name": "GSXPP",
+                            "colorByPoint": true,
+                            "data": totalEstimadoGSPPCentroCostoMes
+                        },
+                        {
+                            "name": "Promedio de Trabajadores",
+                            "colorByPoint": true,
+                            "data": totalEstimadoPTCentroCostoMes
+                        },
+                        {
+                            "name": "Salario Medio",
+                            "colorByPoint": true,
+                            "data": totalEstimadoSMCentroCostoMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Fin del dashboard de Fondo de Salario
+        });
+    </script>
+
+{% endblock %}

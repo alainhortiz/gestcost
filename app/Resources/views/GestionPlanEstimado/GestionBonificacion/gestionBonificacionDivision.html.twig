@@ -1,0 +1,1016 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            {% if totalEstimadoBonificacion == 0 %}
+                <div class="dashboard-stat grey">
+            {% else  %}
+                <div class="dashboard-stat {{ aprobarEstimadoBonificacionDivision == true ? 'green-haze' : 'red-flamingo' }}">
+            {% endif %}
+                <div class="visual">
+                    <i class="fa fa-recycle"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                        {{ totalEstimadoBonificacion|number_format(0, '.', ',') }}
+                    </div>
+                    <div class="desc">
+                        <strong>TOTAL ESTIMADO</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if aprobarEstimadoBonificacionDivision == false %}
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                <div class="dashboard-stat {{ (totalEstimadoBonificacion - totalEstimadoDivisionBonificacion) == 0 ? 'grey' : 'red-flamingo' }}"
+                     id="nameMontoRestanteMostrar">
+                    <div class="visual">
+                        <i class="fa fa-recycle"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+                            {{ (totalEstimadoBonificacion - totalEstimadoDivisionBonificacion)|number_format(0, '.', ',') }}
+                        </div>
+                        <div class="desc">
+                            <strong>ESTIMADO RESTANTE</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-lg-3 col-md-5 col-sm-5 col-xs-5">
+                <div class="dashboard-stat grey-cararra" style="display:none" id="nameMontoRestanteDivisionMostrar">
+                    <div class="visual">
+                        <i class="icon icon-basket-loaded"></i>
+                    </div>
+                    <div class="details">
+                        <div class="number" data-toggle="counter-up" id="nameMontoRestanteDivision">
+                        </div>
+                        <div class="desc">
+                            <strong>ESTIMADO RESTANTE DE LA DIVISIÓN</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN DE BONIFICACIÓN POR DIVISIÓN</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                    {% if aprobarEstimadoBonificacionDivision == true %}
+                        <div class="progress progress-striped active">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40"
+                                 aria-valuemin="0" aria-valuemax="100" style="width: {{ porcientoDivisionMensual }}%">
+                                <span class="sr-only-focusable">{{ porcientoDivisionMensual }}% DISTRIBUCIÓN MENSUAL  </span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="tools">
+                {% if aprobarEstimadoBonificacionDivision == true %}
+                            <a href="{{ path('exportarPlanEstimadoBonificacion') }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                {% endif %}
+                    <a href="#" class="reload" id="btnAtrasBonificacion" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalDivision" data-toggle="tab">
+                            PRESUPUESTO ESTIMADO POR DIVISIÓN </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalDivision">
+                        <form role="form" id="formTotalDivision">
+                            <div class="form-body">
+                                <div class="row">
+                                    {% if aprobarEstimadoBonificacionDivision == false %}
+                                        <div class="col-lg-3 col-md-3 col-sm-3">
+                                            <div class="portlet">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select class="form-control" id="categoriaCentroCosto"
+                                                                name="categoriaCentroCosto">
+                                                            <option value="0">Seleccione ...</option>
+                                                            {% for division in  divisionCentrosCostos %}
+                                                                <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label for="categoriaCentroCosto">DIVISIÓN</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalBonificacion"
+                                                               name="totalBonificacion">
+                                                        <label for="totalBonificacion">TOTAL DE PRESUPUESTO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarBonificacion" {{ (totalEstimadoBonificacion - totalEstimadoDivisionBonificacion) == 0 ? 'disabled' }}>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button" class="btn btn-secondary ModificarBonificacion"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarBonificacion" {{ (totalEstimadoBonificacion - totalEstimadoDivisionBonificacion) != 0 ? 'disabled' }}>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    <div class="{{ aprobarEstimadoBonificacionDivision == false ? 'col-lg-9 col-md-9 col-sm-9' : 'col-lg-12 col-md-12 col-sm-12' }}"
+                                         style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet chart" style="margin-top: 20px"
+                                             id="graficoBonificacion"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="totalDivisionMes" style="display:none">
+                        <ul class="nav nav-tabs nav-pills">
+                            <li class="active uppercase">
+                                <a href="#" data-toggle="tab" id="nameTabDivisionMes">
+                                    PRESUPUESTO ESTIMADO POR MESES </a>
+                            </li>
+                        </ul>
+                        <form role="form" id="formTotalDivisionMes">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <div class="portlet">
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="enero"
+                                                           name="enero">
+                                                    <label for="enero">Ene.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="febrero"
+                                                           name="febrero">
+                                                    <label for="febrero">Feb.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="marzo"
+                                                           name="marzo">
+                                                    <label for="marzo">Mar.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="abril"
+                                                           name="abril">
+                                                    <label for="abril">Abr.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="mayo"
+                                                           name="mayo">
+                                                    <label for="mayo">May.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="junio"
+                                                           name="junio">
+                                                    <label for="junio">Jun.</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <div class="portlet">
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="julio"
+                                                           name="julio">
+                                                    <label for="julio">Jul.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="agosto"
+                                                           name="agosto">
+                                                    <label for="agosto">Ago.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="septiembre"
+                                                           name="septiembre">
+                                                    <label for="septiembre">Sep.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="octubre"
+                                                           name="octubre">
+                                                    <label for="octubre">Oct.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="noviembre"
+                                                           name="noviembre">
+                                                    <label for="noviembre">Nov.</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2" style="margin-top: 20px">
+                                                <div class="form-group form-md-line-input input-icon right">
+                                                    <input type="text" class="form-control mesesDivision" onkeypress="return filterFloat(event,this);"
+                                                           id="diciembre"
+                                                           name="diciembre">
+                                                    <label for="diciembre">Dic.</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                        <div class="portlet">
+                                            <div class="col-lg-1 col-md-1 col-sm-12" style="margin-top: 50px">
+                                                <div class="form-actions noborder">
+                                                    <button type="button"
+                                                            class="btn btn-secondary AprobarDivisionMes" disabled>
+                                                        Aprobar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="portlet">
+                                            <div class="col-lg-1 col-md-1 col-sm-12" style="margin-top: 50px">
+                                                <div class="form-actions noborder">
+                                                    <button type="button"
+                                                            class="btn btn-secondary AplicarDivisionMes" disabled>
+                                                        Aplicar sugerencia
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function(){
+                {% if not (app.session.get('aprobarEstimadoBonificacion')) and is_granted("ROLE_DISTRIBUIDOR_DIVISION") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_BONIFICACION' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+
+            });
+
+            $('#btnAtrasBonificacion').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoPlanBonificacionesDivision') }}";
+            });
+
+            //funciones de asignacion del presupuesto por divisiones
+
+            //Declaracion de variables
+            let totalEstimadoBonificacionDivision = [];
+            let totalEstimadoBonificacionDivisionMes = [];
+            let montoRestante = 0;
+            let montoRestanteDivision = 0;
+            let montoTotal = 0;
+            let montoAnterior = 0;
+            let divisionCentroCosto = '';
+            let idDivisionCentroCosto = '';
+            let n;
+            let estimadoMes = 0;
+            let restanteMes = 0;
+
+            //Arreglo para el grafico de presupuesto asignado por Categorias del plan de ventas activo
+            {% for graficoTotal in graficosTotalesEstimadosDivisionesBonificaciones %}
+            totalEstimadoBonificacionDivision.push({
+                name: '{{ graficoTotal['nombre'] }}',
+                y: parseInt('{{ graficoTotal['totalBonificacion'] }}')
+            });
+            {% endfor %}
+
+            (function () {
+                graficoTotalEstimadoBonificacionDivision();
+            })();
+
+            //Cargar el presupuesto estimado de la division seleccionada
+            function cargarDivision(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                        divisionCentroCosto = '{{ division.nombre }}';
+                        if (divisionCentroCosto === categoria) {
+                            {% if aprobarEstimadoBonificacionDivision == false %}
+                            $('#categoriaCentroCosto').val('{{ division.id }}');
+                            {% endif %}
+                            idDivisionCentroCosto = {{ division.id }};
+                        }
+                {% endfor %}
+
+                {% if aprobarEstimadoBonificacionDivision == false %}
+
+                        $('#totalBonificacion').val(presupuesto);
+                        montoAnterior = parseInt(presupuesto);
+                        $('#categoriaCentroCosto').prop("disabled", true);
+                        $('.AsignarBonificacion').prop("disabled", true);
+                        $('.ModificarBonificacion').prop("disabled", false);
+                        $('.AprobarBonificacion').prop("disabled", false);
+
+                {% else %}
+
+                        //mostrar si existe el grafico mensual
+
+                        $('#nameMontoEstimado').text(Highcharts.numberFormat(presupuesto, 0, '.', ','));
+
+                        $(".preload").removeClass('hidden');
+
+                        var mat_datos = {
+                            idPlanEstimado: {{ planEstimado }},
+                            division: idDivisionCentroCosto
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            dataType: "json",
+                            url: '{{ path("graficoBonificacionEstimadoDivisionMensual") }}',
+                            data: mat_datos
+                        }).done(function (data) {
+
+                            $(".preload").addClass('hidden');
+                            var obj = JSON.parse(data);
+
+                            totalEstimadoBonificacionDivisionMes = [];
+                            for (n = 0; n < obj.length; n++) {
+                                totalEstimadoBonificacionDivisionMes.push({
+                                    name: obj[n]['mes'],
+                                    y: parseFloat(obj[n]['totalBonificacion']),
+                                    color: colorSeleccionado
+                                });
+                            }
+
+                            estimadoMes = Math.floor(parseInt(presupuesto) / 12);
+                            restanteMes = Math.floor(parseInt(presupuesto) - (estimadoMes * 12));
+
+                            if (totalEstimadoBonificacionDivisionMes.length === 0) {
+                                $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(presupuesto, 0, '.', ','));
+                                $('#nameMontoRestanteMostrar').css("display", "none");
+                                $('#nameMontoRestanteDivisionMostrar').css("display", "block");
+                                $('#totalDivisionMes').css("display", "block");
+                                $('.mesesDivision').prop("placeholder", estimadoMes);
+                                $('.AplicarDivisionMes').prop("disabled", false);
+                            } else {
+                                $('#nameMontoRestanteDivision').text(0);
+                                $('#nameMontoRestanteMostrar').css("display", "block");
+                                $('#nameMontoRestanteDivisionMostrar').css("display", "none");
+                                $('#totalDivisionMes').css("display", "none");
+                                $('.AplicarDivisionMes').prop("disabled", true);
+                                graficoTotalEstimadoBonificacionDivisionMes();
+                            }
+
+                            montoRestanteDivision = parseInt(presupuesto);
+                        });
+                {% endif %}
+            }
+
+            $('.AplicarDivisionMes').on('click', function () {
+                if (estimadoMes !== 0) {
+                    $('.mesesDivision').prop("value", estimadoMes);
+                    $('.AplicarDivisionMes').prop("disabled", true);
+                    $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(restanteMes, 0, '.', ','));
+                    if (restanteMes === 0) {
+                        $('.AprobarDivisionMes').prop("disabled", false);
+                    }
+                }
+            });
+
+            //Grafico general Total presupuesto Estimado por categorías
+            function graficoTotalEstimadoBonificacionDivision() {
+                var valorMax = totalEstimadoBonificacionDivision.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoBonificacionDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoBonificacion', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'DISTRIBUCIÓN POR DIVISIONES'
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoBonificacionDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivision(oEvent.point.name, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            $('.AsignarBonificacion').on('click', function () {
+
+                if ($("#categoriaCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalBonificacion").val() === '') {
+                    alertify.alert('<strong>El total de presupuesto es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = {{ totalEstimadoBonificacion - totalEstimadoDivisionBonificacion }};
+
+                if (parseInt($("#totalBonificacion").val()) > montoRestante) {
+                    alertify.alert('<strong>El total de presupuesto no puede ser mayor que el monto restante.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalBonificacion").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    division: $("#categoriaCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoDivisionBonificacion") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El plan de Bonificación para esta división ha asignado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanBonificacionesDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.ModificarBonificacion').on('click', function () {
+
+                if ($("#categoriaCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalBonificacion").val() === '') {
+                    alertify.alert('<strong>El total de presupuesto es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = {{ totalEstimadoBonificacion - totalEstimadoDivisionBonificacion }};
+
+                if (montoRestante === 0) {
+                    if (parseInt($("#totalBonificacion").val()) > montoAnterior) {
+                        alertify.alert('<strong>El total de presupuesto no puede ser mayor que el monto disponible.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (parseInt($("#totalBonificacion").val()) > (montoAnterior + montoRestante)) {
+                        alertify.alert('<strong>El total de presupuesto no puede ser mayor que el monto restante.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalBonificacion").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    division: $("#categoriaCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateTotalEstimadoDivisionBonificacion") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El plan de bonificación para esta división ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#categoriaCentroCosto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarBonificacion').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanBonificacionesDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.AprobarBonificacion').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar el presupuesto estimado de bonificación para las divisiones</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ planEstimado }}
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarPresupuestoEstimadoDivisionBonificacion") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó el plan de bonificación para las divisiones</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanBonificacionesDivision') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                        }
+                    });
+                });
+
+            });
+
+            //fin asignacion del presupuesto total por división
+
+            //funciones distribución del presupuesto mensual por division
+
+            $('.AprobarDivisionMes').on('click', function () {
+
+                if ($('.mesesDivision').val() === '') {
+                    alertify.alert('<strong>El total de presupuesto mensual es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                presupuestoMeses();
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: totalEstimadoBonificacionDivisionMes,
+                    idPlanEstimado: {{ planEstimado }},
+                    idDivisionCentroCosto: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoBonificacionDivisionMes") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto mensual para esta división ha sido distribuido correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#nameMontoRestanteDivisionMostrar').css("display", "none");
+                                window.location.href = "{{ path('gestionarEstimadoPlanBonificacionesDivision') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanBonificacionesDivision') }}";
+                            });
+                    }
+                });
+
+
+            });
+
+            function presupuestoMeses() {
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'enero',
+                    presupuesto: $("#enero").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'febrero',
+                    presupuesto: $("#febrero").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'marzo',
+                    presupuesto: $("#marzo").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'abril',
+                    presupuesto: $("#abril").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'mayo',
+                    presupuesto: $("#mayo").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'junio',
+                    presupuesto: $("#junio").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'julio',
+                    presupuesto: $("#julio").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'agosto',
+                    presupuesto: $("#agosto").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'septiembre',
+                    presupuesto: $("#septiembre").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'octubre',
+                    presupuesto: $("#octubre").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'noviembre',
+                    presupuesto: $("#noviembre").val()
+                });
+
+                totalEstimadoBonificacionDivisionMes.push({
+                    mes: 'diciembre',
+                    presupuesto: $("#diciembre").val()
+                });
+            }
+
+            $('.mesesDivision').on("keyup", function () {
+
+                montoTotal = 0;
+                if (!Number.isNaN(parseInt($("#enero").val()))) {
+                    montoTotal+= parseInt($("#enero").val());
+                }
+                if (!Number.isNaN(parseInt($("#febrero").val()))) {
+                    montoTotal+= parseInt($("#febrero").val());
+                }
+                if (!Number.isNaN(parseInt($("#marzo").val()))) {
+                    montoTotal+= parseInt($("#marzo").val());
+                }
+                if (!Number.isNaN(parseInt($("#abril").val()))) {
+                    montoTotal+= parseInt($("#abril").val());
+                }
+                if (!Number.isNaN(parseInt($("#mayo").val()))) {
+                    montoTotal+= parseInt($("#mayo").val());
+                }
+                if (!Number.isNaN(parseInt($("#junio").val()))) {
+                    montoTotal+= parseInt($("#junio").val());
+                }
+                if (!Number.isNaN(parseInt($("#julio").val()))) {
+                    montoTotal+= parseInt($("#julio").val());
+                }
+                if (!Number.isNaN(parseInt($("#agosto").val()))) {
+                    montoTotal+= parseInt($("#agosto").val());
+                }
+                if (!Number.isNaN(parseInt($("#septiembre").val()))) {
+                    montoTotal+= parseInt($("#septiembre").val());
+                }
+                if (!Number.isNaN(parseInt($("#octubre").val()))) {
+                    montoTotal+= parseInt($("#octubre").val());
+                }
+                if (!Number.isNaN(parseInt($("#noviembre").val()))) {
+                    montoTotal+= parseInt($("#noviembre").val());
+                }
+                if (!Number.isNaN(parseInt($("#diciembre").val()))) {
+                    montoTotal+= parseInt($("#diciembre").val());
+                }
+                let restante = montoRestanteDivision - montoTotal;
+
+                if ((restante) >= 0) {
+                    if ($(this).val() !== '') {
+                        $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(restante, 0, '.', ','));
+                        if (parseInt(restante) === 0) {
+                            $('.AprobarDivisionMes').prop("disabled", false);
+                        } else {
+                            $('.AprobarDivisionMes').prop("disabled", true);
+                            $('.AplicarDivisionMes').prop("disabled", true);
+                        }
+                    }
+                } else {
+                    alertify.alert('<strong>No tiene presupuesto disponible.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                        .set('label', 'Aceptar');
+                    montoTotal = 0;
+                    $('.AprobarDivisionMes').prop("disabled", true);
+                    return false;
+                }
+            });
+
+            //Grafico mensual Total presupuesto Estimado por divisiones
+            function graficoTotalEstimadoBonificacionDivisionMes() {
+                var valorMax = totalEstimadoBonificacionDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoBonificacionDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoBonificacion', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'DISTRIBUCIÓN MENSUAL POR DIVISIONES'
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoBonificacionDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            // fin funciones distribución del presupuesto mensual por division
+
+        });
+    </script>
+{% endblock %}

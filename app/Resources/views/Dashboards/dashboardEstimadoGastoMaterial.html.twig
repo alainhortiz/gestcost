@@ -1,0 +1,398 @@
+{% extends 'Dashboards/baseDashboard.html.twig' %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN ROW -->
+    <div id="dashboardGastoMaterial">
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameGastoMaterialMostrar" class="caption-subject bold uppercase font-green-haze"> GASTO MATERIAL</span>
+                        </div>
+                        <div class="tools">
+                             <a href="{{ path('exportarPlanEstimadoGastoMaterial') }}" class="fa fa-file-excel-o fa-2x font-green" data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoGastoMaterial" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameGastoMaterialMensual" class="caption-subject bold uppercase font-green-haze"> GASTO MATERIAL MENSUAL </span>
+                        </div>
+                        <div class="tools">
+                             <a href="#" class="reload hidden" id="btnAtrasGastoMaterial" data-placement="top" data-original-title="Regresar"></a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoGastoMaterialMensual" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+    </div>
+    <!-- END ROW -->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (app.user.isActive) %}
+                window.location.href = "{{ path('login') }}";
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            //Gasto Material
+            var meses = [];
+            var totalEstimadoGastoMaterial = [];
+            var gastoMaterialCombustibleMes = [];
+            var gastoMaterialEnergiaMes = [];
+            var gastoMaterialMateriaPrimaMes = [];
+
+            //Dashboard de gestion de Ventas
+            $('#linkVenta').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanVenta') }}";
+            });
+
+            //Dashboard de gestion de Otros Ingresos
+            $('#linkOtroIngreso').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtroIngreso') }}";
+            });
+
+            //Dashboard de Fondo de Salario
+            $('#linkSalario').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanSalario') }}";
+            });
+
+            //Dashboard de gestion de Combustible
+            $('#linkCombustible').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanCombustible') }}";
+            });
+
+            //Dashboard gestion de Energía
+            $('#linkEnergia').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanEnergia') }}";
+            });
+
+            //Dashboard gestion de Otros Gastos
+            $('#linkOtroGastos').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtrosGastos') }}";
+            });
+
+            //Dashboard de gestion de Materias Primas
+            $('#linkMateriasPrimas').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanMateriasPrimas') }}";
+            });
+
+            //Dashboard de gestion de Depreciación
+            $('#linkDepreciacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanDepreciacion') }}";
+            });
+
+            //Dashboard de gestion de Bonificación
+            $('#linkBonificacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanBonificacion') }}";
+            });
+
+            //Dashboard de gestion de Gastos de comedor
+            $('#linkComedor').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanComedor') }}";
+            });
+
+            //Dashboard de gestion de Amortización
+            $('#linkAmortizacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanAmortizacion') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkGastoMaterial').on("click", function () {
+                $('#dashboardGastoMaterial').css("display", "block");
+                totalEstimadoGastoMaterial = [];
+                //llenar el arreglo del primer grafico
+                totalEstimadoGastoMaterial.push({
+                        name: 'Materias Primas',
+                        y: parseInt('{{ app.session.get('totalEstimadoMateriaPrima') }}')
+                    });
+                totalEstimadoGastoMaterial.push({
+                        name: 'Combustible',
+                        y: parseInt('{{ app.session.get('totalEstimadoCombustible') }}')
+                    });
+                totalEstimadoGastoMaterial.push({
+                        name: 'Energía',
+                        y: parseInt('{{ app.session.get('totalEstimadoEnergia') }}')
+                    });
+                graficoTotalEstimadoGastoMaterial();
+                graficoTotalEstimadoGastoMaterialMensual();
+            });
+
+            //Grafico principal de Energia por Meses
+            {% if graficosTotalesEstimadosMesesEnergias %}
+                meses = [];
+                {% for graficoTotal in graficosTotalesEstimadosMesesEnergias %}
+                        gastoMaterialEnergiaMes.push(parseFloat({{ graficoTotal['totalEnergiaPresupuesto'] }}));
+                        meses.push('{{ graficoTotal['mes'] }}');
+                {% endfor %}
+            {% endif %}
+
+            //Grafico principal de Materias Primas por Meses
+            {% if graficosTotalesEstimadosMesesmateriasPrimas %}
+                meses = [];
+                {% for graficoTotal in graficosTotalesEstimadosMesesmateriasPrimas %}
+                        gastoMaterialMateriaPrimaMes.push(parseFloat({{ graficoTotal['presupuesto'] }}));
+                        meses.push('{{ graficoTotal['mes'] }}');
+                {% endfor %}
+            {% endif %}
+
+            //Grafico principal de Combustible por Meses
+            {% if graficosTotalesEstimadosMesesCombustibles %}
+                 meses = [];
+                {% for graficoTotal in graficosTotalesEstimadosMesesCombustibles %}
+                     gastoMaterialCombustibleMes.push(parseFloat({{ graficoTotal['importeCombustible'] }}));
+                     meses.push('{{ graficoTotal['mes'] }}');
+                {% endfor %}
+            {% endif %}
+
+            $('#dashboardGastoMaterial').css("display", "block");
+            totalEstimadoGastoMaterial = [];
+            //llenar el arreglo del primer grafico
+            totalEstimadoGastoMaterial.push({
+                name: 'Materias Primas',
+                y: parseInt('{{ app.session.get('totalEstimadoMateriaPrima') }}')
+            });
+            totalEstimadoGastoMaterial.push({
+                name: 'Combustible',
+                y: parseInt('{{ app.session.get('totalEstimadoCombustible') }}')
+            });
+            totalEstimadoGastoMaterial.push({
+                name: 'Energía',
+                y: parseInt('{{ app.session.get('totalEstimadoEnergia') }}')
+            });
+            graficoTotalEstimadoGastoMaterial();
+            graficoTotalEstimadoGastoMaterialMensual();
+
+            //Grafico general Plan de Ventas por divisiones
+            function graficoTotalEstimadoGastoMaterial() {
+                var valorMax = totalEstimadoGastoMaterial.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoGastoMaterial.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoGastoMaterial', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Gasto Material",
+                            "colorByPoint": true,
+                            "data": totalEstimadoGastoMaterial
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Grafico general Plan de Ventas por divisiones
+            function graficoTotalEstimadoGastoMaterialMensual() {
+                var valorMax = gastoMaterialEnergiaMes.length - 1;
+                var valorScrollbar = false;
+                if (gastoMaterialEnergiaMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoGastoMaterialMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        categories: meses,
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Importe - Litros',
+                            align: 'middle',
+                            useHTML: true
+                        },
+                        stackLabels: {
+                            enabled: true,
+                            style: {
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'percent',
+                            dataLabels: {
+                                enabled: true
+                            }
+                        },
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, '.', ',');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px"><b>{point.x}</b></span><br>',
+                        pointFormat: '<span style="color:{point.color}">{series.name}</span>: <b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Materias Primas y Materiales",
+                            "data": gastoMaterialMateriaPrimaMes
+                        },
+                        {
+                            "name": "Combustible",
+                            "data": gastoMaterialCombustibleMes
+                        },
+                        {
+                            "name": "Energía",
+                            "data": gastoMaterialEnergiaMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Fin del dashboard de Gasto Material
+
+
+        });
+    </script>
+
+{% endblock %}

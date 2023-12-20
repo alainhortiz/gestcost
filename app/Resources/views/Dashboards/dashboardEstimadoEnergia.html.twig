@@ -1,0 +1,733 @@
+{% extends 'Dashboards/baseDashboard.html.twig' %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN ROW -->
+    <div id="dashboardEnergia" >
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameDivisionEnergia" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN DE LA ENERGÍA POR DIVISIONES</span>
+                        </div>
+                        <div class="tools">
+                        <a href="#"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                            <a href="#" class="reload hidden" id="btnAtrasDivisionEnergia" data-placement="top"
+                               data-original-title="Regresar">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoDivisionEnergia" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+        <div class="row" style="margin-top: 40px">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <!-- BEGIN CHART PORTLET-->
+                <div class="portlet light bordered sombreado">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <span id="nameDivisionEnergiaMensual" class="caption-subject bold uppercase font-green-haze"> DISTRIBUCIÓN MENSUAL DE LA ENERGÍA</span>
+                        </div>
+                        <div class="tools">
+                            <a href="#" class="reload hidden" id="btnAtrasDivisionEnergiaMensual" data-placement="top"
+                               data-original-title="Reiniciar">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="portlet-body">
+                        <div id="graficoDivisionEnergiaMensual" class="chart" style="height: 250px;">
+                        </div>
+                    </div>
+                </div>
+                <!-- END CHART PORTLET-->
+            </div>
+        </div>
+    </div>
+    <!-- END ROW -->
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (app.user.isActive) %}
+                window.location.href = "{{ path('login') }}";
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            var divisionCentroCosto = '';
+            var centroCosto = '';
+            var idCentroCosto = 0;
+            var n;
+            //Energia
+            var nameDivision = [];
+            var nameCentro = [];
+            var meses = [];
+            var mesesCentroCosto = [];
+            var totalEstimadoEnergiaDivision = [];
+            var totalEstimadoKWDivision = [];
+            var totalEstimadoEnergiaDivisionMes = [];
+            var totalEstimadoKWDivisionMes = [];
+            var totalEstimadoEnergiaCentroCosto = [];
+            var totalEstimadoKWCentroCosto = [];
+            var totalEstimadoEnergiaCentroCostoMes = [];
+            var totalEstimadoKWCentroCostoMes = [];
+
+            //Dashboard de gestion de Ventas
+            $('#linkVenta').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanVenta') }}";
+            });
+
+            //Dashboard de gestion de Otros Ingresos
+            $('#linkOtroIngreso').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtroIngreso') }}";
+            });
+
+            //Dashboard de gestion de Fondo de Salario
+            $('#linkSalario').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanSalario') }}";
+            });
+
+            //Dashboard de gestion de Combustible
+            $('#linkCombustible').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanCombustible') }}";
+            });
+
+            //Dashboard gestion de Otros Gastos
+            $('#linkOtroGastos').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanOtrosGastos') }}";
+            });
+
+            //Dashboard de gestion de Materias Primas
+            $('#linkMateriasPrimas').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanMateriasPrimas') }}";
+            });
+
+            //Dashboard de gestion de Depreciación
+            $('#linkDepreciacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanDepreciacion') }}";
+            });
+
+            //Dashboard de gestion de Bonificación
+            $('#linkBonificacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanBonificacion') }}";
+            });
+
+            //Dashboard de gestion de Gastos de comedor
+            $('#linkComedor').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanComedor') }}";
+            });
+
+            //Dashboard de gestion de Amortización
+            $('#linkAmortizacion').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanAmortizacion') }}";
+            });
+
+            //Dashboard de Gasto Material
+            $('#linkGastoMaterial').on("click", function () {
+                window.location.href = "{{ path('dashboardEstimadoPlanGastoMaterial') }}";
+            });
+
+            //Dashboard gestion de Energía
+            $('#linkEnergia').on("click", function () {
+                $('#dashboardEnergia').css("display", "block");
+                graficoTotalEstimadoEnergiaDivision();
+                graficoTotalEstimadoEnergiaDivisionMes();
+            });
+
+            $('#btnAtrasDivisionEnergia').on("click", function () {
+                $('#btnAtrasDivisionEnergia').addClass('hidden');
+                graficoTotalEstimadoEnergiaDivision();
+                inicioMensualEnergias();
+                graficoTotalEstimadoEnergiaDivisionMes();
+                $('#nameDivisionEnergia').text(' DISTRIBUCIÓN DEL KW POR DIVISIONES');
+                $('#nameDivisionEnergiaMensual').text(' DISTRIBUCIÓN MENSUAL DEL KW');
+            });
+
+            //Grafico principal de kW por divisiones
+            {% for graficoTotal in graficosTotalesEstimadosDivisionesEnergias %}
+                    nameDivision.push('{{ graficoTotal['nombre'] }}');
+                    totalEstimadoEnergiaDivision.push(parseFloat({{ graficoTotal['totalEnergiaPresupuesto'] }}));
+                    totalEstimadoKWDivision.push(parseInt({{ graficoTotal['totalKWDivision'] }}));
+            {% endfor %}
+
+            //Grafico principal de kW por meses
+            {% for graficoTotal in graficosTotalesEstimadosMesesEnergias %}
+                    meses.push('{{ graficoTotal['mes'] }}');
+                    totalEstimadoEnergiaDivisionMes.push(parseFloat({{ graficoTotal['totalEnergiaPresupuesto'] }}));
+                    totalEstimadoKWDivisionMes.push(parseInt({{ graficoTotal['totalKWDivisionMes'] }}));
+            {% endfor %}
+
+            $('#dashboardEnergia').css("display", "block");
+            graficoTotalEstimadoEnergiaDivision();
+            graficoTotalEstimadoEnergiaDivisionMes();
+
+            //Inicio grafico mensual de Energia
+            function inicioMensualEnergias() {
+                totalEstimadoEnergiaDivisionMes = [];
+                totalEstimadoKWDivisionMes = [];
+                {% for graficoTotal in graficosTotalesEstimadosMesesEnergias %}
+                    totalEstimadoEnergiaDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalEnergiaPresupuesto'] }}')
+                    });
+                    totalEstimadoKWDivisionMes.push({
+                        name: '{{ graficoTotal['mes'] }}',
+                        y: parseFloat('{{ graficoTotal['totalKWDivisionMes'] }}')
+                    });
+                {% endfor %}
+            }
+
+            //Grafico general Plan de Energia por divisiones
+            function graficoTotalEstimadoEnergiaDivision() {
+                var valorMax = totalEstimadoEnergiaDivision.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoEnergiaDivision.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionEnergia', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        categories: nameDivision,
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total de kW estimados',
+                            align: 'middle',
+                            useHTML: true
+                        },
+                        stackLabels: {
+                            enabled: true,
+                            style: {
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'percent',
+                            dataLabels: {
+                                enabled: true
+                            }
+                        },
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, '.', ',');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px"><b>{point.x}</b></span><br>',
+                        pointFormat: '<span style="color:{point.color}">{series.name}</span>: <b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Total de kW",
+                            "data": totalEstimadoKWDivision,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarDivisionEnergia(oEvent.point.category, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        },
+                        {
+                            "name": "Total de presupuesto",
+                            "data": totalEstimadoEnergiaDivision
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de Energia de la division seleccionada
+            function cargarDivisionEnergia(categoria, presupuesto, colorSeleccionado) {
+
+                var idDivisionCentroCosto = '';
+
+                //mostrar el total del presupuesto
+                {% for division in divisionCentrosCostos %}
+                    divisionCentroCosto = '{{ division.nombre }}';
+                    if (divisionCentroCosto === categoria) {
+                        idDivisionCentroCosto = {{ division.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    division: idDivisionCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardEnergiaEstimadoDivisionMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+                    var divisionMensual = obj['divisionMensual'];
+                    var divisionCantroCosto = obj['divisionCentroCosto'];
+
+                    totalEstimadoEnergiaDivisionMes = [];
+                    totalEstimadoKWDivisionMes = [];
+                    for (n = 0; n < divisionMensual.length; n++) {
+                        totalEstimadoEnergiaDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseFloat(divisionMensual[n]['totalEnergiaPresupuesto']),
+                            color: colorSeleccionado
+                        });
+                        totalEstimadoKWDivisionMes.push({
+                            name: divisionMensual[n]['mes'],
+                            y: parseFloat(divisionMensual[n]['totalKWDivisionMes']),
+                            color: colorSeleccionado
+                        });
+                    }
+
+                    nameCentro = [];
+                    totalEstimadoEnergiaCentroCosto = [];
+                    totalEstimadoKWCentroCosto = [];
+                    for (n = 0; n < divisionCantroCosto.length; n++) {
+                        nameCentro.push(divisionCantroCosto[n]['centro']);
+                        totalEstimadoEnergiaCentroCosto.push(parseFloat(divisionCantroCosto[n]['totalEnergiaPresupuesto']));
+                        totalEstimadoKWCentroCosto.push(parseInt(divisionCantroCosto[n]['totalKWCentroCostoMes']));
+                    }
+
+                    $('#nameDivisionEnergia').text(' DISTRIBUCIÓN DE LA ENERGÍA EN LOS CENTROS DE COSTOS DE LA ' + categoria);
+                    $('#nameDivisionEnergiaMensual').text(' DISTRIBUCIÓN MENSUAL DE LA ENERGÍA EN LA ' + categoria);
+                    $('#btnAtrasEnergiaInicio').addClass('hidden');
+                    $('#btnAtrasDivisionEnergia').removeClass('hidden');
+
+                    graficoTotalEstimadoEnergiaDivisionMes();
+                    graficoTotalEstimadoEnergiaCentroCosto();
+                });
+            }
+
+            //Grafico Plan de Energia Mensual por divisiones
+            function graficoTotalEstimadoEnergiaDivisionMes() {
+                var valorMax = totalEstimadoEnergiaDivisionMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoEnergiaDivisionMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionEnergiaMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        categories: meses,
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total de kW estimados',
+                            align: 'middle',
+                            useHTML: true
+                        },
+                        stackLabels: {
+                            enabled: true,
+                            style: {
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'percent',
+                            dataLabels: {
+                                enabled: true
+                            }
+                        },
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, '.', ',');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px"><b>{point.x}</b></span><br>',
+                        pointFormat: '<span style="color:{point.color}">{series.name}</span>: <b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Total de kW",
+                            "data": totalEstimadoKWDivisionMes
+                        },
+                        {
+                            "name": "Total de presupuesto",
+                            "data": totalEstimadoEnergiaDivisionMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Cargar el plan de energia de la division seleccionada
+            function cargarCentroCostoEnergia(categoria, presupuesto, colorSeleccionado) {
+
+                //mostrar el total del presupuesto
+                {% for centro in centrosCostos %}
+                    centroCosto = '{{ centro.nombre }}';
+                    if (centroCosto === categoria) {
+                        idCentroCosto = {{ centro.id }};
+                    }
+                {% endfor %}
+
+                //mostrar si existe el grafico mensual
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ app.session.get('idPlanEstimado') }},
+                    centro: idCentroCosto
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("dashboardEnergiaEstimadoCentroCostoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    mesesCentroCosto = [];
+                    totalEstimadoEnergiaCentroCostoMes = [];
+                    totalEstimadoKWCentroCostoMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        mesesCentroCosto.push(obj[n]['mes']);
+                        totalEstimadoEnergiaCentroCostoMes.push(parseFloat(obj[n]['totalEnergiaPresupuesto']));
+                        totalEstimadoKWCentroCostoMes.push(parseInt(obj[n]['totalKWCentroCostoMes']));
+                    }
+
+                    $('#nameDivisionEnergiaMensual').text(' DISTRIBUCIÓN MENSUAL DE LA ENERGÍA EN EL ' + categoria);
+                    $('#btnAtrasDivisionEnergia').removeClass('hidden');
+
+                    graficoTotalEstimadoEnergiaCentroCostoMes();
+
+                });
+            }
+
+            //Grafico 2do nivel Plan de Energia por centro de costos
+            function graficoTotalEstimadoEnergiaCentroCosto() {
+                var valorMax = totalEstimadoEnergiaCentroCosto.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoEnergiaCentroCosto.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionEnergia', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        categories: nameCentro,
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total de kW estimados',
+                            align: 'middle',
+                            useHTML: true
+                        },
+                        stackLabels: {
+                            enabled: true,
+                            style: {
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'percent',
+                            dataLabels: {
+                                enabled: true
+                            }
+                        },
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, '.', ',');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px"><b>{point.x}</b></span><br>',
+                        pointFormat: '<span style="color:{point.color}">{series.name}</span>: <b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Total de kW",
+                            "data": totalEstimadoKWCentroCosto,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarCentroCostoEnergia(oEvent.point.category, oEvent.point.y, oEvent.point.color);
+                                }
+                            }
+                        },
+                        {
+                            "name": "Total de presupuesto",
+                            "data": totalEstimadoEnergiaCentroCosto
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+             //Grafico mensual plan de energia del centro de costo seleccionado
+            function graficoTotalEstimadoEnergiaCentroCostoMes() {
+                var valorMax = totalEstimadoEnergiaCentroCostoMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoEnergiaCentroCostoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoDivisionEnergiaMensual', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: null
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        categories: mesesCentroCosto,
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total de kW estimados',
+                            align: 'middle',
+                            useHTML: true
+                        },
+                        stackLabels: {
+                            enabled: true,
+                            style: {
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'percent',
+                            dataLabels: {
+                                enabled: true
+                            }
+                        },
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, '.', ',');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px"><b>{point.x}</b></span><br>',
+                        pointFormat: '<span style="color:{point.color}">{series.name}</span>: <b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Total de kW",
+                            "data": totalEstimadoKWCentroCostoMes
+                        },
+                        {
+                            "name": "Total de presupuesto",
+                            "data": totalEstimadoEnergiaCentroCostoMes
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            //Fin del dashboard de Energia
+
+
+        });
+    </script>
+
+{% endblock %}

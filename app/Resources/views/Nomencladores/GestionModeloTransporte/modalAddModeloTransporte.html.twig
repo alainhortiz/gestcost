@@ -1,0 +1,58 @@
+<div id="modalAddModeloTransporte" data-backdrop="static" data-keyboard=false class="modal fade" tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog" style="width: 50vw">
+        <div class="modal-content portlet light estilosForm">
+            <div class="modal-header">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green-sunglo"></i>
+                    <span class="bold uppercase" style="font-size: 17px"> AGREGAR MODELO DE TRANSPORTE</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="scroller" style="height: 150px" data-always-visible="1" data-rail-visible1="1">
+                    <div class="row">
+                        <div class="portlet-body form">
+                            <form class="form-horizontal" role="form">
+                                <div class="form-body">
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Tipo</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px" class="fa fa-exclamation tooltips hidden  addTipoTransporte" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <select class="form-control input-group-sm" id="addTipoTransporte" name="addTipoTransporte">
+                                                    <option value="0">Seleccione un tipo de transporte </option>
+                                                    {% for tipo in  tiposTransportes %}
+                                                        <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Nombre</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-comment"></i>
+												</span>
+                                                <i style="color: #dc141b" class="fa fa-exclamation tooltips hidden addNombre" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <input type="text" class="form-control" placeholder="Teclee el nombre" id="addNombre" name="addNombre">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn default cerrar">Cerrar</button>
+            <button type="button" class="btn btn-secondary" id="addGuardar">Guardar</button>
+        </div>
+    </div>
+</div>

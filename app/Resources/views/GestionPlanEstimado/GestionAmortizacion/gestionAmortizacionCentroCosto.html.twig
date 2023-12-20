@@ -1,0 +1,1282 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            <div class="dashboard-stat  red-flamingo"  id="nameMontoEstimadoMostrar">
+                <div class="visual">
+                    <i class="fa fa-bank"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                    </div>
+                    <div class="desc">
+                        <strong>TOTAL ESTIMADO</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+            <div class="dashboard-stat red-flamingo"
+                 id="nameMontoRestanteMostrar">
+                <div class="visual">
+                    <i class="fa fa-bank"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+
+                    </div>
+                    <div class="desc">
+                        <strong>ESTIMADO RESTANTE</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN DE AMORTIZACIÓN POR CENTRO DE COSTO</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                </div>
+                <div class="tools">
+                    <a href="{{ path('exportarPlanEstimadoAmortizacion') }}"
+                       class="fa fa-file-excel-o fa-2x font-green"
+                       data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                    <a href="#" class="reload" id="btnAtrasCentroCosto" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalCentroCosto" data-toggle="tab">
+                            PRESUPUESTO ESTIMADO POR CENTROS DE COSTOS
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalCentroCosto">
+                        <form role="form" id="formTotalCentroCosto">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                        <div class="portlet">
+                                            <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input">
+                                                    <select class="form-control" id="divisionCentroCosto"
+                                                            name="divisionCentroCosto">
+                                                        <option value="0">Seleccione ...</option>
+                                                        {% for division in  divisionCentrosCostos %}
+                                                            <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <label for="divisionCentroCosto">DIVISIÓN</label>
+                                                </div>
+                                            </div>
+                                            <div id="gestionMensual" >
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="mesCentroCosto"
+                                                                name="mesCentroCosto">
+                                                            <option id="inicioMes" value="0">Seleccione ...</option>
+                                                        </select>
+                                                        <label for="mesCentroCosto">MES</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="centroCosto"
+                                                                name="centroCosto">
+                                                            <option id="inicioCentroCosto" value="0">Seleccione ...
+                                                            </option>
+                                                        </select>
+                                                        <label for="centroCosto">CENTRO DE COSTO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalPresupuestoCentroCosto"
+                                                               name="totalPresupuestoCentroCosto" disabled>
+                                                        <label for="totalPresupuestoCentroCosto">TOTAL DE
+                                                            PRESUPUESTO</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarCentroCostoAmortizacion"
+                                                                disabled>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary ModificarCentroCostoAmortizacion"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarCentroCostoAmortizacion"
+                                                                disabled>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9 col-md-9 col-sm-9" style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet chart" style="margin-top: 20px; display: none"
+                                             id="progresoDistribucion">
+                                            <span class="caption-subject bold uppercase"
+                                                  style="font-size: 19px;color: #005850">
+                                                ESTADO DE LA DISTRIBUCIÓN MENSUAL
+                                            </span>
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">ENERO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="eneroStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="eneroValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">FEBRERO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="febreroStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="febreroValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">MARZO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="marzoStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="marzoValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">ABRIL</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="abrilStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="abrilValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                #}
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">MAYO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="mayoStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="mayoValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">JUNIO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="junioStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="junioValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">JULIO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="julioStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="julioValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">AGOSTO</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="agostoStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="agostoValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">SEPTIEMBRE</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="septiembreStatus"
+                                                             class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="septiembreValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">OCTUBRE</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="octubreStatus" class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="octubreValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">NOVIEMBRE</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="noviembreStatus"
+                                                             class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="noviembreValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3" style="margin-top: 10px">
+                                                    <label for="totalVentaComercial">DICIEMBRE</label>
+                                                    <div class="progress progress-striped active">
+                                                        <div id="diciembreStatus"
+                                                             class="progress-bar progress-bar-danger"
+                                                             role="progressbar"
+                                                             aria-valuenow="40"
+                                                             aria-valuemin="0" aria-valuemax="100"
+                                                             style="width: 1%">
+                                                            <span class="sr-only-focusable" id="diciembreValue">% DISTRIBUCIÓN MENSUAL  </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="portlet chart" style="margin-top: 20px; display:none"
+                                             id="graficoAmortizacion"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (app.session.get('aprobarEstimadoAmortizacionDivision')) and is_granted("ROLE_DISTRIBUIDOR_CENTRO") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_AMORTIZACION' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            //Declaracion de variables
+            var totalEstimadoAmortizacionCentroCostoMes = [];
+            var meses = [];
+            var montoRestante = 0;
+            var montoAnterior = 0;
+            var presupuesto = 0;
+            var totalAmortizacionDivision = 0;
+            var totalAmortizacionDivisionMes = 0;
+            var totalAmortizacionCentroCostoMes = 0;
+            var n;
+            var eneroDivision = 0;
+            var febreroDivision = 0;
+            var marzoDivision = 0;
+            var abrilDivision = 0;
+            var mayoDivision = 0;
+            var junioDivision = 0;
+            var julioDivision = 0;
+            var agostoDivision = 0;
+            var septiembreDivision = 0;
+            var octubreDivision = 0;
+            var noviembreDivision = 0;
+            var diciembreDivision = 0;
+            var eneroCentroCosto = 0;
+            var febreroCentroCosto = 0;
+            var marzoCentroCosto = 0;
+            var abrilCentroCosto = 0;
+            var mayoCentroCosto = 0;
+            var junioCentroCosto = 0;
+            var julioCentroCosto = 0;
+            var agostoCentroCosto = 0;
+            var septiembreCentroCosto = 0;
+            var octubreCentroCosto = 0;
+            var noviembreCentroCosto = 0;
+            var diciembreCentroCosto = 0;
+            var estadoEnero = 0;
+            var estadoFebrero = 0;
+            var estadoMarzo = 0;
+            var estadoAbril = 0;
+            var estadoMayo = 0;
+            var estadoJunio = 0;
+            var estadoJulio = 0;
+            var estadoAgosto = 0;
+            var estadoSeptiembre = 0;
+            var estadoOctubre = 0;
+            var estadoNoviembre = 0;
+            var estadoDiciembre = 0;
+            var totalEstadoMeses = 0;
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+
+            });
+
+            $('#btnAtrasCentroCosto').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoPlanAmortizacionesCentroCosto') }}";
+            });
+
+            $('#divisionCentroCosto').on('change', function () {
+                var html = '';
+                var divisionCentroCosto = $('#divisionCentroCosto').val();
+                if (divisionCentroCosto === '0') {
+                    $("#centroCosto").prop('disabled', true);
+                    $("#mesCentroCosto").prop('disabled', true);
+                    $("option").remove('.cambioCentroCosto');
+                    $("option").remove('.cambioMes');
+                    $('#nameMontoEstimado').text(0);
+                    $('#nameMontoRestante').text(0);
+                    $('#gestionMensual').css("display", "none");
+                    $('#progresoDistribucion').css("display", "none");
+                    $('#graficoAmortizacion').css("display", "none");
+                    $(".AprobarCentroCostoAmortizacion").prop('disabled', true);
+                    $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                    $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                    $('#nameMontoRestanteMostrar').addClass('grey');
+                    $('#nameMontoEstimadoMostrar').removeClass('green-haze');
+                    $('#nameMontoEstimadoMostrar').removeClass('red-flamingo');
+                    $('#nameMontoEstimadoMostrar').addClass('grey');
+                } else {
+                    $("option").remove('.cambioCentroCosto');
+                    $("#inicioCentroCosto").after('<option class="cambioCentroCosto"></option>');
+
+                    {% for centro in  centrosCostos %}
+                    var idDivisionCentroCosto = '{{ centro.divisionCentroCosto.id }}';
+
+                    if (idDivisionCentroCosto === divisionCentroCosto) {
+                        var id = {{ centro.id }};
+                        var name = '{{ centro.nombre }}';
+                        html += '<option class="cambioCentroCosto" value="' + id + '">' + name + '</option>';
+                    }
+                    {% endfor %}
+                    $(".cambioCentroCosto").replaceWith(html);
+                    cargarMeses();
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalAmortizacionDivision, 0, '.', ','));
+
+                    iniciarMesesEstados();
+
+                    //armar el estado de distribucion mensual
+                    {% if graficosAmortizacionEstimadoCentroCostoMensual %}
+                    {% for mes in  graficosAmortizacionEstimadoCentroCostoMensual %}
+                    var idDivisionCentroCosto = '{{ mes['division'] }}';
+
+                    if (idDivisionCentroCosto === divisionCentroCosto) {
+                        totalAmortizacionCentroCostoMes = parseInt({{ mes['totalAmortizacion'] }});
+                        calcularMesesTotalCentroCosto('{{ mes['mes'] }}');
+                    }
+                    {% endfor %}
+                    cargarMesesEstadoCentroCosto();
+                    if (totalEstadoMeses === 1200) {
+                        $(".AprobarCentroCostoAmortizacion").prop('disabled', false);
+                    } else {
+                        $(".AprobarCentroCostoAmortizacion").prop('disabled', true);
+                    }
+                    {% else %}
+                    totalAmortizacionCentroCostoMes = 0;
+                    totalEstadoMeses = 0;
+                    {% endif %}
+                    $('#graficoAmortizacion').css("display", "none");
+                    $('#progresoDistribucion').css("display", "block");
+                }
+                $("#totalPresupuestoCentroCosto").val('');
+                $("#totalPresupuestoCentroCosto").prop('disabled', true);
+                $(".AsignarCentroCostoAmortizacion").prop('disabled', true);
+                $(".ModificarCentroCostoAmortizacion").prop('disabled', true);
+                if (comprobarAprobacion()) {
+                    $('#nameMontoEstimadoMostrar').removeClass('grey');
+                    $('#nameMontoEstimadoMostrar').removeClass('red-flamingo');
+                    $('#nameMontoRestanteMostrar').removeClass('grey');
+                    $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                    $('#nameMontoEstimadoMostrar').addClass('green-haze');
+                    $('#nameMontoRestanteMostrar').addClass('green-haze');
+                    $('#gestionMensual').css("display", "none");
+                } else {
+                    $('#nameMontoEstimadoMostrar').removeClass('green-haze');
+                    $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                    if (divisionCentroCosto === '0') {
+                        $('#nameMontoEstimadoMostrar').addClass('grey');
+                        $('#nameMontoRestanteMostrar').addClass('grey');
+                    } else {
+                        $('#nameMontoEstimadoMostrar').addClass('red-flamingo');
+                        $('#nameMontoRestanteMostrar').addClass('red-flamingo');
+                    }
+                    $('#gestionMensual').css("display", "block");
+                }
+            });
+
+            function comprobarAprobacion() {
+                var estado = false;
+                {% if divisionesAprobadas %}
+                var division = $("#divisionCentroCosto").val();
+                {% for aprobacion in divisionesAprobadas %}
+                var idDivision = '{{ aprobacion['division'] }}';
+                var aprobar = '{{ aprobacion['aprobado'] }}';
+                if (division === idDivision) {
+                    estado = aprobar;
+                }
+                {% endfor %}
+                {% endif %}
+                return estado;
+            }
+
+            function iniciarMesesEstados() {
+                eneroCentroCosto = 0;
+                febreroCentroCosto = 0;
+                marzoCentroCosto = 0;
+                abrilCentroCosto = 0;
+                mayoCentroCosto = 0;
+                junioCentroCosto = 0;
+                julioCentroCosto = 0;
+                agostoCentroCosto = 0;
+                septiembreCentroCosto = 0;
+                octubreCentroCosto = 0;
+                noviembreCentroCosto = 0;
+                diciembreCentroCosto = 0;
+                $('#eneroStatus').css("width", '1%');
+                $('#eneroValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#febreroStatus').css("width", '1%');
+                $('#febreroValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#marzoStatus').css("width", '1%');
+                $('#marzoValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#abrilStatus').css("width", '1%');
+                $('#abrilValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#mayoStatus').css("width", '1%');
+                $('#mayoValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#junioStatus').css("width", '1%');
+                $('#junioValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#julioStatus').css("width", '1%');
+                $('#julioValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#agostoStatus').css("width", '1%');
+                $('#agostoValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#septiembreStatus').css("width", '1%');
+                $('#septiembreValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#octubreStatus').css("width", '1%');
+                $('#octubreValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#noviembreStatus').css("width", '1%');
+                $('#noviembreValue').text('% DISTRIBUCIÓN MENSUAL');
+                $('#diciembreStatus').css("width", '1%');
+                $('#diciembreValue').text('% DISTRIBUCIÓN MENSUAL');
+            }
+
+            function calcularMesesTotalCentroCosto(mes) {
+                switch (mes) {
+                    case 'enero':
+                        eneroCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'febrero':
+                        febreroCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'marzo':
+                        marzoCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'abril':
+                        abrilCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'mayo':
+                        mayoCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'junio':
+                        junioCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'julio':
+                        julioCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'agosto':
+                        agostoCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'septiembre':
+                        septiembreCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'octubre':
+                        octubreCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'noviembre':
+                        noviembreCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                    case 'diciembre':
+                        diciembreCentroCosto += totalAmortizacionCentroCostoMes;
+                        break;
+                }
+            }
+
+            function cargarMesesEstadoCentroCosto() {
+                totalEstadoMeses = 0;
+                estadoEnero = (eneroCentroCosto / eneroDivision) * 100;
+                if (estadoEnero === 100) {
+                    $('#eneroStatus').removeClass('progress-bar-danger');
+                    $('#eneroStatus').addClass('progress-bar-success');
+                } else {
+                    $('#eneroStatus').removeClass('progress-bar-success');
+                    $('#eneroStatus').addClass('progress-bar-danger');
+                }
+                $('#eneroStatus').css("width", parseInt(estadoEnero) + '%');
+                $('#eneroValue').text(parseInt(estadoEnero) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoFebrero = (febreroCentroCosto / febreroDivision) * 100;
+                if (estadoFebrero === 100) {
+                    $('#febreroStatus').removeClass('progress-bar-danger');
+                    $('#febreroStatus').addClass('progress-bar-success');
+                } else {
+                    $('#febreroStatus').removeClass('progress-bar-success');
+                    $('#febreroStatus').addClass('progress-bar-danger');
+                }
+                $('#febreroStatus').css("width", parseInt(estadoFebrero) + '%');
+                $('#febreroValue').text(parseInt(estadoFebrero) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoMarzo = (marzoCentroCosto / marzoDivision) * 100;
+                if (estadoMarzo === 100) {
+                    $('#marzoStatus').removeClass('progress-bar-danger');
+                    $('#marzoStatus').addClass('progress-bar-success');
+                } else {
+                    $('#marzoStatus').removeClass('progress-bar-success');
+                    $('#marzoStatus').addClass('progress-bar-danger');
+                }
+                $('#marzoStatus').css("width", parseInt(estadoMarzo) + '%');
+                $('#marzoValue').text(parseInt(estadoMarzo) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoAbril = (abrilCentroCosto / abrilDivision) * 100;
+                if (estadoAbril === 100) {
+                    $('#abrilStatus').removeClass('progress-bar-danger');
+                    $('#abrilStatus').addClass('progress-bar-success');
+                } else {
+                    $('#abrilStatus').removeClass('progress-bar-success');
+                    $('#abrilStatus').addClass('progress-bar-danger');
+                }
+                $('#abrilStatus').css("width", parseInt(estadoAbril) + '%');
+                $('#abrilValue').text(parseInt(estadoAbril) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoMayo = (mayoCentroCosto / mayoDivision) * 100;
+                if (estadoMayo === 100) {
+                    $('#mayoStatus').removeClass('progress-bar-danger');
+                    $('#mayoStatus').addClass('progress-bar-success');
+                } else {
+                    $('#mayoStatus').removeClass('progress-bar-success');
+                    $('#mayoStatus').addClass('progress-bar-danger');
+                }
+                $('#mayoStatus').css("width", parseInt(estadoMayo) + '%');
+                $('#mayoValue').text(parseInt(estadoMayo) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoJunio = (junioCentroCosto / junioDivision) * 100;
+                if (estadoJunio === 100) {
+                    $('#junioStatus').removeClass('progress-bar-danger');
+                    $('#junioStatus').addClass('progress-bar-success');
+                } else {
+                    $('#junioStatus').removeClass('progress-bar-success');
+                    $('#junioStatus').addClass('progress-bar-danger');
+                }
+                $('#junioStatus').css("width", parseInt(estadoJunio) + '%');
+                $('#junioValue').text(parseInt(estadoJunio) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoJulio = (julioCentroCosto / julioDivision) * 100;
+                if (estadoJulio === 100) {
+                    $('#julioStatus').removeClass('progress-bar-danger');
+                    $('#julioStatus').addClass('progress-bar-success');
+                } else {
+                    $('#julioStatus').removeClass('progress-bar-success');
+                    $('#julioStatus').addClass('progress-bar-danger');
+                }
+                $('#julioStatus').css("width", parseInt(estadoJulio) + '%');
+                $('#julioValue').text(parseInt(estadoJulio) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoAgosto = (agostoCentroCosto / agostoDivision) * 100;
+                if (estadoAgosto === 100) {
+                    $('#agostoStatus').removeClass('progress-bar-danger');
+                    $('#agostoStatus').addClass('progress-bar-success');
+                } else {
+                    $('#agostoStatus').removeClass('progress-bar-success');
+                    $('#agostoStatus').addClass('progress-bar-danger');
+                }
+                $('#agostoStatus').css("width", parseInt(estadoAgosto) + '%');
+                $('#agostoValue').text(parseInt(estadoAgosto) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoSeptiembre = (septiembreCentroCosto / septiembreDivision) * 100;
+                if (estadoSeptiembre === 100) {
+                    $('#septiembreStatus').removeClass('progress-bar-danger');
+                    $('#septiembreStatus').addClass('progress-bar-success');
+                } else {
+                    $('#septiembreStatus').removeClass('progress-bar-success');
+                    $('#septiembreStatus').addClass('progress-bar-danger');
+                }
+                $('#septiembreStatus').css("width", parseInt(estadoSeptiembre) + '%');
+                $('#septiembreValue').text(parseInt(estadoSeptiembre) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoOctubre = (octubreCentroCosto / octubreDivision) * 100;
+                if (estadoOctubre === 100) {
+                    $('#octubreStatus').removeClass('progress-bar-danger');
+                    $('#octubreStatus').addClass('progress-bar-success');
+                } else {
+                    $('#octubreStatus').removeClass('progress-bar-success');
+                    $('#octubreStatus').addClass('progress-bar-danger');
+                }
+                $('#octubreStatus').css("width", parseInt(estadoOctubre) + '%');
+                $('#octubreValue').text(parseInt(estadoOctubre) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoNoviembre = (noviembreCentroCosto / noviembreDivision) * 100;
+                if (estadoNoviembre === 100) {
+                    $('#noviembreStatus').removeClass('progress-bar-danger');
+                    $('#noviembreStatus').addClass('progress-bar-success');
+                } else {
+                    $('#noviembreStatus').removeClass('progress-bar-success');
+                    $('#noviembreStatus').addClass('progress-bar-danger');
+                }
+                $('#noviembreStatus').css("width", parseInt(estadoNoviembre) + '%');
+                $('#noviembreValue').text(parseInt(estadoNoviembre) + '% DISTRIBUCIÓN MENSUAL');
+
+                estadoDiciembre = (diciembreCentroCosto / diciembreDivision) * 100;
+                if (estadoDiciembre === 100) {
+                    $('#diciembreStatus').removeClass('progress-bar-danger');
+                    $('#diciembreStatus').addClass('progress-bar-success');
+                } else {
+                    $('#diciembreStatus').removeClass('progress-bar-success');
+                    $('#diciembreStatus').addClass('progress-bar-danger');
+                }
+                $('#diciembreStatus').css("width", parseInt(estadoDiciembre) + '%');
+                $('#diciembreValue').text(parseInt(estadoDiciembre) + '% DISTRIBUCIÓN MENSUAL');
+
+                totalEstadoMeses = estadoEnero + estadoFebrero + estadoMarzo + estadoAbril + estadoMayo + estadoJunio + estadoJulio + estadoAgosto + estadoSeptiembre + estadoOctubre + estadoNoviembre + estadoDiciembre;
+            }
+
+            function cargarMesesEstadoDivision(mes, tope) {
+                switch (mes) {
+                    case 'enero':
+                        eneroDivision = 0;
+                        eneroDivision = tope;
+                        break;
+                    case 'febrero':
+                        febreroDivision = 0;
+                        febreroDivision = tope;
+                        break;
+                    case 'marzo':
+                        marzoDivision = 0;
+                        marzoDivision = tope;
+                        break;
+                    case 'abril':
+                        abrilDivision = 0;
+                        abrilDivision = tope;
+                        break;
+                    case 'mayo':
+                        mayoDivision = 0;
+                        mayoDivision = tope;
+                        break;
+                    case 'junio':
+                        junioDivision = 0;
+                        junioDivision = tope;
+                        break;
+                    case 'julio':
+                        julioDivision = 0;
+                        julioDivision = tope;
+                        break;
+                    case 'agosto':
+                        agostoDivision = 0;
+                        agostoDivision = tope;
+                        break;
+                    case 'septiembre':
+                        septiembreDivision = 0;
+                        septiembreDivision = tope;
+                        break;
+                    case 'octubre':
+                        octubreDivision = 0;
+                        octubreDivision = tope;
+                        break;
+                    case 'noviembre':
+                        noviembreDivision = 0;
+                        noviembreDivision = tope;
+                        break;
+                    case 'diciembre':
+                        diciembreDivision = 0;
+                        diciembreDivision = tope;
+                        break;
+                }
+            }
+
+            function cargarMeses() {
+                var html = '';
+                var divisionCentroCosto = $('#divisionCentroCosto').val();
+                $("option").remove('.cambioMes');
+                $("#inicioMes").after('<option class="cambioMes"></option>');
+                totalAmortizacionDivision = 0;
+                {% for mes in  graficosAmortizacionEstimadoDivisionMensual %}
+                var idDivisionCentroCosto = '{{ mes['division'] }}';
+
+                if (idDivisionCentroCosto === divisionCentroCosto) {
+                    totalAmortizacionDivision += parseInt({{ mes['totalAmortizacion'] }});
+                    var id = '{{ mes['mes'] }}';
+                    var name = '{{ mes['mes'] }}';
+                    html += '<option class="cambioMes" value="' + id + '">' + name + '</option>';
+
+                    //Cargar los kw estimados de la divivion por meses
+                    cargarMesesEstadoDivision('{{ mes['mes'] }}', parseInt({{ mes['totalAmortizacion'] }}));
+                }
+                {% endfor %}
+                $(".cambioMes").replaceWith(html);
+                $("#mesCentroCosto").prop('disabled', false);
+            }
+
+            $('#mesCentroCosto').on('change', function () {
+                var divisionCentroCosto = $('#divisionCentroCosto').val();
+                var mesSeleccionado = $('#mesCentroCosto').val();
+                if (mesSeleccionado === '0') {
+                    totalAmortizacionDivisionMes = 0;
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalAmortizacionDivision, 0, '.', ','));
+                    $('#centroCosto').val(0);
+                    $("#centroCosto").prop('disabled', true);
+                    $("#totalPresupuestoCentroCosto").val('');
+                    $("#totalPresupuestoCentroCosto").prop('disabled', true);
+                    $('#graficoAmortizacion').css("display", "none");
+                    $('#progresoDistribucion').css("display", "block");
+                    $('.ModificarCentroCostoAmortizacion').prop("disabled", true);
+                } else {
+                    totalAmortizacionDivisionMes = 0;
+                    {% for mes in  graficosAmortizacionEstimadoDivisionMensual %}
+                    var idDivisionCentroCosto = '{{ mes['division'] }}';
+                    var mes = '{{ mes['mes'] }}';
+
+                    if (idDivisionCentroCosto === divisionCentroCosto && mes === mesSeleccionado) {
+                        totalAmortizacionDivisionMes = parseInt({{ mes['totalAmortizacion'] }});
+                    }
+                    {% endfor %}
+                    totalAmortizacionCentroCostoMes = 0;
+                    {% if graficosAmortizacionEstimadoCentroCostoMensual %}
+                    {% for mes in  graficosAmortizacionEstimadoCentroCostoMensual %}
+                    var idDivisionCentroCosto = '{{ mes['division'] }}';
+                    var mes = '{{ mes['mes'] }}';
+
+                    if (idDivisionCentroCosto === divisionCentroCosto && mes === mesSeleccionado) {
+                        totalAmortizacionCentroCostoMes += parseInt({{ mes['totalAmortizacion'] }});
+                    }
+                    {% endfor %}
+                    {% else %}
+                    totalAmortizacionCentroCostoMes = 0;
+                    {% endif %}
+
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalAmortizacionDivisionMes, 0, '.', ','));
+                    $('#nameMontoRestante').text(Highcharts.numberFormat(totalAmortizacionDivisionMes - totalAmortizacionCentroCostoMes, 0, '.', ','));
+                    var valor = totalAmortizacionDivisionMes - totalAmortizacionCentroCostoMes;
+                    if (valor === 0) {
+                        $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                        $('#nameMontoRestanteMostrar').addClass('green-haze');
+                    } else {
+                        $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                        $('#nameMontoRestanteMostrar').addClass('red-flamingo');
+                    }
+                    $("#centroCosto").val(0);
+                    $("#centroCosto").prop('disabled', false);
+                    $("#totalPresupuestoCentroCosto").val('');
+                    $("#totalPresupuestoCentroCosto").prop('disabled', true);
+                    $('#graficoAmortizacion').css("display", "none");
+                    $('#progresoDistribucion').css("display", "block");
+                }
+            });
+
+            $('#centroCosto').on('change', function () {
+                var centroCosto = $('#centroCosto').val();
+                if (centroCosto === '0') {
+                    $("#totalPresupuestoCentroCosto").val('');
+                    $("#totalPresupuestoCentroCosto").prop('disabled', true);
+                    $('#graficoAmortizacion').css("display", "none");
+                    $('#progresoDistribucion').css("display", "block");
+                } else {
+                    $("#totalPresupuestoCentroCosto").val('');
+                    if (totalEstadoMeses !== 1200) {
+                        $("#totalPresupuestoCentroCosto").prop('disabled', false);
+                    }
+                    //Grafico del centro de costo seleccionado por meses
+                    cargarGraficoCentroCostoMeses();
+                    /*}*/
+                }
+            });
+
+            function cargarGraficoCentroCostoMeses() {
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPlanEstimado: {{ planEstimado }},
+                    centroCosto: $('#centroCosto').val()
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: '{{ path("graficoAmortizacionEstimadoCentroCostoMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    var obj = JSON.parse(data);
+
+                    meses = [];
+                    totalEstimadoAmortizacionCentroCostoMes = [];
+                    for (n = 0; n < obj.length; n++) {
+                        totalEstimadoAmortizacionCentroCostoMes.push({
+                            name: obj[n]['mes'],
+                            y: parseFloat(obj[n]['totalAmortizacion'])
+                        });
+                    }
+
+                    if (totalEstimadoAmortizacionCentroCostoMes.length === 0) {
+                        $('#graficoAmortizacion').css("display", "none");
+                        $('#progresoDistribucion').css("display", "block");
+                    } else {
+                        $('#graficoAmortizacion').css("display", "block");
+                        $('#progresoDistribucion').css("display", "none");
+                        graficoTotalEstimadoAmortizacionCentroCostoMes();
+                    }
+
+                });
+            }
+
+            $('#totalPresupuestoCentroCosto').on("keyup", function () {
+                if ($('.ModificarCentroCostoAmortizacion').prop("disabled")) {
+                    if ($(this).val().trim() != '') {
+                        $('.AsignarCentroCostoAmortizacion').prop("disabled", false);
+
+                    } else {
+                        $('.AsignarCentroCostoAmortizacion').prop("disabled", true);
+                    }
+                }
+            });
+
+            //Cargar el presupuesto estimado del centro de costo seleccionada
+            function cargarCentroCosto(categoria, presupuesto) {
+                var centroCostoSeleccionado = parseInt($('#centroCosto').val());
+                var mesSeleccionado = categoria;
+                var centroCostoActual = '';
+                var nameCentroCosto = '';
+                {% for centro in centrosCostos %}
+                centroCostoActual = parseInt({{ centro.id }});
+                if (centroCostoActual === centroCostoSeleccionado) {
+                    nameCentroCosto = '{{ centro.nombre }}';
+                }
+                {% endfor %}
+
+                {% for graficoTotal in graficosAmortizacionEstimadoCentroCostoMensual %}
+                centroCostoActual = '{{ graficoTotal['centro'] }}';
+                if (centroCostoActual === nameCentroCosto) {
+                    $('#totalPresupuestoCentroCosto').val(presupuesto);
+                    $('#mesCentroCosto').val(mesSeleccionado);
+                    montoAnterior = parseFloat(presupuesto);
+                    $('.AsignarCentroCostoAmortizacion').prop("disabled", true);
+                    $('.AprobarCentroCostoAmortizacion').prop("disabled", true);
+                    $('.ModificarCentroCostoAmortizacion').prop("disabled", false);
+                }
+                {% endfor %}
+            }
+
+            $('.AsignarCentroCostoAmortizacion').on('click', function () {
+
+                if ($("#divisionCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#centroCosto").val() === '0') {
+                    alertify.alert('<strong>El centro de costo es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#mesCentroCosto").val() === '0') {
+                    alertify.alert('<strong>El mes es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoCentroCosto").val() === '') {
+                    alertify.alert('<strong>El presupuesto estimado es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = parseFloat(totalAmortizacionDivisionMes - totalAmortizacionCentroCostoMes);
+
+                if (parseFloat($("#totalPresupuestoCentroCosto").val()) > montoRestante) {
+                    alertify.alert('<strong>El presupuesto no puede ser mayor que el monto restante.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoCentroCosto").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    centroCosto: $("#centroCosto").val(),
+                    division: $("#divisionCentroCosto").val(),
+                    mes: $("#mesCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertTotalEstimadoCentroCostoAmortizacion") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto mensual estimado para este centro de costo ha asignado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanAmortizacionesCentroCosto') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoPlanAmortizacionesCentroCosto') }}";
+                            });
+                    }
+                });
+
+            });
+
+            $('.ModificarCentroCostoAmortizacion').on('click', function () {
+
+                if ($("#divisionCentroCosto").val() === '0') {
+                    alertify.alert('<strong>La división es obligatoria, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#centroCosto").val() === '0') {
+                    alertify.alert('<strong>El centro de costo es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#mesCentroCosto").val() === '0') {
+                    alertify.alert('<strong>El mes es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalPresupuestoCentroCosto").val() === '') {
+                    alertify.alert('<strong>El presupuesto estimado es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestante = parseFloat(totalAmortizacionDivisionMes - totalAmortizacionCentroCostoMes);
+
+                if (montoRestante === 0) {
+                    if (parseInt($("#totalPresupuestoCentroCosto").val()) > montoAnterior) {
+                        alertify.alert('<strong>El presupuesto estimado no puede ser mayor que el monto disponible.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (parseInt($("#totalPresupuestoCentroCosto").val()) > (montoAnterior + montoRestante)) {
+                        alertify.alert('<strong>El presupuesto no puede ser mayor que el monto restante.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    presupuesto: $("#totalPresupuestoCentroCosto").val(),
+                    idPlanEstimado: {{ planEstimado }},
+                    centroCosto: $("#centroCosto").val(),
+                    division: $("#divisionCentroCosto").val(),
+                    mes: $("#mesCentroCosto").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateTotalEstimadoCentroCostoAmortizacion") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El presupuesto estimado de este centro de costo ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#centroCosto').prop("disabled", false);
+                                if (montoRestante !== 0) {
+                                    $('.AsignarCentroCostoDepreciacion').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoPlanAmortizacionesCentroCosto') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.AprobarCentroCostoAmortizacion').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar el presupuesto mensual estimado para los centros de costos de esta división</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ planEstimado }},
+                        division: $("#divisionCentroCosto").val()
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarPresupuestoEstimadoCentroCostoAmortizacion") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó el presupuesto mensual estimado para los centros de costos</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanAmortizacionesCentroCosto') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoPlanAmortizacionesCentroCosto') }}";
+                                });
+                        }
+                    });
+                });
+
+            });
+
+            //fin asignacion del presupuesto total por centro de costo
+
+            //funciones distribución del presupuesto mensual por centro de costo
+
+            //Grafico mensual Total presupuesto Estimado por Centros de Costos
+            function graficoTotalEstimadoAmortizacionCentroCostoMes() {
+                var valorMax = totalEstimadoAmortizacionCentroCostoMes.length - 1;
+                var valorScrollbar = false;
+                if (totalEstimadoAmortizacionCentroCostoMes.length > 6) {
+                    valorMax = 5;
+                    valorScrollbar = true;
+                }
+                Highcharts.chart('graficoAmortizacion', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'DISTRIBUCIÓN POR MESES'
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    scrollbar: {
+                        enabled: valorScrollbar,
+                        liveRedraw: true,
+                        step: 1
+                    },
+                    xAxis: {
+                        type: 'category',
+                        min: 0,
+                        max: valorMax,
+                        useHTML: true
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Presupuesto Estimado',
+                            useHTML: true
+                        }
+
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        series: {
+                            borderWidth: 0,
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            getExtremesFromAll: true,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return Highcharts.numberFormat(this.y, 0, ',', '.');
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                        pointFormat: '<span style="color:{point.color}">{point.name}</span>' + ' presupuesto asignado ' + '<b>{point.y:,.0f}</b>'
+                    },
+
+                    "series": [
+                        {
+                            "name": "Categorías",
+                            "colorByPoint": true,
+                            "data": totalEstimadoAmortizacionCentroCostoMes,
+                            events: {
+                                click: function (oEvent) {
+                                    cargarCentroCosto(oEvent.point.name, oEvent.point.y);
+                                }
+                            }
+                        }
+                    ],
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 800
+                            },
+                            chartOptions: {
+                                scrollbar: {
+                                    enabled: true
+                                },
+                                xAxis: {
+                                    min: 0,
+                                    max: 1,
+                                    useHTML: true
+                                }
+                            }
+                        }]
+                    }
+                });
+            }
+
+            // fin funciones distribución del presupuesto mensual por Centros de Costos
+
+        });
+    </script>
+{% endblock %}

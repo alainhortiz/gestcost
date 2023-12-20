@@ -1,0 +1,866 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/plugins/bootstrap-toastr/toastr.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">MODIFICAR REAL - {{ mes|upper }}</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase"
+                          id="year">{{ planReal.year }}</span>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form role="form">
+                    <div class="form-body">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div class="panel-group accordion" id="accordion3">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="accordion-toggle accordion-toggle-styled bold uppercase"
+                                                   data-toggle="collapse" data-parent="#accordion3"
+                                                   href="#collapse_3_1" id="nameCentro">
+                                                    CENTRO DE COSTO - {{ realMes.centroCosto.nombre }}
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse_3_1" class="panel-collapse in">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b; margin-right: 10px"
+                                                               class="fa fa-exclamation tooltips hidden  categoriaCentroCosto"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <select class="form-control" id="categoriaCentroCosto"
+                                                                    name="categoriaCentroCosto" disabled>
+                                                                <option value="{{ realMes.centroCosto.divisionCentroCosto.id }}">{{ realMes.centroCosto.divisionCentroCosto.nombre }}</option>
+                                                            </select>
+                                                            <label for="categoriaCentroCosto">DIVISIÓN</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b; margin-right: 10px"
+                                                               class="fa fa-exclamation tooltips hidden centroCosto"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <select class="form-control" id="centroCosto"
+                                                                    name="centroCosto" disabled>
+                                                                <option value="{{ realMes.centroCosto.id }}">{{ realMes.centroCosto.nombre }}</option>
+                                                            </select>
+                                                            <label for="centroCosto">CENTRO DE COSTO</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="accordion-toggle accordion-toggle-styled collapsed"
+                                                   data-toggle="collapse" data-parent="#accordion3"
+                                                   href="#collapse_3_2">
+                                                    <strong>INGRESOS</strong>
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse_3_2" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="ventaTotal"
+                                                                   name="ventaTotal" value="{{ realMes.venta }}">
+                                                            <label for="ventaTotal">Ventas Totales</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="otroIngreso"
+                                                                   name="otroIngreso" value="{{ realMes.otroIngreso }}">
+                                                            <label for="otroIngreso">Otros Ingresos</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="accordion-toggle accordion-toggle-styled collapsed"
+                                                   data-toggle="collapse" data-parent="#accordion3"
+                                                   href="#collapse_3_3">
+                                                    <strong>RECURSOS HUMANOS</strong>
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse_3_3" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="salario"
+                                                                   name="salario" value="{{ realMes.Salario }}">
+                                                            <label for="salario">Salario</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="vacaciones"
+                                                                   name="vacaciones" value="{{ realMes.Vacaciones }}">
+                                                            <label for="vacaciones">Vacaciones</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="seguridadSocial"
+                                                                   name="seguridadSocial"
+                                                                   value="{{ realMes.seguridadSocial }}">
+                                                            <label for="seguridadSocial">Seguridad Social</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="accordion-toggle accordion-toggle-styled collapsed"
+                                                   data-toggle="collapse" data-parent="#accordion3"
+                                                   href="#collapse_3_4">
+                                                    <strong>SERVICIOS RECIBIDOS</strong>
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse_3_4" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-lg-4 col-md-4 col-sm-12">
+                                                        <div class="portlet">
+                                                            <div class="row">
+                                                                <div class="col-lg-12 col-md-12 col-sm-12"
+                                                                     style="margin-top: 40px">
+                                                                    <div class="form-group form-md-line-input">
+                                                                        <select class="form-control" id="tipoServicio"
+                                                                                name="tipoServicio">
+                                                                            <option value="0">Seleccione ...</option>
+                                                                            {% for tipoServicio in  tiposServicios %}
+                                                                                <option value="{{ tipoServicio.id }}">{{ tipoServicio.nombre }}</option>
+                                                                            {% endfor %}
+                                                                        </select>
+                                                                        <label for="tipoServicio">Tipo de
+                                                                            Servicio</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-lg-12 col-md-12 col-sm-12"
+                                                                     style="margin-top: 20px">
+                                                                    <div class="form-group form-md-line-input">
+                                                                        <select disabled class="form-control"
+                                                                                id="servicio"
+                                                                                name="servicio">
+                                                                            <option id="inicio2" value="0"></option>
+                                                                        </select>
+                                                                        <label for="servicio">Servicio</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-lg-6 col-md-6 col-sm-6"
+                                                                     style="margin-top: 20px">
+                                                                    <div class="form-group form-md-line-input input-icon right">
+                                                                        <i style="color: #111111"></i>
+                                                                        <input type="text" class="form-control"
+                                                                               onkeypress="return filterFloat(event,this);"
+                                                                               id="totalServicio"
+                                                                               name="totalServicio" disabled>
+                                                                        <label for="totalServicio">
+                                                                            Total</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-3 col-md-3 col-sm-3"
+                                                                     style="margin-top: 35px">
+                                                                    <div class="form-actions noborder">
+                                                                        <button type="button"
+                                                                                class="btn btn-secondary AdicionarServicio"
+                                                                                disabled><i
+                                                                                    class="fa fa-plus"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-3 col-md-3 col-sm-3"
+                                                                     style="margin-top: 35px">
+                                                                    <div class="form-actions noborder">
+                                                                        <button type="button"
+                                                                                class="btn btn-secondary LimpiarServicio"
+                                                                                disabled><i
+                                                                                    class="fa fa-refresh"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-8 col-md-8 col-sm-12"
+                                                         style="overflow-x:auto;margin-top: 20px">
+                                                        <div class="portlet-body "
+                                                             style="overflow-x: auto; display: block"
+                                                             id="tablaServicio">
+                                                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                                                   id="dataServicio" style="width:100%">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th class="text-center"
+                                                                        style="background: #009490;color: #d6f5f3">
+                                                                        Tipo de Servicio
+                                                                    </th>
+                                                                    <th class="text-center"
+                                                                        style="background: #009490;color: #d6f5f3">
+                                                                        Servicio
+                                                                    </th>
+                                                                    <th class="text-center"
+                                                                        style="background: #009490;color: #d6f5f3">
+                                                                        No. Cuenta
+                                                                    </th>
+                                                                    <th class="text-center"
+                                                                        style="background: #009490;color: #d6f5f3">
+                                                                        Total
+                                                                    </th>
+                                                                    <th class="text-center"
+                                                                        style="background: #009490;color: #d6f5f3">
+                                                                        Acción
+                                                                    </th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                {% for realServi in realMesServicios %}
+                                                                    <tr data-id="{{ realServi.id }}">
+                                                                        <td class="text-center">{{ realServi.otroGasto.tipoServicio.nombre }}</td>
+                                                                        <td class="text-center">{{ realServi.otroGasto.nombre }}</td>
+                                                                        <td class="text-center">{{ realServi.otroGasto.codigo }}</td>
+                                                                        <td class="text-center">{{ realServi.total }}</td>
+                                                                        <td class="text-center">
+                                                                            <a href="#"
+                                                                               class="btn default btn-xs red-stripe delete"
+                                                                               data-toggle="tooltip"
+                                                                               data-placement="left"
+                                                                               title="Eliminar servicio recibido">
+                                                                                Borrar </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="accordion-toggle accordion-toggle-styled collapsed"
+                                                   data-toggle="collapse" data-parent="#accordion3"
+                                                   href="#collapse_3_4">
+                                                    <strong>LOGÍSTICA</strong>
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse_3_4" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="materiaPrima"
+                                                                   name="materiaPrima"
+                                                                   value="{{ realMes.materiaPrima }}">
+                                                            <label for="materiaPrima">Materias Primas</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="combustibleLubricante"
+                                                                   name="combustibleLubricante"
+                                                                   value="{{ realMes.combustibleLubricante }}">
+                                                            <label for="combustibleLubricante">Combustibles y
+                                                                Lubricantes</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="energia"
+                                                                   name="energia" value="{{ realMes.energia }}">
+                                                            <label for="energia">Energía</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="depreciacion"
+                                                                   name="depreciacion"
+                                                                   value="{{ realMes.depreciacion }}">
+                                                            <label for="depreciacion">Depreciación AFT</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="margin-top: 20px">
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="otroGasto"
+                                                                   name="otroGasto" value="{{ realMes.otroGasto }}">
+                                                            <label for="otroGasto">Otros Gastos Monetarios</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="gastoFinanciero"
+                                                                   name="gastoFinanciero"
+                                                                   value="{{ realMes.gastoFinanciero }}">
+                                                            <label for="gastoFinanciero">Gastos Financieros</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="impuestoTerrestre" name="impuestoTerrestre"
+                                                                   value="{{ realMes.impuestoTerrestre }}">
+                                                            <label for="impuestoTerrestre">Impuesto Terrestre</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="otroGastoMonetario" name="otroGastoMonetario"
+                                                                   value="{{ realMes.otroGastoMonetario }}">
+                                                            <label for="otroGastoMonetario">Otros Gastos
+                                                                Monetarios</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="margin-top: 20px">
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="gastoComedor" name="gastoComedor"
+                                                                   value="{{ realMes.gastoComedor }}">
+                                                            <label for="gastoComedor">Gastos de Comedor</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                                        <div class="form-group form-md-line-input input-icon right">
+                                                            <i style="color: #dc141b"
+                                                               class="fa fa-exclamation tooltips hidden"
+                                                               data-placement="bottom"
+                                                               data-original-title="Este campo es obligatorio"></i>
+                                                            <input type="text" class="form-control validar"
+                                                                   onkeypress="return filterFloat(event,this);"
+                                                                   id="gastoxPerdida" name="gastoxPerdida"
+                                                                   value="{{ realMes.gastoxPerdida }}">
+                                                            <label for="gastoxPerdida">Gastos x Pérdidas</label>
+                                                            <span class="help-block">* campo obligatorio </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions noborder">
+                        <button type="button" class="btn btn-secondary" id="btnGuardar">Guardar</button>
+                        <button type="button" class="btn btn default" id="btnSalir">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/bootstrap-toastr/toastr.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/bootstrap-toastr/ui-toastr.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (is_granted("ROLE_INICIO_CIERRE_REAL")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'REAL' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            //Declaraciones
+            var ventaTotal = 0;
+            var otroIngreso = 0;
+            var salario = 0;
+            var vacaciones = 0;
+            var seguridadSocial = 0;
+            var materiaPrima = 0;
+            var combustibleLubricante = 0;
+            var energia = 0;
+            var depreciacion = 0;
+            var otroGasto = 0;
+            var gastoFinanciero = 0;
+            var impuestoTerrestre = 0;
+            var otroGastoMonetario = 0;
+            var gastoComedor = 0;
+            var gastoxPerdida = 0;
+            var totalesServicios = [];
+
+            //Llenar el arreglo de los servicios recibidos de este real
+            {% if realMesServicios %}
+                {% for realServi in realMesServicios %}
+                    totalesServicios.push({
+                        servicio: '{{ realServi.otroGasto.id }}',
+                        servicioName: '{{ realServi.otroGasto.nombre }}',
+                        total: parseFloat('{{ realServi.otroGasto.id }}')
+                    });
+                {% endfor %}
+            {% endif %}
+
+            $('#dataRealTotalCentroCosto').DataTable({
+                "lengthMenu": [[5], [5]]
+            });
+
+            $('#dataRealCentroCosto').DataTable({
+                "lengthMenu": [[5], [5]]
+            });
+
+            var table = $('#dataServicio').DataTable({
+                columns: [
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {class: "text-center"},
+                    {
+                        defaultContent: "<a href='#' " +
+                            " class='btn default btn-xs red-stripe delete' data-toggle='tooltip'" +
+                            " data-placement='left'" +
+                            " title='Eliminar servicio recibido'>Borrar</a>", class: "text-center"
+                    }
+                ],
+                //Para habilitar el scrolly y no utilizar el paginado
+                // scrollY: "200px",
+                // scrollCollapse: true,
+                // "paging": false,
+                // "info": false
+                "lengthChange": false,
+                "lengthMenu": [[6], [6]],
+                "searching": false
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function () {
+                window.location.href = "{{ path('gestionarPlanesReales') }}";
+            });
+
+            $(".validar").keyup(function (event) {
+                var tecla = event.which;
+                if (tecla === 188) {
+                    var contenido = $(this).val().slice(0, -1);
+                    $(this).val(contenido + '.');
+                }
+            });
+
+            $('#categoriaCentroCosto').on('change', function () {
+                var html = '';
+                var divisionCentroCosto = $('#categoriaCentroCosto').val();
+                if (divisionCentroCosto == '0') {
+                    $("#centroCosto").prop('disabled', true);
+                    $("option").remove('.cambioCentroCosto');
+                } else {
+                    $("option").remove('.cambioCentroCosto');
+                    $("#inicio").after('<option class="cambioCentroCosto"></option>');
+
+                    {% for centro in  centrosCostos %}
+
+                    {#                    {% for real in  realMeses if real.centroCosto.nombre != centro.nombre %}#}
+                    var idDivisionCentroCosto = '{{ centro.divisionCentroCosto.id }}';
+
+                    if (idDivisionCentroCosto == divisionCentroCosto) {
+                        var id = {{ centro.id }};
+                        var name = '{{ centro.nombre }}';
+                        html += '<option class="cambioCentroCosto" value="' + id + '">' + name + '</option>';
+
+                    }
+                    {#                    {% endfor %}#}
+                    {% endfor %}
+                    $(".cambioCentroCosto").replaceWith(html);
+                    $("#centroCosto").prop('disabled', false);
+                }
+            });
+
+            $('#centroCosto').on('change', function () {
+
+                if ($("#centroCosto").val() !== '0') {
+                    $("#btnGuardar").prop('disabled', false);
+                    var centroCosto = $('#centroCosto').val();
+                    {% for centro in  centrosCostos %}
+                    var idCentroCosto = '{{ centro.id }}';
+                    if (idCentroCosto == centroCosto) {
+                        $('#nameCentro').text('CENTRO DE COSTO - ' + '{{ centro.nombre }}');
+                    }
+                    {% endfor %}
+                } else {
+                    $('#nameCentro').text('CENTRO DE COSTO');
+                    $("#btnGuardar").prop('disabled', true);
+                }
+            });
+
+            $('#tipoServicio').on('change', function () {
+                var html = '';
+                var tipoServicio = $('#tipoServicio').val();
+                if (tipoServicio == '0') {
+                    $("#servicio").prop('disabled', true);
+                    $("option").remove('.cambioServicio');
+                } else {
+                    $("option").remove('.cambioServicio');
+                    $("#inicio2").after('<option class="cambioServicio"></option>');
+
+                    {% for servicio in  servicios %}
+                    var idTipoServicio = '{{ servicio.tipoServicio.id }}';
+                    if (idTipoServicio == tipoServicio) {
+                        var id = {{ servicio.id }};
+                        var name = '{{ servicio.nombre }}';
+                        html += '<option class="cambioServicio" value="' + id + '">' + name + '</option>';
+                    }
+                    {% endfor %}
+                    if (html != '') {
+                        $(".cambioServicio").replaceWith(html);
+                        $("#servicio").prop('disabled', false);
+                    } else {
+                        $("#servicio").prop('disabled', true);
+                    }
+                }
+            });
+
+            $('#servicio').on('change', function () {
+                var totalServicio = $('#servicio').val();
+                $(".AdicionarServicio").prop('disabled', true);
+                if (totalServicio === '0') {
+                    $("#totalServicio").prop('disabled', true);
+                } else {
+                    $("#totalServicio").val('');
+                    $("#totalServicio").prop('disabled', false);
+                }
+            });
+
+            $('#totalServicio').on('keyup', function () {
+                var totalServicio = $('#totalServicio').val();
+                if (totalServicio === '0' || totalServicio === '') {
+                    $(".AdicionarServicio").prop('disabled', true);
+                } else {
+                    $(".AdicionarServicio").prop('disabled', false);
+                }
+            });
+
+            $('.AdicionarServicio').on('click', function () {
+                //Tipo de servicio and Servicio name
+                var nameTipoServicio = '';
+                var nameServicio = '';
+                var noCuentaServicio = '';
+                var totalServicio = parseFloat($("#totalServicio").val());
+                var servicio = $('#servicio').val();
+                {% for servicio in  servicios %}
+                var idServicio = '{{ servicio.id }}';
+                if (idServicio == servicio) {
+                    nameTipoServicio = '{{ servicio.tipoServicio.nombre }}';
+                    nameServicio = '{{ servicio.nombre }}';
+                    noCuentaServicio = '{{ servicio.codigo }}';
+                }
+                {% endfor %}
+
+                //Verificar si existe el servicio
+                {
+                    var n;
+                    var existe = false;
+                    for (n = 0; n < totalesServicios.length; n++) {
+                        if (totalesServicios[n]['servicio'] == $("#servicio").val()) {
+                            existe = true;
+                            break;
+                        }
+                    }
+                    if (existe) {
+                        alertify.alert('<strong>El servicio seleccionado ya existe, no se puede agregar.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    } else {
+                        //Adicionar la fila
+                        table.row.add([
+                            nameTipoServicio,
+                            nameServicio,
+                            noCuentaServicio,
+                            totalServicio
+                        ]).draw(false);
+                        //Adicionar al arreglo
+                        totalesServicios.push({
+                            servicio: $("#servicio").val(),
+                            servicioName: nameServicio,
+                            total: totalServicio
+                        });
+                    }
+                }
+                limpiarControles();
+                $(".AdicionarServicio").prop('disabled', true);
+                $(".LimpiarServicio").prop('disabled', false);
+            });
+
+            $('.LimpiarServicio').on('click', function () {
+                //Borrar los datos del datatable
+                totalServicio = 0;
+                table.clear().draw(false);
+                limpiarControles();
+                $(".AdicionarServicio").prop('disabled', true);
+                $(".LimpiarServicio").prop('disabled', true);
+            });
+
+            function limpiarControles() {
+                // $('#tipoServicio').val(0);
+                $('#servicio').val(0);
+                $('#totalServicio').val('');
+                $('#totalServicio').prop('disabled', true);
+            }
+
+            $('#dataServicio tbody').on('click', '.delete', function () {
+                var row = $(this).parents('tr');
+                var fila = table.row(row).data();
+                var n;
+                for (n = 0; n < totalesServicios.length; n++) {
+                    if (totalesServicios[n]['servicioName'] == fila[1]) {
+                        totalesServicios.splice(n, 1);
+                        break;
+                    }
+                }
+                row.fadeOut();
+            });
+
+            $('#btnGuardar').on('click', function () {
+
+                if ($("#ventaTotal").val() !== '') {
+                    ventaTotal = $("#ventaTotal").val()
+                }
+                if ($("#otroIngreso").val() !== '') {
+                    otroIngreso = $("#otroIngreso").val()
+                }
+                if ($("#salario").val() !== '') {
+                    salario = $("#salario").val()
+                }
+                if ($("#vacaciones").val() !== '') {
+                    vacaciones = $("#vacaciones").val()
+                }
+                if ($("#seguridadSocial").val() !== '') {
+                    seguridadSocial = $("#seguridadSocial").val()
+                }
+                if ($("#materiaPrima").val() !== '') {
+                    materiaPrima = $("#materiaPrima").val()
+                }
+                if ($("#combustibleLubricante").val() !== '') {
+                    combustibleLubricante = $("#combustibleLubricante").val()
+                }
+                if ($("#depreciacion").val() !== '') {
+                    depreciacion = $("#depreciacion").val()
+                }
+                if ($("#otroGasto").val() !== '') {
+                    otroGasto = $("#otroGasto").val()
+                }
+                if ($("#gastoFinanciero").val() !== '') {
+                    gastoFinanciero = $("#gastoFinanciero").val()
+                }
+                if ($("#impuestoTerrestre").val() !== '') {
+                    impuestoTerrestre = $("#impuestoTerrestre").val()
+                }
+                if ($("#otroGastoMonetario").val() !== '') {
+                    otroGastoMonetario = $("#otroGastoMonetario").val()
+                }
+                if ($("#gastoComedor").val() !== '') {
+                    gastoComedor = $("#gastoComedor").val()
+                }
+                if ($("#gastoxPerdida").val() !== '') {
+                    gastoxPerdida = $("#gastoxPerdida").val()
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    id: {{ realMes.id }},
+                    mes: '{{ mes }}',
+                    centroCosto: $("#centroCosto").val(),
+                    ventaTotal: ventaTotal,
+                    otroIngreso: otroIngreso,
+                    salario: salario,
+                    vacaciones: vacaciones,
+                    seguridadSocial: seguridadSocial,
+                    materiaPrima: materiaPrima,
+                    combustibleLubricante: combustibleLubricante,
+                    energia: energia,
+                    depreciacion: depreciacion,
+                    otroGasto: otroGasto,
+                    gastoFinanciero: gastoFinanciero,
+                    impuestoTerrestre: impuestoTerrestre,
+                    otroGastoMonetario: otroGastoMonetario,
+                    gastoComedor: gastoComedor,
+                    gastoxPerdida: gastoxPerdida,
+                    totalesServicios: totalesServicios
+                };
+
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updatePlanRealMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data == 'ok') {
+
+                        alertify.alert('<strong>El real mensual de este centro de costo ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarPlanesReales') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,106 @@
+<div id="modalAddPlantillaCargo" data-backdrop="static" data-keyboard=false class="modal fade" tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog" style="width: 80vw">
+        <div class="modal-content portlet light estilosForm">
+            <div class="modal-header">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green-sunglo"></i>
+                    <span class="bold uppercase" style="font-size: 17px"> AGREGAR CARGO A LA PLANTILLA</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="scroller" style="height: 300px" data-always-visible="1" data-rail-visible1="1">
+                    <div class="row">
+                        <div class="portlet-body form">
+                            <form class="form-horizontal" role="form">
+                                <div class="form-body">
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Tipo de Plantilla</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px" class="fa fa-exclamation tooltips hidden  addTipoPlantilla" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <select class="form-control input-group-sm" id="addTipoPlantilla" name="addTipoPlantilla">
+                                                    <option value="0">Seleccione el tipo </option>
+                                                    {% for tipo in  tipoPlantillas %}
+                                                        <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">División</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px" class="fa fa-exclamation tooltips hidden  addCategoriaCentroCosto" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <select class="form-control input-group-sm" id="addCategoriaCentroCosto" name="addCategoriaCentroCosto">
+                                                    <option value="0">Seleccione la división del Centro de Costo </option>
+                                                    {% for division in  divisionCentrosCostos %}
+                                                        <option value="{{ division.id }}">{{ division.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Centro de Costo</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px" class="fa fa-exclamation tooltips hidden  addCentroCosto" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <select disabled class="form-control input-group-sm" id="addCentroCosto" name="addCentroCosto">
+                                                    <option id="inicio" value="0">Seleccione el Centro de Costo</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Denominación de Cargo</label>
+                                        <div class="col-lg-8 col-md-8 col-sm-8">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-circle-o"></i>
+												</span>
+                                                <i style="color: #dc141b ; margin-right: 10px" class="fa fa-exclamation tooltips hidden  addDenominadorCargo" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <select class="form-control input-group-sm" id="addDenominadorCargo" name="addDenominadorCargo">
+                                                    <option value="0">Seleccione el cargo </option>
+                                                    {% for denominador in  denominadorCargos %}
+                                                        <option value="{{ denominador.id }}">{{ denominador.denominadorCargo }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-3 col-md-3 col-sm-3 control-label">Cantidad</label>
+                                        <div class="col-lg-2 col-md-2 col-sm-2">
+                                            <div class="input-group input-icon right">
+												<span class="input-group-addon">
+												<i class="fa fa-tag"></i>
+												</span>
+                                                <i style="color: #dc141b" class="fa fa-exclamation tooltips hidden addCantidad" data-placement="bottom" data-original-title="Este campo es obligatorio" ></i>
+                                                <input type="text" class="form-control" placeholder="Teclee la cantidad" id="addCantidad" name="addCantidad">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn default cerrar">Cerrar</button>
+            <button type="button" class="btn btn-secondary" id="addGuardar">Guardar</button>
+        </div>
+    </div>
+</div>

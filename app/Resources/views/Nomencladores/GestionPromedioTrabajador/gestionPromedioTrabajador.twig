@@ -1,0 +1,175 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div id="containerMostrartipoCombustible" class="container-fluid" style="display:block">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-car font-green"></i>
+                    <span class="caption-subject bold uppercase">PROMEDIO DE TRABAJADORES</span>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div style="padding-top: 10px">
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title" style="background-color: #2b3643">
+                            <div class="caption">
+                                <i class="fa fa-table"></i>
+                            </div>
+                        </div>
+                        <div class="portlet-body " style="background-color: #afbac0 ; overflow-x: auto">
+                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                   id="dataPromedioTrabajador">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Total
+                                    </th>
+                                    <th class="text-center">
+                                        Acciones
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for promedio in promedioTrabajadores %}
+                                    <tr data-id="{{ promedio.id }}">
+                                        <td class="text-center">{{ promedio.total }}</td>
+                                        <td class="text-center">
+                                            <a href="#" style="margin-top: 5px"
+                                               class="btn default btn-xs green-stripe edit" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Modificar el promedio de trabajadores">
+                                                Modificar el total </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('Nomencladores/GestionPromedioTrabajador/modalEditPromedioTrabajador.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+
+            (function(){
+                {% if not (is_granted("ROLE_NOMENCLADOR")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'PLANTILLA_CARGOS' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            $('#dataPromedioTrabajador').DataTable();
+
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function () {
+                window.location.href = "{{ path('gestionarPromedioTrabajadores') }}";
+            });
+
+            var idPromedioTrabajador = '';
+            var total = '';
+
+            // función que carga datos en el formulario para editar
+            $('#dataPromedioTrabajador tbody').on('click', '.edit', function () {
+
+                var row = $(this).parents('tr');
+                idPromedioTrabajador = row.data('id');
+
+                {% for promedio in promedioTrabajadores %}
+                var id = parseInt('{{ promedio.id }}');
+                if (id === idPromedioTrabajador) {
+                    $('#editTotal').val('{{ promedio.total }}');
+
+                    total = '{{ promedio.total }}';
+
+                }
+                {% endfor %}
+                $('#modalEditPromedioTrabajador').modal('show');
+            });
+
+            $('#editGuardar').on('click', function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalEditPromedioTrabajador input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+                if (errores !== 0) return false;
+
+                $('#modalEditPromedioTrabajador').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idPromedioTrabajador: idPromedioTrabajador,
+                    total: $('#editTotal').val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updatePromedioTrabajador") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El total del promedio de trabajadores ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarPromedioTrabajadores') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+        });
+    </script>
+{% endblock %}

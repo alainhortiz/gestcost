@@ -1,0 +1,1023 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block info %}
+    <div class="row counters">
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="margin-top: 20px">
+            <div class="dashboard-stat  red-flamingo" id="nameMontoEstimadoMostrar">
+                <div class="visual">
+                    <i class="fa fa-tint"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoEstimado">
+                    </div>
+                    <div class="desc">
+                        <strong>LITROS ESTIMADOS</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="margin-top: 20px">
+            <div class="dashboard-stat red-flamingo"
+                 id="nameMontoRestanteMostrar">
+                <div class="visual">
+                    <i class="fa fa-tint"></i>
+                </div>
+                <div class="details">
+                    <div class="number" data-toggle="counter-up" id="nameMontoRestante">
+
+                    </div>
+                    <div class="desc">
+                        <strong>LITROS RESTANTES</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="fa fa-folder-open font-green"></i>
+                    <span class="caption-subject bold uppercase">PLAN DE GESTIÓN DEL ACEITE</span>
+                    <span id="nameSeccionHelp" class="caption-helper bold uppercase" id="year">{{ yearActivo }}</span>
+                </div>
+                <div class="tools">
+                    <a href="{{ path('exportarPlanEstimadoCombustible') }}"
+                       class="fa fa-file-excel-o fa-2x font-green"
+                       data-toggle="tooltip" data-placement="left" title="Exportar a Excel">  </a>
+                    <a href="#" class="reload" id="btnAtrasMedioTransporte" data-placement="top"
+                       data-original-title="Reiniciar">
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <ul class="nav nav-tabs nav-pills">
+                    <li class="active">
+                        <a href="#totalCentroCosto" data-toggle="tab">
+                            LITROS ESTIMADOS POR MEDIOS DE TRANSPORTES
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="totalCentroCosto">
+                        <form role="form" id="formTotalCentroCosto">
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-3 col-sm-3">
+                                        <div class="portlet">
+                                            <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 40px">
+                                                <div class="form-group form-md-line-input">
+                                                    <select class="form-control" id="tipoLubricante"
+                                                            name="tipoLubricante">
+                                                        <option value="0">Seleccione ...</option>
+                                                        {% for tipo in  tiposLubricantes %}
+                                                            <option value="{{ tipo.lubricante.id }}">{{ tipo.lubricante.nombre }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <label for="tipoLubricante">TIPO DE ACEITE</label>
+                                                </div>
+                                            </div>
+                                            <div id="gestionMensual" style="display:{{ aprobadoEstimadoLubricante == true ? 'none' : 'block' }}">
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="tipoTransporte"
+                                                                name="tipoTransporte">
+                                                            <option id="inicioTipo" value="0">Seleccione ...</option>
+                                                        </select>
+                                                        <label for="tipoTransporte">TIPO DE TRANSPORTE</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="transporte"
+                                                                name="transporte">
+                                                            <option id="inicioTransporte" value="0">Seleccione ...
+                                                            </option>
+                                                        </select>
+                                                        <label for="transporte">MEDIOS DE TRANSPORTES</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input">
+                                                        <select disabled class="form-control" id="mesTransporte"
+                                                                name="mesTransporte">
+                                                            <option id="inicioMes" value="0">Seleccione ...</option>
+                                                        </select>
+                                                        <label for="mesTransporte">DISTRIBUCIÓN POR MES</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-group form-md-line-input input-icon right">
+                                                        <i style="color: #111111"></i>
+                                                        <input type="text" class="form-control" onkeypress="return filterFloat(event,this);"
+                                                               id="totalLtsLubricante"
+                                                               name="totalLtsLubricante" disabled>
+                                                        <label for="totalLtsLubricante">
+                                                            LITROS MENSUALES DE ACEITE</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AsignarLubricante"
+                                                                disabled>
+                                                            Asignar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary ModificarLubricante"
+                                                                disabled>
+                                                            Modificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-12" style="margin-top: 20px">
+                                                    <div class="form-actions noborder">
+                                                        <button type="button"
+                                                                class="btn btn-secondary AprobarLubricante"
+                                                                disabled>
+                                                            Aprobar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-9 col-md-9 col-sm-9" style="overflow-x:auto;margin-top: 20px">
+                                        <div class="portlet-body " style="overflow-x: auto; display: none" id="tablaTransporte">
+                                            <table class="table table-striped table-bordered table-hover table-responsive" id="dataTransporte">
+                                                <thead>
+                                                <tr>
+                                                    <th class="hidden" style="background: #009490;color: #d6f5f3">
+                                                        ID
+                                                    </th>
+                                                    <th style="background: #009490;color: #d6f5f3">
+                                                        MODELO
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        MATRÍCULA
+                                                    </th>
+                                                    <th style="background: #009490;color: #d6f5f3">
+                                                        CENTRO DE COSTO
+                                                    </th>
+                                                    <th style="background: #009490;color: #d6f5f3">
+                                                        DIVISIÓN
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3" width="2px">
+                                                        ASIGNACIÓN DE ACEITE
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3" width="2px">
+                                                        IMPORTE DE ACEITE
+                                                    </th>
+                                                    <th class="text-center" style="background: #009490;color: #d6f5f3">
+                                                        MODIFICAR
+                                                    </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- BEGIN GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plugins/highstock/code/highstock.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/annotations.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/exporting.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-data.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/highstock/code/modules/export-clientside.js') }}"></script>
+    <!-- END  GRAFICOS HIGHSTOCK LEVEL PLUGINS -->
+    <script src="{{ asset('easyadmin/plantilla1/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/plantilla1/js/counterup.min.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+
+            (function () {
+                {% if not (app.session.get('aprobarEstimadoLubricante')) and is_granted("ROLE_DISTRIBUIDOR_DIVISION") %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ESTIMADO_COMBUSTIBLE' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            var table = $('#dataTransporte').DataTable();
+
+            // jQuery counterUp
+            $('[data-toggle="counter-up"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+
+            $('#transporte').select2({
+                placeholder: 'Seleccione ...',
+                allowClear: true
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('.salir').on('click', function () {
+                window.location.href = "{{ path('inicio') }}";
+
+            });
+
+            $('#btnAtrasMedioTransporte').on("click", function () {
+                window.location.href = "{{ path('gestionarEstimadoLubricantesMediosTransportes') }}";
+            });
+
+            //Declaracion de variables
+            var transportesTipoLubricanteAsignado = [];
+            var precio = 0;
+            var totalLtsLubricante = 0;
+            var totalLtsLubricanteMedioBasico = 0;
+            var montoRestanteLubricante = 0;
+            var montoAnteriorLubricante = 0;
+            var presupuestoMensualLubricante = 0;
+            var idTransporte = 0;
+            var modificar = false;
+            var lubricanteAprobado = 0;
+            var enero = 0;
+            var febrero = 0;
+            var marzo = 0;
+            var abril = 0;
+            var mayo = 0;
+            var junio = 0;
+            var julio = 0;
+            var agosto = 0;
+            var septiembre = 0;
+            var octubre = 0;
+            var noviembre = 0;
+            var diciembre = 0;
+            var eneroAnterior = 0;
+            var febreroAnterior = 0;
+            var marzoAnterior = 0;
+            var abrilAnterior = 0;
+            var mayoAnterior = 0;
+            var junioAnterior= 0;
+            var julioAnterior = 0;
+            var agostoAnterior = 0;
+            var septiembreAnterior = 0;
+            var octubreAnterior = 0;
+            var noviembreAnterior = 0;
+            var diciembreAnterior = 0;
+            var cantidad = 0;
+
+            $('#tipoLubricante').on('change', function () {
+                $("#transporte").val('').prop('disabled' , true).select2({
+
+                    placeholder: 'Seleccione ...',
+                    allowClear: true
+                });
+                var html = '';
+                modificar = false;
+                var tipoLubricante = parseInt($('#tipoLubricante').val());
+                if (tipoLubricante === 0) {
+                    $("#tipoTransporte").prop('disabled', true);
+                    $("#transporte").prop('disabled', true);
+                    $("option").remove('.cambioTipo');
+                    $("option").remove('.cambioTransporte');
+                    $('#nameMontoEstimado').text(0);
+                    $(".AprobarLubricante").prop('disabled', true);
+                    $('#totalDivisionMes').css("display", "none");
+                    $("#mesTransporte").prop('disabled', true);
+                    $('#tablaTransporte').css("display", "none");
+                    $('#nameMontoEstimadoMostrar').removeClass("green-haze");
+                    $('#nameMontoEstimadoMostrar').addClass("red-flamingo");
+                    $('#nameMontoRestanteMostrar').removeClass("green-haze");
+                    $('#nameMontoRestanteMostrar').addClass("red-flamingo");
+                } else {
+                    $("option").remove('.cambioTipo');
+                    $("#inicioTipo").after('<option class="cambioTipo"></option>');
+
+                    //Llenar el select de tipo de transporte
+                    {% for tipo in  tiposTransportes %}
+                    var idTipoLubricante = parseInt({{ tipo.idTipoLubricante }});
+                    if (idTipoLubricante === tipoLubricante) {
+                        var id = {{ tipo.id }};
+                        var name = '{{ tipo.nombre }}';
+                        html += '<option class="cambioTipo" value="' + id + '">' + name + '</option>';
+                    }
+                    {% endfor %}
+                    $(".cambioTipo").replaceWith(html);
+                    $("#tipoTransporte").prop('disabled', false);
+
+                    //obtener los litros asignados por tipo de combustible
+
+                    precio = 0;
+                    totalLtsLubricante = 0;
+                    totalLtsLubricanteMedioBasico = 0;
+                    transportesTipoLubricanteAsignado =[];
+                    var aprobadoTipoLubricante = false;
+
+                    {% for tipo in  tiposLubricantes %}
+                    var idTipoLubricante =  parseInt({{ tipo.lubricante.id }});
+
+                    if (idTipoLubricante === tipoLubricante) {
+                        totalLtsLubricante = parseInt({{ tipo.lts }});
+                        {% if tipo.aprobadoEstimadoLubricanteMedioTransporte %}
+                              aprobadoTipoLubricante = true;
+                        {% endif %}
+                    }
+                    {% endfor %}
+                    {% if graficosTEstimadosLubricantesMedios %}
+                    {% for medio in  graficosTEstimadosLubricantesMedios %}
+                    var idTipoLubricante = parseInt({{ medio.tipoLubricanteId }});
+                    var idTransporteActual = parseInt({{ medio.idTransporte }});
+                    if (idTipoLubricante === tipoLubricante) {
+                        totalLtsLubricanteMedioBasico += parseInt({{ medio['ltsLubricante'] }});
+                        {% for cant in graficosTEstimadosLubricantesMediosCantMeses %}
+                        var idTranspMeses = parseInt({{ cant.idTransporte }});
+                        if (idTransporteActual ===idTranspMeses) {
+                            cantidad = parseInt({{ cant.cantidad }});
+                        }
+                        {% endfor %}
+                        transportesTipoLubricanteAsignado.push([
+                            '{{ medio['idTransporte'] }}',
+                            '{{ medio['modeloNombre'] }}',
+                            '{{ medio['matricula'] }}',
+                            '{{ medio['centro'] }}',
+                            '{{ medio['division'] }}',
+                            Highcharts.numberFormat('{{ medio['ltsLubricante'] }}', 2, '.', ','),
+                            Highcharts.numberFormat('{{ medio['importeLubricante'] }}', 2, '.', ','),
+                        ]);
+                    }
+                    {% endfor %}
+
+                    if (transportesTipoLubricanteAsignado.length !== 0) {
+                        $('#tablaTransporte').css("display", "block");
+                        if (aprobadoTipoLubricante) {
+                            table = $('#dataTransporte').DataTable( {
+                                destroy: true,
+                                data: transportesTipoLubricanteAsignado,
+                                columns: [
+                                    { class: "hidden" },
+                                    { class: "text-center" },
+                                    { class: "text-center" },
+                                    { class: "text-center"},
+                                    { class: "text-center"},
+                                    { class: "text-center" },
+                                    { class: "text-center" },
+                                    { defaultContent: "<a href='#'>-</a>", class: "text-center" }
+                                ],
+                                "lengthMenu": [[6], [6]]
+                            } );
+                            $('#nameMontoEstimadoMostrar').removeClass('red-flamingo');
+                            $('#nameMontoRestanteMostrar').removeClass('red-flamingo');
+                            $('#nameMontoEstimadoMostrar').addClass('green-haze');
+                            $('#nameMontoRestanteMostrar').addClass('green-haze');
+                        } else {
+                            table = $('#dataTransporte').DataTable( {
+                                destroy: true,
+                                data: transportesTipoLubricanteAsignado,
+                                columns: [
+                                    { class: "hidden" },
+                                    { class: "text-center" },
+                                    { class: "text-center" },
+                                    { class: "text-center"},
+                                    { class: "text-center"},
+                                    { class: "text-center" },
+                                    { class: "text-center" },
+                                    { defaultContent: "<a href='#' " +
+                                            " class='btn default btn-xs green-stripe edit' data-toggle='tooltip'" +
+                                            " data-placement='left'" +
+                                            " title='Modificar asignación de combustible'>Editar</a>", class: "text-center" }
+                                ],
+                                "lengthMenu": [[6], [6]]
+                            } );
+                            $('#nameMontoEstimadoMostrar').removeClass('green-haze');
+                            $('#nameMontoRestanteMostrar').removeClass('green-haze');
+                            $('#nameMontoEstimadoMostrar').addClass('red-flamingo');
+                            $('#nameMontoRestanteMostrar').addClass('red-flamingo');
+                        }
+
+                    } else {
+                        $('#tablaTransporte').css("display", "none");
+                    }
+                    {% endif %}
+
+                    montoRestanteLubricante = totalLtsLubricante - totalLtsLubricanteMedioBasico;
+
+                    $('#nameMontoEstimado').text(Highcharts.numberFormat(totalLtsLubricante, 0, '.', ','));
+                    $('#nameMontoRestante').text(Highcharts.numberFormat(montoRestanteLubricante, 0, '.', ','));
+
+                    if (montoRestanteLubricante === 0){
+                        $(".AprobarLubricante").prop('disabled', false);
+                    }else {
+                        $(".AprobarLubricante").prop('disabled', true);
+                    }
+                }
+                $("#totalLtsLubricante").val('');
+                $("#totalLtsLubricante").prop('disabled', true);
+                $(".AsignarLubricante").prop('disabled', true);
+                $(".ModificarLubricante").prop('disabled', true);
+                combustibleLubricante = parseInt({{ aprobadoEstimadoLubricante }});
+                if (lubricanteAprobado === 1){
+                    $("#gestionMensual").css("display", "none");
+                } else {
+                    if (comprobarAprobacion()) {
+                        $('#dataTransporte a.edit').css("display", "none");
+                        $("#gestionMensual").css("display", "none");
+                        $('#nameMontoEstimadoMostrar').removeClass("red-flamingo");
+                        $('#nameMontoEstimadoMostrar').addClass("green-haze");
+                        $('#nameMontoRestanteMostrar').removeClass("red-flamingo");
+                        $('#nameMontoRestanteMostrar').addClass("green-haze");
+                    } else {
+                        $('#dataTransporte a.edit').css("display", "block");
+                        $("#gestionMensual").css("display", "block");
+                        $('#nameMontoEstimadoMostrar').removeClass("green-haze");
+                        $('#nameMontoEstimadoMostrar').addClass("red-flamingo");
+                        $('#nameMontoRestanteMostrar').removeClass("green-haze");
+                        $('#nameMontoRestanteMostrar').addClass("red-flamingo");
+                    }
+                }
+            });
+
+            function comprobarAprobacion() {
+                var estado = false;
+                {% if tiposLubricantesAprobados %}
+                        var tipoLubricante = $("#tipoLubricante").val();
+                        {% for aprobacion in tiposLubricantesAprobados %}
+                                var idTipoLubricante = '{{ aprobacion['tipoLubricante'] }}';
+                                var aprobar = '{{ aprobacion['aprobado'] }}';
+                                if (tipoLubricante === idTipoLubricante) {
+                                    estado = aprobar;
+                                }
+                        {% endfor %}
+                {% endif %}
+                return estado;
+            }
+
+            $('#tipoTransporte').on('change', function () {
+                $("#transporte").val('').prop('disabled' , true).select2({
+
+                    placeholder: 'Seleccione ...',
+                    allowClear: true
+                });
+                var html = '';
+                var tipoTransporte = parseInt($('#tipoTransporte').val());
+                var tipoLubricante = parseInt($('#tipoLubricante').val());
+                if (tipoTransporte === 0) {
+                    $("option").remove('.cambioTransporte');
+                } else {
+                    $("#transporte").val(0);
+                    $("option").remove('.cambioTransporte');
+                    $("#inicioTransporte").after('<option class="cambioTransporte"></option>');
+
+                    //Llenar el select de transporte
+                    {% for tipo in  transportes %}
+                    var idTipoTransporte = parseInt({{ tipo.modeloTransporte.tipoTransporte.id }});
+                    var idTipoLubricante = parseInt({{ tipo.lubricante.id }});
+                    if (idTipoTransporte === tipoTransporte && idTipoLubricante === tipoLubricante) {
+                        var id = {{ tipo.id }};
+                        var name = '{{ tipo.modeloTransporte.nombre ~ ' - Chapa: ' ~ tipo.matricula}}';
+                        html += '<option class="cambioTransporte" value="' + id + '">' + name + '</option>';
+                    }
+                    {% endfor %}
+                    $(".cambioTransporte").replaceWith(html);
+                    $("#transporte").prop('disabled', false);
+                }
+                $("#totalLtsLubricante").val('');
+                $("#totalLtsLubricante").prop('disabled', true);
+                $(".AsignarLubricante").prop('disabled', true);
+                $(".ModificarLubricante").prop('disabled', true);
+            });
+
+            $('#transporte').on('change', function () {
+                var html = '';
+                var transporte = parseInt($('#transporte').val());
+                if (transporte === 0) {
+                    $("#totalLtsLubricante").prop('disabled', true);
+                    $("#totalLtsLubricante").val('');
+                    $("#mesTransporte").val(0);
+                    $("#mesTransporte").prop('disabled', true);
+                    $("option").remove('.cambioMes');
+                } else {
+                    //Llenar los meses
+                    $("option").remove('.cambioMes');
+                    $("#inicioMes").after('<option class="cambioMes"></option>');
+                    {% for mes in  mesesTransportes %}
+                            var id = '{{ mes }}';
+                            var name = '{{ mes }}';
+                            html += '<option class="cambioMes" value="' + id + '">' + name + '</option>';
+                    {% endfor %}
+                    $(".cambioMes").replaceWith(html);
+                    $("#mesTransporte").prop('disabled', false);
+
+                    //verificar si el total de litros restante es menor que 12
+                    if (montoRestanteLubricante < 12) {
+                        $("#mesTransporte").prop('disabled', false);
+                        $("#mesTransporte").val(0);
+                        $("#totalLtsLubricante").val('');
+                        $("#totalLtsLubricante").prop('disabled', true);
+                    } else {
+                        $("#mesTransporte").prop('disabled', true);
+                        $("#totalLtsLubricante").prop('disabled', false);
+                    }
+                }
+                $(".AsignarLubricante").prop('disabled', true);
+                $(".ModificarLubricante").prop('disabled', true);
+            });
+
+            $('#mesTransporte').on('change', function () {
+                var mesTransporte = $('#mesTransporte').val();
+                if (mesTransporte === '0') {
+                    $("#totalLtsLubricante").prop('disabled', true);
+                }else {
+                    if (modificar){
+                        {% for medio in graficosTEstimadosLubricantesMediosMes %}
+                                var id = parseInt('{{ medio.idTransporte }}');
+                                var idMes = '{{ medio.mes }}';
+                                if( id === idTransporte && idMes === mesTransporte)
+                                {
+                                    $('#totalLtsLubricante').val('{{ medio.ltsLubricante }}');
+                                    $('#totalLtsLubricante').prop("disabled", false);
+                                    montoAnteriorLubricante = parseInt({{ medio.ltsLubricante }});
+                                }
+                        {% endfor %}
+                    }else {
+                        $("#mesTransporte").prop('disabled', false);
+                        $("#totalLtsLubricante").prop('disabled', false);
+                    }
+                }
+            });
+
+            $('#totalLtsLubricante').on("keyup", function () {
+
+                var montoAntes = montoAnteriorLubricante;
+
+                if (!modificar) {
+                    if ($(this).val().trim() != '') {
+                        $('.AsignarLubricante').prop("disabled", false);
+
+                    } else {
+                        $('.AsignarLubricante').prop("disabled", true);
+                    }
+                }else {
+                    if ($(this).val().trim() != montoAntes) {
+                        $('.ModificarLubricante').prop("disabled", false);
+
+                    } else {
+                        $('.ModificarLubricante').prop("disabled", true);
+                    }
+                }
+            });
+
+            $('#dataTransporte').on('click', 'a.edit', function (e) {
+                e.preventDefault();
+                var row = $(this).parents('tr');
+                var fila = table.row(row).data();
+                var html = '';
+
+                idTransporte = parseInt(fila[0]);
+
+                {% for medio in graficosTEstimadosLubricantesMedios %}
+                        var id = parseInt('{{ medio.idTransporte }}');
+                        if( id === idTransporte)
+                        {
+                            //Cargar meses de asignacion
+
+                            $("option").remove('.cambioMes');
+                            $("#inicioMes").after('<option class="cambioMes"></option>');
+
+                            {% for mes in  graficosTEstimadosLubricantesMediosMes %}
+                                    var idT = parseInt('{{ mes.idTransporte }}');
+                                    if( idT === idTransporte){
+                                        var id = '{{ mes.mes }}';
+                                        var name = '{{ mes.mes }}';
+                                        html += '<option class="cambioMes" value="' + id + '">' + name + '</option>';
+                                    }
+                            {% endfor %}
+
+                            $(".cambioMes").replaceWith(html);
+                            $("#mesTransporte").prop('disabled', false);
+
+                            var restoLubricante = parseFloat('{{ medio.ltsLubricante }}') % 12;
+
+                            if (restoLubricante === 0 ) {
+                                $('#totalLtsLubricante').val(parseFloat('{{ medio.ltsLubricante }}') / 12);
+                                $('#totalLtsLubricante').prop("disabled", false);
+                                montoAnteriorLubricante = parseFloat({{ medio.ltsLubricante }}) / 12;
+                            }else {
+                                $('#totalLtsLubricante').val('');
+                                $('#totalLtsLubricante').prop("disabled", true);
+                            }
+
+                            $('#tipoTransporte').val('{{ medio.idTipoTransporte }}');
+
+                            //Llenar transporte
+                            var name = '{{ medio.modeloNombre ~ ' - Chapa: ' ~ medio.matricula}}';
+                            $("#transporte").val('').prop('disabled' , true).select2({
+                                placeholder: name
+                            });
+                        }
+                {% endfor %}
+
+                $("#mesTransporte").prop('disabled', false);
+                $('#tipoTransporte').prop("disabled", true);
+                $('.AsignarLubricante').prop("disabled", true);
+                $('.AprobarLubricante').prop("disabled", true);
+                modificar = true;
+            });
+
+            $('.AsignarLubricante').on('click', function () {
+
+                //Validaciones
+                if ($("#tipoLubricante").val() === '0') {
+                    alertify.alert('<strong>El tipo de aceite es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#transporte").val() === 'Seleccione ...') {
+                    alertify.alert('<strong>El medio de transporte es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalLtsLubricante").val() === '') {
+                    alertify.alert('<strong>El total de litros de aceite es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalLtsLubricante").val() === '0') {
+                    alertify.alert('<strong>El total de litros de aceite debe ser mayor que 0.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestanteLubricante = parseFloat(totalLtsLubricante - totalLtsLubricanteMedioBasico);
+
+                var mes = '';
+                if (montoRestanteLubricante < 12) {
+                    presupuestoMensualLubricante = parseInt($("#totalLtsLubricante").val());
+                    mes = $("#mesTransporte").val();
+                } else {
+                    presupuestoMensualLubricante = parseInt($("#totalLtsLubricante").val()) * 12;
+                    mes = '';
+                }
+
+                if (presupuestoMensualLubricante > montoRestanteLubricante) {
+                    alertify.alert('<strong>El total de litros de aceite no puede ser mayor que los litros restantes.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    tipoLubricante: $("#tipoLubricante").val(),
+                    transporte: $("#transporte").val(),
+                    mes: mes,
+                    ltsLubricante: $("#totalLtsLubricante").val(),
+                    idPlanEstimado: {{ planEstimado }}
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertLubricanteMedioTrasporteMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+                        alertify.alert('<strong>La asignación mensual de aceite para este medio de transporte ha asignado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarEstimadoLubricantesMediosTransportes') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.ModificarLubricante').on('click', function () {
+
+                //Validaciones
+                if ($("#tipoLubricante").val() === '0') {
+                    alertify.alert('<strong>El tipo de aceite es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#transporte").val() === 'Seleccione ...') {
+                    alertify.alert('<strong>El medio de transporte es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalLtsLubricante").val() === '') {
+                    alertify.alert('<strong>El total de litros de aceite es obligatorio, no puede quedar en blanco.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                if ($("#totalLtsLubricante").val() === '0') {
+                    alertify.alert('<strong>El total de litros de aceite debe ser mayor que 0.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                        .set('label', 'Aceptar');
+                    return false;
+                }
+
+                montoRestanteLubricante = parseFloat(totalLtsLubricante - totalLtsLubricanteMedioBasico);
+
+                var mes = '';
+                if ($("#mesTransporte").val() !== '0') {
+                    presupuestoMensualLubricante = parseInt($("#totalLtsLubricante").val());
+                    mes = $("#mesTransporte").val();
+                } else {
+                    presupuestoMensualLubricante = parseInt($("#totalLtsLubricante").val()) * 12;
+                    montoAnteriorLubricante *= 12;
+                    mes = '';
+                }
+
+                if (montoRestanteLubricante === 0) {
+                    if (presupuestoMensualLubricante > montoAnteriorLubricante) {
+                        alertify.alert('<strong>El total de litros de aceite no puede ser mayor que los litros restantes.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                } else {
+                    if (presupuestoMensualLubricante > (montoAnteriorLubricante + montoRestanteLubricante)) {
+                        alertify.alert('<strong>El total de litros de aceite no puede ser mayor que los litros restantes.</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar');
+                        return false;
+                    }
+                }
+
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    transporte: idTransporte,
+                    mes: mes,
+                    ltsLubricante: $("#totalLtsLubricante").val(),
+                    idPlanEstimado: {{ planEstimado }}
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateLubricanteMedioTrasporteMensual") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>El total de litros de aceite para este medio de transporte ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                if (montoRestanteLubricante !== 0) {
+                                    $('.AsignarLubricante').prop("disabled", false);
+                                }
+                                window.location.href = "{{ path('gestionarEstimadoLubricantesMediosTransportes') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('.AprobarLubricante').on('click', function () {
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea aprobar la asignación mensual de litros de aceite</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    var mat_datos = {
+                        idPlanEstimado: {{ planEstimado }},
+                        tipoLubricante: $("#tipoLubricante").val()
+                    };
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("aprobarLubricanteMedioTrasporteMensual") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>Se aprobó la asignación mensual de litros de aceite</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoLubricantesMediosTransportes') }}";
+                                });
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                                .set('label', 'Aceptar')
+                                .set('onok', function () {
+                                    window.location.href = "{{ path('gestionarEstimadoLubricantesMediosTransportes') }}";
+                                });
+                        }
+                    });
+                });
+
+            });
+
+            $('.mesesDivision').on("change", function () {
+
+                switch ($(this).attr('id')) {
+                    case 'enero':
+                        enero = 0;
+                        enero = parseInt($("#enero").val());
+                        break;
+                    case 'febrero':
+                        febrero = 0;
+                        febrero = parseInt($("#febrero").val());
+                        break;
+                    case 'marzo':
+                        marzo = 0;
+                        marzo = parseInt($("#marzo").val());
+                        break;
+                    case 'abril':
+                        abril = 0;
+                        abril = parseInt($("#abril").val());
+                        break;
+                    case 'mayo':
+                        mayo = 0;
+                        mayo = parseInt($("#mayo").val());
+                        break;
+                    case 'junio':
+                        junio = 0;
+                        junio = parseInt($("#junio").val());
+                        break;
+                    case 'julio':
+                        julio = 0;
+                        julio = parseInt($("#julio").val());
+                        break;
+                    case 'agosto':
+                        agosto = 0;
+                        agosto = parseInt($("#agosto").val());
+                        break;
+                    case 'septiembre':
+                        septiembre = 0;
+                        septiembre = parseInt($("#septiembre").val());
+                        break;
+                    case 'octubre':
+                        octubre = 0;
+                        octubre = parseInt($("#octubre").val());
+                        break;
+                    case 'noviembre':
+                        noviembre = 0;
+                        noviembre = parseInt($("#noviembre").val());
+                        break;
+                    case 'diciembre':
+                        diciembre = 0;
+                        diciembre = parseInt($("#diciembre").val());
+                        break;
+                }
+
+                montoTotal = 0;
+                montoTotal = enero + febrero + marzo + abril + mayo + junio + julio + agosto + septiembre + octubre + noviembre + diciembre;
+                var restante = totalLtsLubricante - montoTotal;
+
+                alert(parseInt($("#enero").val()));
+                alert(restante);
+
+                if ((restante) >= 0) {
+                    if ($(this).val() !== '') {
+                        $('#nameMontoRestanteDivision').text(Highcharts.numberFormat(restante, 0, '.', ','));
+                        if (parseInt(restante) === 0) {
+                            $('.AprobarDivisionMes').prop("disabled", false);
+                        } else {
+                            $('.AprobarDivisionMes').prop("disabled", true);
+                        }
+                    }
+                } else {
+                    alertify.alert('<strong>No tiene litros disponibles.</strong>')
+                        .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                            '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                        .set('label', 'Aceptar');
+                    montoTotal = 0;
+                    $('.AprobarDivisionMes').prop("disabled", true);
+                    return false;
+                }
+            });
+
+            $('.mesesDivision').on("keyup", function () {
+
+                var name = $(this).prop('name');
+                var montoAntes =0;
+
+                switch ($(this).prop('name')) {
+                    case 'enero':
+                        montoAntes = eneroAnterior;
+                        break;
+                    case 'febrero':
+                        montoAntes = febreroAnterior;
+                        break;
+                    case 'marzo':
+                        montoAntes = marzoAnterior;
+                        break;
+                    case 'abril':
+                        montoAntes = abrilAnterior;
+                        break;
+                    case 'mayo':
+                        montoAntes = mayoAnterior;
+                        break;
+                    case 'junio':
+                        montoAntes = junioAnterior;
+                        break;
+                    case 'julio':
+                        montoAntes = julioAnterior;
+                        break;
+                    case 'agosto':
+                        montoAntes = agostoAnterior;
+                        break;
+                    case 'septiembre':
+                        montoAntes = septiembreAnterior;
+                        break;
+                    case 'octubre':
+                        montoAntes = octubreAnterior;
+                        break;
+                    case 'noviembre':
+                        montoAntes = noviembreAnterior;
+                        break;
+                    case 'diciembre':
+                        montoAntes = diciembreAnterior;
+                        break;
+                }
+
+                if (modificar) {
+                    if ($(this).val().trim() != montoAntes) {
+                        $('.ModificarLubricante').prop("disabled", false);
+
+                    } else {
+                        $('.ModificarLubricante').prop("disabled", true);
+                    }
+                }
+            });
+
+        });
+    </script>
+{% endblock %}

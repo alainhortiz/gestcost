@@ -1,0 +1,337 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/DataTables-1.10.10/media/css/jquery.dataTables.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/tema/select2/select2-bootstrap.min.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <div id="containerMostrarmateriaPrima" class="container-fluid" style="display:block">
+        <div class="portlet light estilosForm">
+            <div class="portlet-title">
+                <div class="caption font-green">
+                    <i class="icon-settings font-green"></i>
+                    <span class="caption-subject bold uppercase">MATERIAS PRIMAS Y MATERIALES</span>
+                </div>
+                {% if materiasPrimas %}
+                    <div class="caption font-green" style="float: right">
+                        <a href="{{ path('exportarListadoNomencladores' , {nomenclador:'MateriaPrima'}) }}"
+                           class="fa fa-file-excel-o fa-2x font-green"
+                           data-toggle="tooltip" data-placement="left" title="Exportar a Excel"></a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="portlet-body">
+                <div style="padding-top: 10px">
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title" style="background-color: #2b3643">
+                            <div class="caption">
+                                <i class="fa fa-table"></i>
+                            </div>
+                            <div class="caption bold uppercase" style="float: right">
+                                <a href="#" style="text-decoration: none; color: #ededed;" id="addMateriaPrima"
+                                   name="addMateriaPrima">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                    AGREGAR
+                                </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body " style="background-color: #afbac0 ; overflow-x: auto">
+                            <table class="table table-striped table-bordered table-hover table-responsive"
+                                   id="dataMateriaPrima">
+                                <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Código
+                                    </th>
+                                    <th>
+                                        Nombre
+                                    </th>
+                                    <th class="text-center">
+                                        Activo
+                                    </th>
+                                    <th class="text-center">
+                                        Acciones
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for materia in materiasPrimas %}
+                                    <tr data-id="{{ materia.id }}">
+                                        <td class="text-center">{{ materia.codigo }}</td>
+                                        <td>{{ materia.nombre }}</td>
+                                        <td class="text-center">
+                                            {% if materia.isActive == 1 %}
+                                                <div class="md-checkbox" style="margin-left: 50%">
+                                                    <input type="checkbox" disabled class="md-check" checked>
+                                                    <label>
+                                                        <span></span>
+                                                        <span class="check"></span>
+                                                        <span class="box"></span>
+                                                    </label>
+                                                </div>
+                                            {% else %}
+                                                <div class="md-checkbox" style="margin-left: 50%">
+                                                    <input type="checkbox" disabled class="md-check">
+                                                    <label>
+                                                        <span></span>
+                                                        <span class="check"></span>
+                                                        <span class="box"></span>
+                                                    </label>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="#" style="margin-top: 5px"
+                                               class="btn default btn-xs green-stripe edit" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Modificar Materia Prima y Materiales">
+                                                Editar </a>
+                                            <a href="#" style="margin-top: 5px"
+                                               class="btn default btn-xs red-stripe delete" data-toggle="tooltip"
+                                               data-placement="left"
+                                               title="Desactivar  Materia Prima y Materiales">
+                                                Desactivar </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ include('Nomencladores/GestionMateriaPrima/modalAddMateriaPrima.html.twig') }}
+        {{ include('Nomencladores/GestionMateriaPrima/modalEditMateriaPrima.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/tema/DataTables-1.10.10/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/select2/select2.full.min.js') }}"></script>
+    <script>
+        jQuery(document).ready(function () {
+
+            (function () {
+                {% if not (is_granted("ROLE_ADMINISTRADOR") or is_granted("ROLE_SUPERUSUARIO")) %}
+                window.location.href = "{{ path('login') }}";
+                {% else %}
+                {% for nivel in app.user.nivelAccesos() if nivel == 'ADMINISTRACION' %}
+                {% else %}
+                window.location.href = "{{ path('login') }}";
+                {% endfor %}
+                {% endif %}
+            })();
+
+            $('#dataMateriaPrima').DataTable();
+
+            //--------- reiniciar el formulario -----------------
+            $('#btnReload').on('click', function () {
+                window.location.reload();
+            });
+
+            //--------- abandonar el formulario -----------------
+            $('#btnSalir').on('click', function () {
+                window.location.href = "{{ path('gestionarMateriasPrimas') }}";
+            });
+
+            $('#addMateriaPrima').on('click', function () {
+                $('#modalAddMateriaPrima').modal('show');
+            });
+
+            $('#addGuardar').on('click', function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalAddMateriaPrima input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+                if (errores !== 0) return false;
+
+                $('#modalAddMateriaPrima').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    codigo: $("#addCodigo").val(),
+                    nombre: $("#addNombre").val(),
+                    activo: 1
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertMateriaPrima") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>La materia prima ha sido insertada correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                $('#modalAddMateriaPrima input').each(function () {
+                                    $(this).val('');
+                                });
+                                window.location.href = "{{ path('gestionarMateriasPrimas') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            var idMateriaPrima = '';
+            var nombre = '';
+            var codigo = '';
+            var activo = 0;
+
+            // función que carga datos en el formulario para editar
+            $('#dataMateriaPrima tbody').on('click', '.edit', function () {
+
+                var row = $(this).parents('tr');
+                idMateriaPrima = row.data('id');
+
+                {% for materia in materiasPrimas %}
+                var id = parseInt('{{ materia.id }}');
+                if (id === idMateriaPrima) {
+                    $('#editCodigo').val('{{ materia.codigo }}');
+                    $('#editNombre').val('{{ materia.nombre }}');
+                    $('#editActivo').val('{{ materia.isActive }}');
+
+                    codigo = '{{ materia.codigo }}';
+                    nombre = '{{ materia.nombre }}';
+                    activo = '{{ materia.isActive }}';
+
+                    if (activo === '1') {
+                        $('#editActivo').prop("checked", true);
+                    } else {
+                        $('#editActivo').prop("checked", false);
+                    }
+
+                }
+                {% endfor %}
+                $('#modalEditMateriaPrima').modal('show');
+            });
+
+            $('#editGuardar').on('click', function () {
+
+                //Validaciones
+                var errores = 0;
+                $('#modalEditMateriaPrima input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if ($(this).val().trim() == '') {
+                        $(this).addClass('input-error');
+                        $('.' + name).removeClass('hidden');
+                        errores++;
+                    } else {
+                        $(this).removeClass('input-error');
+                        $('.' + name).addClass('hidden');
+                    }
+                });
+                if (errores !== 0) return false;
+
+                $('#modalEditMateriaPrima').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                activo = 0;
+                if ($('#editActivo').prop('checked')) {
+                    activo = 1;
+                }
+
+                var mat_datos = {
+                    idMateriaPrima: idMateriaPrima,
+                    nombre: $('#editNombre').val(),
+                    codigo: $('#editCodigo').val(),
+                    activo: activo
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateMateriaPrima") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if (data === 'ok') {
+
+                        alertify.alert('<strong>La materia prima ha sido modificada correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                            .set('label', 'Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarMateriasPrimas') }}";
+                            });
+                    } else {
+                        alertify.alert('<strong>' + data + '</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label', 'Aceptar')
+                    }
+                });
+
+            });
+
+            $('#dataMateriaPrima tbody').on('click', '.delete', function () {
+
+                var row = $(this).parents('tr');
+
+                var mat_datos = {idMateriaPrima: row.data('id')};
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea desactivar la materia prima seleccionada</strong>').set('onok', function () {
+
+                    $(".preload").removeClass('hidden');
+
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("deleteMateriaPrima") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if (data === 'ok') {
+
+                            alertify.alert('<strong>La materia prima ha sido descativada correctamente</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                        } else {
+                            alertify.alert('<strong>' + data + '</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label', 'Aceptar')
+                        }
+                    });
+                });
+            });
+
+
+        });
+    </script>
+{% endblock %}
